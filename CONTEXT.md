@@ -43,11 +43,20 @@ telefonu. Dlatego numer nie jest unikalny — patrz [[Telefon]].
 
 ### Telefon (Phone)
 Polski numer komórkowy lub stacjonarny, dziewięć cyfr, bez prefiksu kraju.
-Przechowywany jako same cyfry; formatowany do wyświetlenia (`602 118 447`)
-i do wybrania numeru (`tel:+48602118447`).
+
+Numer jest **jedną wartością o trzech odczytach**:
+
+- **cyfry** — to, co trzyma baza i po czym porównuje się numery,
+- **zapis czytelny** — `602 118 447`, dla tabeli i formularza,
+- **adres do wybrania numeru** — `tel:+48602118447`.
+
+Wartość powstaje raz, przy odczytaniu tego, co wpisano lub wklejono; dalej się
+o nią tylko pyta. Normalizacja dzieje się na wejściu i nigdzie później.
 
 Konsekwencja: numer wpisany ze spacjami, myślnikami lub prefiksem `+48` jest
-normalizowany, nie odrzucany. Wyszukiwanie po numerze też ignoruje formatowanie.
+normalizowany, nie odrzucany. Wyszukiwanie po numerze też ignoruje formatowanie —
+ale ma własną regułę, czy zapytanie jest w ogóle pytaniem o numer: samotna cyfra
+wśród liter to tekst, nie fragment numeru.
 
 Numer **nie jest unikalny** — jedna osoba może występować jako kilka kontaktów
 o różnych specjalizacjach. Powtórzony numer jest ostrzeżeniem w interfejsie,

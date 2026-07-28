@@ -16,13 +16,13 @@ ostrzeżeniem, nie błędem.
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Jedno miejsce wyprowadza cyfry z tego, co wpisano; nic dalej nie
+- [x] Jedno miejsce wyprowadza cyfry z tego, co wpisano; nic dalej nie
       normalizuje powtórnie
-- [ ] Wyszukiwanie zachowuje własną regułę „czy to w ogóle pytanie o numer"
-- [ ] Asercja zgodności schematu formularza z ciałem żądania (ADR-0001) nadal się
+- [x] Wyszukiwanie zachowuje własną regułę „czy to w ogóle pytanie o numer"
+- [x] Asercja zgodności schematu formularza z ciałem żądania (ADR-0001) nadal się
       kompiluje — wyjściem walidacji zostaje to, co przyjmuje API
-- [ ] Istniejące testy numeru, wyszukiwania i duplikatu przechodzą bez zmian
+- [x] Istniejące testy numeru, wyszukiwania i duplikatu przechodzą bez zmian
       w ich treści
-- [ ] CONTEXT.md → Telefon opisuje trzy odczyty jednej wartości
+- [x] CONTEXT.md → Telefon opisuje trzy odczyty jednej wartości

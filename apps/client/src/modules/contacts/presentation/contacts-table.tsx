@@ -12,7 +12,7 @@ import {
 } from "../../../libs/ui/table"
 import type { Contact } from "../domain/models"
 import { SORT_COLUMNS, type SortColumn, type SortDirection } from "../domain/sorting"
-import { formatPhone, phoneHref } from "../domain/phone"
+import { parsePhone, phoneDial, phoneReadable } from "../domain/phone"
 import { isDraft } from "../integration/queries"
 import { contactsCopy } from "./copy"
 import { RowMenu } from "./row-menu"
@@ -71,7 +71,7 @@ const SortMark = ({ direction }: { readonly direction: SortDirection | null }) =
 
 const copyPhone = async (phone: string) => {
   try {
-    await navigator.clipboard.writeText(formatPhone(phone))
+    await navigator.clipboard.writeText(phoneReadable(parsePhone(phone)))
     toast.success(contactsCopy.row.copied)
   } catch {
     // The clipboard can be refused (no permission, a page without HTTPS).
@@ -141,7 +141,10 @@ export const ContactsTable = ({
     </TableHeader>
     <TableBody>
       {contacts.map((contact) => {
-        const readable = formatPhone(contact.phone)
+        // Read once per row; the cell then asks it for the readable form and
+        // for the dial address.
+        const phone = parsePhone(contact.phone)
+        const readable = phoneReadable(phone)
 
         return (
           <TableRow
@@ -156,7 +159,7 @@ export const ContactsTable = ({
             </TableCell>
             <TableCell className="px-3 py-2.5 text-right">
               <a
-                href={phoneHref(contact.phone)}
+                href={phoneDial(phone)}
                 aria-label={`${contactsCopy.row.call}${readable}`}
                 className="font-bold text-foreground tabular-nums hover:text-primary"
               >
