@@ -1,0 +1,4 @@
+[test]
+# Redirects the suite onto its own database — the harness truncates tables, and
+# without this it would empty the working data. See the file for the details.
+preload = ["./apps/server/src/__tests__/preload.ts"]

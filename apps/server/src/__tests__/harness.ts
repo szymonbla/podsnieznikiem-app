@@ -25,6 +25,9 @@ interface TestContext {
  * Seam 1 — the test hits a running server backed by a real Postgres. The
  * server comes up on a random port, migrations run exactly as they do on a
  * production start, and every test begins with an empty table.
+ *
+ * The truncate below is why `preload.ts` redirects the suite onto a database
+ * of its own: pointed at the working database it would empty it on every run.
  */
 export const withServer = <A, E>(
   test: (context: TestContext) => Effect.Effect<A, E, never>

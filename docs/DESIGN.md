@@ -455,7 +455,11 @@ brak zmiennej zatrzymuje serwer natychmiast, z jasnym komunikatem.
 1. **HTTP** — testy uderzają w działające API z prawdziwym Postgresem
    w kontenerze. Ten szew łapie literówki w surowym SQL-u; bez ORM-a nic innego
    ich nie złapie. Osobne testy repozytorium są zbędne — leżą niżej i pokrywają
-   to samo.
+   to samo. Zestaw dostaje **własną bazę** — `<baza>_test`, wyprowadzoną
+   z `DATABASE_URL` i zakładaną przy pierwszym uruchomieniu
+   (`apps/server/src/__tests__/preload.ts`, podpięte przez `bunfig.toml`).
+   Harness czyści tabelę przed każdym testem, więc bez tego `bun run test`
+   kasowałby dane robocze.
 2. **Wyrenderowany ekran** — Testing Library z routerem i react-query, sieć
    podstawiona przez MSW. Asercje przez rolę i tekst.
 3. **Funkcje czyste** — formatowanie numeru, odmiana liczebnika, porównanie do
