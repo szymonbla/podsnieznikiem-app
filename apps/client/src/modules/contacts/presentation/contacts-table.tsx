@@ -10,10 +10,10 @@ import {
   TableHeader,
   TableRow
 } from "../../../libs/ui/table"
+import { isDraft } from "../domain/drafts"
 import type { Contact } from "../domain/models"
 import { SORT_COLUMNS, type SortColumn, type SortDirection } from "../domain/sorting"
 import { formatPhone, phoneHref } from "../domain/phone"
-import { isDraft } from "../integration/queries"
 import { contactsCopy } from "./copy"
 import { RowMenu } from "./row-menu"
 
