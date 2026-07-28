@@ -47,7 +47,7 @@ interface WriteBody {
 export const contactsApi = (
   initial: ReadonlyArray<Contact> = [],
   /** The failure the API should return instead of writing — for the error paths. */
-  failWith?: { readonly status: 400 | 404; readonly body: Record<string, unknown> }
+  failWith?: { readonly status: 400 | 404 | 500; readonly body: Record<string, unknown> }
 ) => {
   let contacts = [...initial]
   let sequence = 0
@@ -108,6 +108,10 @@ export const contactsApi = (
 
     http.delete("*/api/contacts/:id", ({ params }) => {
       requests.push({ method: "DELETE", body: {} })
+
+      if (failWith !== undefined) {
+        return HttpResponse.json(failWith.body, { status: failWith.status })
+      }
 
       const existing = contacts.find((contact) => contact.id === params["id"])
       if (existing === undefined) {

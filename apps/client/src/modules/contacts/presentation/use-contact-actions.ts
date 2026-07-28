@@ -4,12 +4,8 @@ import { toast } from "sonner"
 import type { ContactFormOutput } from "../configuration/schema"
 import { UNDO_WINDOW_MS } from "../configuration/query-settings"
 import type { Contact, CreateContactBody } from "../domain/models"
-import {
-  ContactMutationError,
-  useCreateContact,
-  useDeleteContact,
-  useUpdateContact
-} from "../integration/queries"
+import { ContactMutationError } from "../integration/optimistic-writes"
+import { useCreateContact, useDeleteContact, useUpdateContact } from "../integration/queries"
 import { contactsCopy } from "./copy"
 
 interface ContactActions {

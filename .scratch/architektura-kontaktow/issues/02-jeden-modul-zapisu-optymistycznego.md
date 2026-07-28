@@ -16,14 +16,14 @@ lista. Reszta jest wewnątrz modułu.
 
 **Blocked by:** 01 — tożsamość szkicu w domenie.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Anulowanie, zapamiętanie, podgląd, cofnięcie, unieważnienie i tłumaczenie
+- [x] Anulowanie, zapamiętanie, podgląd, cofnięcie, unieważnienie i tłumaczenie
       błędu żyją w jednym module; trzy zapisy są jego wołającymi
-- [ ] Test: nieudane dodanie zdejmuje kontakt z listy, a lista wraca dokładnie
+- [x] Test: nieudane dodanie zdejmuje kontakt z listy, a lista wraca dokładnie
       do stanu sprzed podglądu
-- [ ] Test: nieudana edycja przywraca poprzednie wartości wiersza
-- [ ] Test: nieudane usunięcie przywraca wiersz na listę
-- [ ] Błąd walidacji z serwera nadal ląduje przy właściwym polu formularza,
+- [x] Test: nieudana edycja przywraca poprzednie wartości wiersza
+- [x] Test: nieudane usunięcie przywraca wiersz na listę
+- [x] Błąd walidacji z serwera nadal ląduje przy właściwym polu formularza,
       a brak kontaktu nadal zamyka formularz z komunikatem o nieaktualnej liście
-- [ ] Istniejące testy ekranu przechodzą bez zmian w ich treści
+- [x] Istniejące testy ekranu przechodzą bez zmian w ich treści
