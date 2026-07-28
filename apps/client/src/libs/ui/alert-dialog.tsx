@@ -54,15 +54,21 @@ function AlertDialogContent({
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />
-      <AlertDialogPrimitive.Content
-        data-slot="alert-dialog-content"
-        data-size={size}
-        className={cn(
-          "group/alert-dialog-content fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-3rem)] translate-x-[-50%] translate-y-[-50%] gap-2 rounded-surface border-0 bg-background p-6 shadow-modal duration-200 data-[size=sm]:max-w-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[size=default]:sm:max-w-[420px]",
-          className
-        )}
-        {...props}
-      />
+      {/* Centred by the flex wrapper — see the note in dialog.tsx. */}
+      <div
+        data-slot="alert-dialog-positioner"
+        className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-6"
+      >
+        <AlertDialogPrimitive.Content
+          data-slot="alert-dialog-content"
+          data-size={size}
+          className={cn(
+            "group/alert-dialog-content pointer-events-auto relative m-auto grid w-full gap-2 rounded-surface border-0 bg-background p-6 shadow-modal duration-200 data-[size=sm]:max-w-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[size=default]:sm:max-w-[420px]",
+            className
+          )}
+          {...props}
+        />
+      </div>
     </AlertDialogPortal>
   )
 }

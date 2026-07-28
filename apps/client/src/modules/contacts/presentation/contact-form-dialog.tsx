@@ -1,6 +1,6 @@
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema"
 import { useEffect, useId, type ReactNode } from "react"
-import { useForm, type UseFormRegisterReturn } from "react-hook-form"
+import { Controller, useForm, type UseFormRegisterReturn } from "react-hook-form"
 
 import { Button } from "../../../libs/ui/button"
 import {
@@ -21,6 +21,7 @@ import {
   type ContactFormValues
 } from "../configuration/schema"
 import { findPhoneOwner } from "../domain/duplicates"
+import { RoleCombobox } from "./role-combobox"
 import type { Contact } from "../domain/models"
 import { formatPhone } from "../domain/phone"
 import { contactsCopy } from "./copy"
@@ -54,8 +55,6 @@ interface FieldProps {
   /** Content under the field that is not an error — today, the duplicate warning. */
   readonly note?: ReactNode
   readonly inputMode?: "tel"
-  /** The suggestions list (`datalist`) — today only on the role field. */
-  readonly listId?: string
 }
 
 /**
@@ -69,8 +68,7 @@ const Field = ({
   registration,
   error,
   note,
-  inputMode,
-  listId
+  inputMode
 }: FieldProps) => {
   /*
    * The message under the field has to be tied to it by id, not by proximity:
@@ -92,7 +90,6 @@ const Field = ({
       <Input
         {...registration}
         {...(inputMode === undefined ? {} : { inputMode })}
-        {...(listId === undefined ? {} : { list: listId })}
         {...(described === "" ? {} : { "aria-describedby": described })}
         placeholder={placeholder}
         aria-invalid={error !== undefined}
@@ -135,6 +132,7 @@ export const ContactFormDialog = ({
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     setError,
@@ -169,6 +167,16 @@ export const ContactFormDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         aria-describedby="contact-form-description"
+        /* An open suggestion list swallows the first `Escape` — see the note
+           in `role-combobox.tsx`. */
+        onEscapeKeyDown={(event) => {
+          if (
+            event.target instanceof Element &&
+            event.target.closest("[data-suggestions-open]") !== null
+          ) {
+            event.preventDefault()
+          }
+        }}
         onCloseAutoFocus={(event) => {
           event.preventDefault()
           onCloseAutoFocus()
@@ -198,19 +206,21 @@ export const ContactFormDialog = ({
             error={errors.name?.message}
           />
 
-          <Field
-            label={contactsCopy.form.fields.role}
-            placeholder={contactsCopy.form.placeholders.role}
-            registration={register("role")}
-            error={errors.role?.message}
-            listId="contact-role-suggestions"
+          <Controller
+            control={control}
+            name="role"
+            render={({ field }) => (
+              <RoleCombobox
+                label={contactsCopy.form.fields.role}
+                placeholder={contactsCopy.form.placeholders.role}
+                suggestions={contactsCopy.form.roleSuggestions}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.role?.message}
+              />
+            )}
           />
-
-          <datalist id="contact-role-suggestions">
-            {contactsCopy.form.roleSuggestions.map((role) => (
-              <option key={role} value={role} />
-            ))}
-          </datalist>
 
           <Field
             label={contactsCopy.form.fields.phone}

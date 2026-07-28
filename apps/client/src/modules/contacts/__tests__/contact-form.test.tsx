@@ -140,6 +140,79 @@ describe("adding a contact", () => {
   })
 })
 
+describe("specialisation suggestions", () => {
+  const roleField = () => screen.getByRole("combobox", { name: "Specjalizacja" })
+
+  test("picking a suggestion fills the field", async () => {
+    const user = userEvent.setup()
+    mockApi.use(...contactsApi().handlers)
+
+    renderApp("/kontakty")
+
+    await openForm(user)
+    await user.click(roleField())
+    await user.click(await screen.findByRole("option", { name: "Kominiarz" }))
+
+    expect((roleField() as HTMLInputElement).value).toBe("Kominiarz")
+    /* The pick closes the list — it is not a menu to keep browsing. */
+    await waitFor(() => {
+      expect(screen.queryByRole("option", { name: "Kominiarz" })).toBeNull()
+    })
+  })
+
+  test("typing narrows the list to what matches", async () => {
+    const user = userEvent.setup()
+    mockApi.use(...contactsApi().handlers)
+
+    renderApp("/kontakty")
+
+    await openForm(user)
+    await user.type(roleField(), "ek")
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual([
+        "Elektryk",
+        "Dekarz"
+      ])
+    })
+  })
+
+  test("the field stays free text — a specialisation outside the list saves", async () => {
+    const user = userEvent.setup()
+    const api = contactsApi()
+    mockApi.use(...api.handlers)
+
+    renderApp("/kontakty")
+
+    await openForm(user)
+    await fill(user, { name: "Anna Kowalska", role: "Księgowa", phone: "600100200" })
+    await user.click(screen.getByRole("button", { name: "Dodaj kontakt" }))
+
+    await waitFor(() => {
+      expect(api.requests.filter((request) => request.method === "POST")).toHaveLength(1)
+    })
+    expect(api.requests[0]?.body.role).toBe("Księgowa")
+  })
+
+  test("Escape shuts the list first and leaves the dialog open", async () => {
+    const user = userEvent.setup()
+    mockApi.use(...contactsApi().handlers)
+
+    renderApp("/kontakty")
+
+    await openForm(user)
+    await user.click(roleField())
+    expect(await screen.findByRole("option", { name: "Hydraulik" })).toBeDefined()
+
+    await user.keyboard("{Escape}")
+
+    await waitFor(() => {
+      expect(screen.queryByRole("option")).toBeNull()
+    })
+    expect(screen.getByRole("dialog")).toBeDefined()
+  })
+})
+
 describe("an error response from the server", () => {
   test("server-side validation lands at the field it concerns", async () => {
     const user = userEvent.setup()
