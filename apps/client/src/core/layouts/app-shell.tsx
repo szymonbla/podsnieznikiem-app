@@ -1,4 +1,5 @@
 import { Link, Outlet } from "@tanstack/react-router"
+import { Toaster } from "sonner"
 
 import { shellCopy } from "./copy"
 
@@ -85,5 +86,12 @@ export const AppShell = () => (
     <div className="wide:h-screen wide:overflow-y-auto">
       <Outlet />
     </div>
+
+    {/*
+      Miejsce na powiadomienia jest jedno, w powłoce — inaczej każdy ekran
+      montowałby własne i dwa naraz pokazywałyby dwa stosy. Powłoka nie wie,
+      co się w nich pojawi; treść wysyłają moduły.
+    */}
+    <Toaster position="bottom-right" richColors containerAriaLabel={shellCopy.notifications} />
   </div>
 )

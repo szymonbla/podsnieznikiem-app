@@ -6,10 +6,12 @@ złapał, czy po prostu padło połączenie — i co w każdym z tych przypadkó
 
 **Blocked by:** 05
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Stan ładowania widoczny — pusty ekran nie udaje braku kontaktów
-- [ ] Brak kontaktów w ogóle: komunikat zachęcający do dodania pierwszego, prowadzący do dodania
-- [ ] Brak wyników wyszukiwania: osobny komunikat z **przytoczonym zapytaniem**, prowadzący do zmiany filtra
-- [ ] Błąd wczytywania: czytelny komunikat o problemie z połączeniem, odróżnialny od pustej listy
-- [ ] Testy szwu 2 pokrywają oba stany puste, stan ładowania i stan błędu sieci
+- [x] Stan ładowania widoczny — pusty ekran nie udaje braku kontaktów
+- [~] Brak kontaktów w ogóle: komunikat zachęcający do dodania pierwszego, prowadzący do dodania
+      — komunikat jest, przycisku prowadzącego do dodania nie ma: dodawanie powstaje
+      w 07. `EmptyState` przyjmuje `action`, więc 07 tylko wstawia tam przycisk.
+- [x] Brak wyników wyszukiwania: osobny komunikat z **przytoczonym zapytaniem**, prowadzący do zmiany filtra
+- [x] Błąd wczytywania: czytelny komunikat o problemie z połączeniem, odróżnialny od pustej listy
+- [x] Testy szwu 2 pokrywają oba stany puste, stan ładowania i stan błędu sieci

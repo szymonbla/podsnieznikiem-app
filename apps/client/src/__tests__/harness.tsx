@@ -34,7 +34,11 @@ export const aContact = (overrides: Partial<Contact> = {}): Contact => {
   }
 }
 
-/** Renderuje aplikację pod wskazanym adresem, tak jak zrobiłaby to przeglądarka. */
+/**
+ * Renderuje aplikację pod wskazanym adresem, tak jak zrobiłaby to przeglądarka.
+ * Zwraca też router, bo część zachowania widać wyłącznie w adresie — filtr
+ * i sortowanie są w nim zapisywane i z niego czytane.
+ */
 export const renderApp = (initialPath: string) => {
   const queryClient = createQueryClient({
     defaultOptions: { queries: { retry: false } }
@@ -43,9 +47,13 @@ export const renderApp = (initialPath: string) => {
     history: createMemoryHistory({ initialEntries: [initialPath] })
   })
 
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  )
+  return {
+    ...render(
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    ),
+    /** Adres tak, jak zobaczyłby go pasek przeglądarki — ze znakiem zapytania. */
+    currentUrl: () => router.state.location.href
+  }
 }

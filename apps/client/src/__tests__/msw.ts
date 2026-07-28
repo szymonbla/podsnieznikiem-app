@@ -16,5 +16,16 @@ export const mockApi = setupServer()
 
 export const apiHandlers = {
   contacts: (contacts: ReadonlyArray<Contact>): HttpHandler =>
-    http.get("*/api/contacts", () => HttpResponse.json(contacts))
+    http.get("*/api/contacts", () => HttpResponse.json(contacts)),
+
+  /** Padnięte połączenie — żądanie nie dochodzi, więc nie ma nawet statusu. */
+  contactsUnreachable: (): HttpHandler =>
+    http.get("*/api/contacts", () => HttpResponse.error()),
+
+  /**
+   * Żądanie, które nigdy nie wraca — jedyny sposób, żeby test zdążył zobaczyć
+   * stan ładowania. Obietnica bez rozstrzygnięcia znika razem z procesem testu.
+   */
+  contactsPending: (): HttpHandler =>
+    http.get("*/api/contacts", () => new Promise<never>(() => {}))
 }

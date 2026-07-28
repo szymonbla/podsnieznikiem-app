@@ -5,7 +5,7 @@ import {
   redirect
 } from "@tanstack/react-router"
 
-import { ContactsScreen } from "../modules/contacts"
+import { ContactsScreen, contactsSearchSchema } from "../modules/contacts"
 import { AppShell } from "./layouts/app-shell"
 
 /**
@@ -27,7 +27,14 @@ const indexRoute = createRoute({
 const contactsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/kontakty",
-  component: ContactsScreen
+  component: ContactsScreen,
+  /*
+   * Filtr i sortowanie są częścią adresu, więc router — nie komponent —
+   * odpowiada za ich odczytanie i zwalidowanie. Schemat przychodzi z modułu:
+   * `core` trzyma trasę, ale nie wie, co znaczy „sortuj po specjalizacji"
+   * (DESIGN.md §3).
+   */
+  validateSearch: contactsSearchSchema
 })
 
 export const routeTree = rootRoute.addChildren([indexRoute, contactsRoute])

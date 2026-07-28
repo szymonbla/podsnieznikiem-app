@@ -8,6 +8,8 @@
 export const shellCopy = {
   cottage: "Pod Śnieżnikiem",
   navigationLabel: "Sekcje panelu",
+  /** Sonner nazywa swój obszar po angielsku, dopóki nie dostanie własnej etykiety. */
+  notifications: "Powiadomienia",
   contacts: "Kontakty",
   upcomingGroup: "Wkrótce",
   /** Powtórzone przy każdej pozycji, bo czytnik ekranu nie widzi grupowania wzrokiem. */
