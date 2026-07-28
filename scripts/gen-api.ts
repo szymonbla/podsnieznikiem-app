@@ -1,13 +1,13 @@
 /**
- * Generator typów klienta z kontraktu serwera (DESIGN.md §5).
+ * Generates the client types from the server contract (DESIGN.md §5).
  *
- * Podnosi serwer na wolnym porcie, pobiera z niego surowy dokument OpenAPI
- * i przepuszcza przez `openapi-typescript`. Wynik jest commitowany, a CI
- * powtarza tę komendę i robi `git diff --exit-code` — nieaktualny plik
- * wywala build.
+ * Brings the server up on a free port, fetches the raw OpenAPI document from
+ * it and runs that through `openapi-typescript`. The result is committed, and
+ * CI repeats this command and runs `git diff --exit-code` — a stale file fails
+ * the build.
  *
- * Świadomie idzie przez **działający serwer**, a nie przez import `api.ts`:
- * generujemy dokładnie ten dokument, który wystawia produkcja.
+ * It deliberately goes through a **running server** rather than importing
+ * `api.ts`: we generate exactly the document production serves.
  */
 import { mkdir, writeFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
@@ -18,8 +18,8 @@ const repositoryRoot = join(import.meta.dirname, "..")
 const outputPath = join(repositoryRoot, "apps/client/src/generated/api.d.ts")
 
 const banner = `/**
- * PLIK GENEROWANY — nie edytować ręcznie.
- * Źródło: dokument OpenAPI serwera. Regeneracja: \`bun run gen:api\`.
+ * GENERATED FILE — do not edit by hand.
+ * Source: the server's OpenAPI document. Regenerate with \`bun run gen:api\`.
  */
 
 `
@@ -32,18 +32,18 @@ const waitForOpenApi = async (baseUrl: string, deadlineMs: number): Promise<unkn
       const response = await fetch(`${baseUrl}/docs/openapi.json`)
       if (response.ok) return await response.json()
     } catch {
-      // serwer jeszcze nie słucha — próbujemy dalej, aż do terminu
+      // the server is not listening yet — keep trying until the deadline
     }
     await Bun.sleep(100)
   }
 
-  throw new Error(`Serwer nie wystawił OpenAPI pod ${baseUrl}/docs/openapi.json w wyznaczonym czasie`)
+  throw new Error(`Server did not serve OpenAPI at ${baseUrl}/docs/openapi.json in time`)
 }
 
 /**
- * Wolny port bierzemy od systemu i natychmiast zwalniamy. Stały numer byłby
- * pułapką: gdyby siedział na nim inny proces, generator pobrałby **cudzy**
- * kontrakt i po cichu zapisał złe typy.
+ * We take a free port from the system and release it immediately. A fixed
+ * number would be a trap: if another process sat on it, the generator would
+ * fetch **someone else's** contract and quietly write the wrong types.
  */
 const freePort = (): number => {
   const probe = Bun.listen({ hostname: "127.0.0.1", port: 0, socket: { data: () => {} } })
@@ -67,7 +67,7 @@ try {
   await mkdir(dirname(outputPath), { recursive: true })
   await writeFile(outputPath, banner + astToString(ast), "utf8")
 
-  console.log(`Zapisano ${outputPath}`)
+  console.log(`Wrote ${outputPath}`)
 } finally {
   server.kill()
   await server.exited

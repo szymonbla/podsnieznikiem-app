@@ -15,14 +15,15 @@ import { appConfig } from "./config.js"
 import { MigratorLive } from "./migrator.js"
 
 /**
- * Połączenie z Postgresem, zbudowane z **zwalidowanej** konfiguracji —
- * nie z osobnego odczytu zmiennej. Nieprawidłowy `DATABASE_URL` przerywa start.
+ * The Postgres connection, built from the **validated** configuration — not
+ * from a separate read of the environment variable. An invalid `DATABASE_URL`
+ * aborts start-up.
  */
 export const SqlLive = Layer.unwrapEffect(
   Effect.map(appConfig, (config) => PgClient.layer({ url: config.databaseUrl }))
 )
 
-/** Migracje idą na starcie, przed obsługą pierwszego żądania. */
+/** Migrations run at start-up, before the first request is served. */
 export const DatabaseLive = Layer.provideMerge(
   MigratorLive.pipe(Layer.provide(BunContext.layer)),
   SqlLive
@@ -31,8 +32,8 @@ export const DatabaseLive = Layer.provideMerge(
 const ApiLive = HttpApiBuilder.api(api).pipe(Layer.provide(ContactsApiLive))
 
 /**
- * Surowy dokument OpenAPI obok Swagger UI — źródło dla generatora typów
- * klienta (DESIGN.md §5; sam generator dochodzi razem z klientem).
+ * The raw OpenAPI document alongside Swagger UI — the source for the client
+ * type generator (DESIGN.md §5; the generator itself ships with the client).
  */
 const OpenApiJsonLive = HttpApiBuilder.Router.use((router) =>
   router.get(
@@ -42,8 +43,8 @@ const OpenApiJsonLive = HttpApiBuilder.Router.use((router) =>
 )
 
 /**
- * Kompletna aplikacja HTTP bez warstwy serwera — patrz `server.ts`.
- * `SqlClient` wychodzi na zewnątrz, żeby testy szwu 1 mogły zaglądać do bazy.
+ * The complete HTTP application without the server layer — see `server.ts`.
+ * `SqlClient` is re-exported so seam 1 tests can look into the database.
  */
 export const HttpLive = HttpApiBuilder.serve().pipe(
   Layer.provide(HttpApiSwagger.layer({ path: "/docs" })),

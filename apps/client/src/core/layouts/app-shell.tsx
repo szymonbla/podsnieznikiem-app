@@ -1,97 +1,151 @@
 import { Link, Outlet } from "@tanstack/react-router"
-import { Toaster } from "sonner"
+import { CalendarDays, MessageSquare, Phone, Wallet } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 
+import { Toaster } from "../../libs/ui/sonner"
 import { shellCopy } from "./copy"
 
+/** Icons for the announced sections — in the same order as the labels in `copy.ts`. */
+const UPCOMING_ICONS: ReadonlyArray<LucideIcon> = [CalendarDays, Wallet, MessageSquare]
+
 /**
- * Sekcja zapowiedziana, ale jeszcze nieistniejąca. Nie ma `href` — nie ma dokąd
- * prowadzić — więc rola linku musi zostać nadana jawnie, żeby czytnik ekranu
- * usłyszał pozycję nawigacji, a nie zwykły tekst. `aria-disabled` mówi, że jest
- * niegotowa; etykieta „Wkrótce" powtarza to słowami, bo poniżej progu wąskiego
- * ekranu nagłówek grupy znika.
+ * A section that is announced but does not exist yet. It has no `href` — there
+ * is nowhere to lead — so the link role has to be given explicitly for a screen
+ * reader to hear a navigation item rather than plain text. `aria-disabled` says
+ * it is not ready.
+ *
+ * The "coming soon" word sits next to every item but stays invisible: the eye
+ * reads it once, from the group heading, while a screen reader enters the list
+ * item by item and without the repetition would hear only the name — it cannot
+ * see the dimming.
  */
-const UpcomingItem = ({ label }: { readonly label: string }) => (
+const UpcomingItem = ({
+  label,
+  icon: Icon
+}: {
+  readonly label: string
+  readonly icon: LucideIcon
+}) => (
   <span
     role="link"
     aria-disabled="true"
-    className="flex items-center justify-between gap-2 rounded-[var(--radius)] px-3 py-2 text-sm text-white/38"
+    className="flex cursor-default items-center gap-2.5 rounded-[var(--radius)] p-2.5 text-sm font-semibold text-ink-soft"
   >
+    <Icon aria-hidden="true" className="size-[17px] shrink-0" strokeWidth={1.9} />
     {label}
-    <span className="rounded-pill bg-white/8 px-2 py-0.5 label-caps text-white/45">
-      {shellCopy.upcomingBadge}
-    </span>
+    <span className="sr-only">{shellCopy.upcomingBadge}</span>
   </span>
 )
 
 /**
- * Powłoka aplikacji — nazwa domku, nawigacja i stopka właściciela wokół treści
- * trasy. Mieszka w `core`, więc nie wie nic o kontaktach ani o żadnej innej
- * domenie (DESIGN.md §3); dostaje ekran przez `Outlet`.
+ * The application shell — the cottage name, the navigation and the owner
+ * footer around the route's content. It lives in `core`, so it knows nothing
+ * about contacts or any other domain (DESIGN.md §3); it receives the screen
+ * through `Outlet`.
  *
- * Poniżej 900 px sidebar zamienia się w poziomy pasek nad treścią, a grupa
- * „Wkrótce" i stopka znikają — na telefonie właściciel przychodzi po numer,
- * nie po zapowiedzi (DESIGN.md §9).
+ * The sidebar is white and a line separates it from the content, not a
+ * difference in lightness — in this design planes are divided by drawing, not
+ * by weight.
+ *
+ * Below 900 px the sidebar turns into a horizontal bar above the content, and
+ * the "coming soon" group and the footer disappear — on a phone the owner
+ * comes for a number, not for announcements (DESIGN.md §9).
  */
 export const AppShell = () => (
-  <div className="min-h-screen wide:grid wide:grid-cols-[var(--spacing-sidebar)_1fr]">
+  <div className="min-h-screen bg-background wide:grid wide:grid-cols-[var(--spacing-sidebar)_1fr]">
+    {/*
+      The navigation comes before the content in tab order, and on a narrow
+      screen it is a horizontal bar as well — without this shortcut the keyboard
+      walks through it on every visit to a screen. Visible only on focus.
+    */}
+    <a
+      href="#tresc"
+      className="sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:top-3 focus-visible:left-3 focus-visible:z-50 focus-visible:rounded-card focus-visible:bg-foreground focus-visible:px-4 focus-visible:py-2 focus-visible:text-sm focus-visible:font-bold focus-visible:text-background"
+    >
+      {shellCopy.skipToContent}
+    </a>
+
     <nav
       aria-label={shellCopy.navigationLabel}
-      className="flex items-center gap-4 bg-foreground px-4 py-3 text-white wide:h-screen wide:flex-col wide:items-stretch wide:gap-6 wide:overflow-y-auto wide:px-4 wide:py-6"
+      className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-separator bg-background px-3.5 py-3 wide:sticky wide:top-0 wide:h-screen wide:flex-col wide:flex-nowrap wide:items-stretch wide:gap-5 wide:overflow-y-auto wide:border-r wide:border-b-0 wide:py-[22px]"
     >
-      <p className="font-heading text-base font-bold tracking-[-0.02em] wide:text-lg">
-        {shellCopy.cottage}
-      </p>
-
-      <ul className="flex flex-1 list-none items-center gap-1 p-0 wide:flex-none wide:flex-col wide:items-stretch">
-        <li>
-          <Link
-            to="/kontakty"
-            activeProps={{ "aria-current": "page" }}
-            className="block rounded-[var(--radius)] px-3 py-2 text-sm font-medium text-white/70 hover:bg-foreground-strong aria-[current=page]:bg-primary-subtle aria-[current=page]:text-white"
-          >
-            {shellCopy.contacts}
-          </Link>
-        </li>
-      </ul>
-
-      {/* Grupa zapowiedzi i stopka są dodatkiem — na wąskim ekranie ustępują liście. */}
-      <div className="hidden wide:block">
-        <p id="upcoming-group" className="px-3 pb-2 label-caps text-white/38">
-          {shellCopy.upcomingGroup}
-        </p>
-        {/* Nagłówek grupy nazywa listę, więc czytnik ekranu wchodzi w nią z kontekstem. */}
-        <ul aria-labelledby="upcoming-group" className="list-none p-0">
-          {shellCopy.upcoming.map((label) => (
-            <li key={label}>
-              <UpcomingItem label={label} />
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="mt-auto hidden items-center gap-3 border-t border-white/10 px-3 pt-4 wide:flex">
+      <div className="flex items-center gap-2.5 px-2">
+        {/* The cottage mark — decoration, so there is nothing to announce. */}
         <span
           aria-hidden="true"
-          className="flex size-9 items-center justify-center rounded-pill bg-white/10 text-xs font-bold"
+          className="grid size-7 flex-none place-items-center rounded-pill bg-foreground"
+        >
+          <span className="size-2.5 rounded-[3px] bg-mark" />
+        </span>
+        <span className="font-heading text-md leading-[1.1] font-bold tracking-[-0.03em]">
+          {shellCopy.cottage}
+        </span>
+      </div>
+
+      {/*
+        The list and the announcements group are one block. In the design the
+        distance between them comes from the group heading's own padding, not
+        from the sidebar's 20 px rhythm — without this wrapper the `gap-5`
+        above lands between them a second time and pushes the whole group
+        20 px down.
+      */}
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <ul className="flex list-none flex-wrap items-center gap-1 p-0 wide:flex-col wide:flex-nowrap wide:items-stretch wide:gap-0.5">
+          <li>
+            <Link
+              to="/kontakty"
+              activeProps={{ "aria-current": "page" }}
+              className="flex items-center gap-2.5 rounded-[var(--radius)] p-2.5 text-sm font-semibold text-muted-foreground hover:bg-muted-hover aria-[current=page]:bg-muted aria-[current=page]:font-bold aria-[current=page]:text-foreground"
+            >
+              <Phone
+                aria-hidden="true"
+                className="size-[17px] shrink-0 text-primary"
+                strokeWidth={1.9}
+              />
+              {shellCopy.contacts}
+            </Link>
+          </li>
+        </ul>
+
+        {/* The announcements group and the footer are extras — on a narrow screen they give way to the list. */}
+        <div className="hidden wide:block">
+          <p id="upcoming-group" className="nav-group-label px-2.5 pt-4 pb-1.5 text-ink-whisper">
+            {shellCopy.upcomingGroup}
+          </p>
+          {/* The group heading names the list, so a screen reader enters it with context. */}
+          <ul aria-labelledby="upcoming-group" className="flex list-none flex-col gap-0.5 p-0">
+            {shellCopy.upcoming.map((label, index) => (
+              <li key={label}>
+                <UpcomingItem label={label} icon={UPCOMING_ICONS[index] ?? MessageSquare} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className="mt-auto hidden items-center gap-2.5 rounded-card border border-border-soft p-2.5 wide:flex">
+        <span
+          aria-hidden="true"
+          className="grid size-7 flex-none place-items-center rounded-pill bg-avatar text-2xs font-extrabold text-primary"
         >
           {shellCopy.owner.initials}
         </span>
-        <span className="flex flex-col">
-          <span className="text-sm font-medium">{shellCopy.owner.name}</span>
-          <span className="text-2xs text-white/45">{shellCopy.owner.role}</span>
+        <span className="flex min-w-0 flex-col">
+          <span className="truncate text-xs font-bold">{shellCopy.owner.name}</span>
+          <span className="text-2xs text-ink-faint">{shellCopy.owner.role}</span>
         </span>
       </div>
     </nav>
 
-    <div className="wide:h-screen wide:overflow-y-auto">
+    <div className="min-w-0 wide:h-screen wide:overflow-y-auto">
       <Outlet />
     </div>
 
     {/*
-      Miejsce na powiadomienia jest jedno, w powłoce — inaczej każdy ekran
-      montowałby własne i dwa naraz pokazywałyby dwa stosy. Powłoka nie wie,
-      co się w nich pojawi; treść wysyłają moduły.
+      There is one place for notifications, in the shell — otherwise every
+      screen would mount its own and two at once would show two stacks. The
+      shell does not know what will appear in them; the modules send the text.
     */}
-    <Toaster position="bottom-right" richColors containerAriaLabel={shellCopy.notifications} />
+    <Toaster containerAriaLabel={shellCopy.notifications} />
   </div>
 )

@@ -4,14 +4,15 @@ import {
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
   AlertDialogTitle
 } from "../../../libs/ui/alert-dialog"
-import { buttonClass } from "../../../libs/ui/button"
 import type { Contact } from "../domain/models"
 import { contactsCopy } from "./copy"
 
 interface DeleteDialogProps {
-  /** Kontakt do usunięcia; jego brak zamyka okno. */
+  /** The contact to delete; its absence closes the dialog. */
   readonly contact: Contact | undefined
   readonly onOpenChange: (open: boolean) => void
   readonly onConfirm: () => void
@@ -19,10 +20,10 @@ interface DeleteDialogProps {
 }
 
 /**
- * Osobne okno ostrzegawcze — z imieniem, nazwiskiem i specjalizacją, bo
- * potwierdzenie „na pewno?" bez nazwy nie chroni przed niczym (spec 0001,
- * historia 52). Usunięcie po potwierdzeniu jest natychmiastowe i trwałe;
- * ratunkiem jest „Cofnij" w powiadomieniu (ADR-0003).
+ * A separate warning dialog — with the name and the role, because an "are you
+ * sure?" without a name protects against nothing (spec 0001, story 52). Once
+ * confirmed, the deletion is immediate and permanent; the rescue is the undo
+ * action in the notification (ADR-0003).
  */
 export const DeleteDialog = ({
   contact,
@@ -38,19 +39,19 @@ export const DeleteDialog = ({
           onCloseAutoFocus()
         }}
       >
-        <AlertDialogTitle>{contactsCopy.remove.title}</AlertDialogTitle>
-        <AlertDialogDescription className="pt-1">
-          {contactsCopy.remove.description(contact.name, contact.role)}
-        </AlertDialogDescription>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{contactsCopy.remove.title}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {contactsCopy.remove.description(contact.name, contact.role)}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
 
-        <div className="flex justify-end gap-2 pt-5">
-          <AlertDialogCancel className={buttonClass("secondary")}>
-            {contactsCopy.remove.cancel}
-          </AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className={buttonClass("destructive")}>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{contactsCopy.remove.cancel}</AlertDialogCancel>
+          <AlertDialogAction variant="destructive" onClick={onConfirm}>
             {contactsCopy.remove.confirm}
           </AlertDialogAction>
-        </div>
+        </AlertDialogFooter>
       </AlertDialogContent>
     ) : null}
   </AlertDialog>

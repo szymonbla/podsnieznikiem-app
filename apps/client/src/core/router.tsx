@@ -9,13 +9,13 @@ import { ContactsScreen, contactsSearchSchema } from "../modules/contacts"
 import { AppShell } from "./layouts/app-shell"
 
 /**
- * Drzewo tras w kodzie, nie z konwencji plików — trasy są jawne i widoczne
- * w jednym miejscu (DESIGN.md §2). Korzeń renderuje powłokę, więc każda trasa
- * dostaje nawigację bez powtarzania jej u siebie.
+ * The route tree in code, not from a file convention — routes are explicit and
+ * visible in one place (DESIGN.md §2). The root renders the shell, so every
+ * route gets the navigation without repeating it.
  */
 const rootRoute = createRootRoute({ component: AppShell })
 
-/** Kontakty to jedyny gotowy ekran, więc korzeń prowadzi prosto do niego. */
+/** Contacts is the only finished screen, so the root leads straight to it. */
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
@@ -29,10 +29,10 @@ const contactsRoute = createRoute({
   path: "/kontakty",
   component: ContactsScreen,
   /*
-   * Filtr i sortowanie są częścią adresu, więc router — nie komponent —
-   * odpowiada za ich odczytanie i zwalidowanie. Schemat przychodzi z modułu:
-   * `core` trzyma trasę, ale nie wie, co znaczy „sortuj po specjalizacji"
-   * (DESIGN.md §3).
+   * The filter and the sort are part of the address, so the router — not the
+   * component — is responsible for reading and validating them. The schema
+   * comes from the module: `core` owns the route but does not know what "sort
+   * by role" means (DESIGN.md §3).
    */
   validateSearch: contactsSearchSchema
 })
@@ -42,8 +42,8 @@ export const routeTree = rootRoute.addChildren([indexRoute, contactsRoute])
 type RouterOptions = Omit<Parameters<typeof createRouter>[0], "routeTree">
 
 /**
- * Fabryka, żeby test szwu 2 mógł podstawić historię w pamięci i wejść
- * bezpośrednio pod badany adres.
+ * A factory, so a seam 2 test can supply an in-memory history and land
+ * directly on the address under test.
  */
 export const createAppRouter = (options?: RouterOptions) =>
   createRouter({ ...options, routeTree })

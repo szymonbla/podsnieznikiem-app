@@ -5,5 +5,5 @@ import { API_ID } from "./api-id.js"
 
 export const api = HttpApi.make(API_ID)
   .add(contactsGroup)
-  .annotate(OpenApi.Title, "Pod Śnieżnikiem")
-  .annotate(OpenApi.Description, "API panelu właściciela domku")
+  .annotate(OpenApi.Title, "Pod \u015anie\u017cnikiem")
+  .annotate(OpenApi.Description, "API for the cottage owner panel")

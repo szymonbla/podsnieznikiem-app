@@ -4,11 +4,11 @@ import { Effect } from "effect"
 import { withServer } from "../../../__tests__/harness.js"
 import type { ContactId } from "../domain/models.js"
 
-/** Identyfikator, którego w bazie na pewno nie ma — do ścieżek „nie znaleziono". */
+/** An id that is certainly not in the database — for the "not found" paths. */
 const anId = (value: string) => value as ContactId
 
-describe("tworzenie kontaktu", () => {
-  test("tworzy kontakt z kompletu trzech pól i zapisuje go w bazie", () =>
+describe("creating a contact", () => {
+  test("creates a contact from all three fields and stores it in the database", () =>
     withServer(({ client, sql }) =>
       Effect.gen(function* () {
         const created = yield* client.contacts.create({
@@ -28,7 +28,7 @@ describe("tworzenie kontaktu", () => {
       })
     ))
 
-  test("nie pozwala utworzyć kontaktu bez specjalizacji", () =>
+  test("refuses to create a contact without a role", () =>
     withServer(({ baseUrl, sql }) =>
       Effect.gen(function* () {
         const response = yield* Effect.promise(() =>
@@ -46,7 +46,7 @@ describe("tworzenie kontaktu", () => {
       })
     ))
 
-  test("nie pozwala utworzyć kontaktu z numerem o złej długości", () =>
+  test("refuses to create a contact with a wrong-length phone number", () =>
     withServer(({ baseUrl, sql }) =>
       Effect.gen(function* () {
         const response = yield* Effect.promise(() =>
@@ -68,13 +68,13 @@ describe("tworzenie kontaktu", () => {
       })
     ))
 
-  test("przycina białe znaki wokół nazwiska i specjalizacji", () =>
+  test("trims whitespace around the name and the role", () =>
     withServer(({ baseUrl, sql }) =>
       Effect.gen(function* () {
         /*
-         * Surowy `fetch`, nie typowany klient: ten wysyłałby ciąg już przycięty,
-         * bo przycięcie jest częścią kontraktu. Badane jest wejście takie, jakie
-         * naprawdę przychodzi po sieci z formularza.
+         * Raw `fetch`, not the typed client: the client would send an already
+         * trimmed string, because trimming is part of the contract. What is
+         * tested is the input as it really arrives over the wire from a form.
          */
         const response = yield* Effect.promise(() =>
           fetch(`${baseUrl}/contacts`, {
@@ -94,7 +94,7 @@ describe("tworzenie kontaktu", () => {
       })
     ))
 
-  test("dopuszcza dwa kontakty o tym samym numerze — jedna osoba, dwa fachy", () =>
+  test("allows two contacts sharing a phone number — one person, two trades", () =>
     withServer(({ client, sql }) =>
       Effect.gen(function* () {
         yield* client.contacts.create({
@@ -110,8 +110,8 @@ describe("tworzenie kontaktu", () => {
     ))
 })
 
-describe("edycja kontaktu", () => {
-  test("zmienia wskazane pole i zostawia pominięte bez zmian", () =>
+describe("editing a contact", () => {
+  test("changes the given field and leaves the omitted ones unchanged", () =>
     withServer(({ client, sql }) =>
       Effect.gen(function* () {
         const created = yield* client.contacts.create({
@@ -136,14 +136,14 @@ describe("edycja kontaktu", () => {
       })
     ))
 
-  test("odświeża znacznik modyfikacji przy zapisie", () =>
+  test("refreshes the modification stamp on write", () =>
     withServer(({ client, sql }) =>
       Effect.gen(function* () {
         const created = yield* client.contacts.create({
           payload: { name: "Marek Nowak", role: "Hydraulik", phone: "512345678" }
         })
 
-        /* Cofnięcie znacznika w bazie zastępuje czekanie na upływ czasu. */
+        /* Pushing the stamp back in the database replaces waiting for time to pass. */
         yield* sql`update contacts set updated_at = now() - interval '1 hour'`
 
         const updated = yield* client.contacts.update({
@@ -157,7 +157,7 @@ describe("edycja kontaktu", () => {
       })
     ))
 
-  test("zgłasza nieodnaleziony kontakt przy edycji nieistniejącego wpisu", () =>
+  test("reports a missing contact when editing an entry that does not exist", () =>
     withServer(({ client }) =>
       Effect.gen(function* () {
         const result = yield* Effect.either(
@@ -175,8 +175,8 @@ describe("edycja kontaktu", () => {
     ))
 })
 
-describe("usuwanie kontaktu", () => {
-  test("usuwa kontakt trwale — po restarcie zapytania nie ma po nim śladu", () =>
+describe("deleting a contact", () => {
+  test("deletes a contact permanently — a re-query finds no trace of it", () =>
     withServer(({ client, sql }) =>
       Effect.gen(function* () {
         const created = yield* client.contacts.create({
@@ -191,7 +191,7 @@ describe("usuwanie kontaktu", () => {
       })
     ))
 
-  test("zgłasza nieodnaleziony kontakt przy usuwaniu nieistniejącego wpisu", () =>
+  test("reports a missing contact when deleting an entry that does not exist", () =>
     withServer(({ client }) =>
       Effect.gen(function* () {
         const result = yield* Effect.either(
@@ -207,7 +207,7 @@ describe("usuwanie kontaktu", () => {
       })
     ))
 
-  test("odtworzony kontakt wraca z nowym identyfikatorem, nie ze starym", () =>
+  test("a restored contact comes back with a new id, not the old one", () =>
     withServer(({ client }) =>
       Effect.gen(function* () {
         const original = yield* client.contacts.create({
@@ -216,7 +216,7 @@ describe("usuwanie kontaktu", () => {
 
         yield* client.contacts.remove({ path: { id: original.id } })
 
-        /* „Cofnij" to powtórne utworzenie z zapamiętanych danych (ADR-0003). */
+        /* "Undo" is a re-create from the remembered data (ADR-0003). */
         const restored = yield* client.contacts.create({
           payload: { name: "Marek Nowak", role: "Hydraulik", phone: "512345678" }
         })

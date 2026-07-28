@@ -14,10 +14,10 @@ import type {
 const fetchContacts = async (): Promise<ReadonlyArray<Contact>> => {
   const { data, error, response } = await apiClient.GET("/contacts")
 
-  // `openapi-fetch` nie rzuca — nieudane żądanie wraca jako `error`.
-  // react-query oczekuje wyjątku, więc tłumaczymy to tutaj, raz.
+  // `openapi-fetch` does not throw — a failed request comes back as `error`.
+  // react-query expects an exception, so we translate that here, once.
   if (error !== undefined || data === undefined) {
-    throw new Error(`Nie udało się pobrać kontaktów (HTTP ${response.status})`)
+    throw new Error(`Failed to fetch contacts (HTTP ${response.status})`)
   }
 
   return data
@@ -31,9 +31,9 @@ export const useContacts = () =>
   })
 
 /**
- * Awaria zapisu w kształcie, na który ekran potrafi zareagować: `notFound`
- * prowadzi do unieważnienia listy (jest nieaktualna), `fieldErrors` wracają na
- * konkretne pola formularza, reszta to komunikat ogólny (DESIGN.md §8).
+ * A write failure in the shape the screen can react to: `notFound` leads to
+ * invalidating the list (it is stale), `fieldErrors` go back to individual form
+ * fields, everything else becomes a general message (DESIGN.md §8).
  */
 export class ContactMutationError extends Error {
   constructor(
@@ -47,19 +47,20 @@ export class ContactMutationError extends Error {
 }
 
 /**
- * Nazwa błędu domenowego, którego obsługa już istnieje. Dołożenie kolejnego
- * błędu na serwerze zmienia unię w kontrakcie, a wtedy ten parametr przestaje
- * przyjmować `tag` — kompilacja pada, dopóki nowy przypadek nie dostanie
- * gałęzi (DESIGN.md §8).
+ * The name of a domain error that already has handling. Adding another error
+ * on the server changes the union in the contract, and then this parameter
+ * stops accepting `tag` — compilation fails until the new case gets a branch
+ * (DESIGN.md §8).
  */
 const assertHandled = (tag: "ContactNotFound"): void => void tag
 
 /**
- * Odpowiedź błędna zamieniana raz, w jednym miejscu: błąd domenowy rozpoznawany
- * po tagu, walidacja schematu rozkładana na pola po ścieżce z błędu parsowania.
+ * The error response is converted once, in one place: a domain error is
+ * recognised by its tag, a schema validation is spread across fields by the
+ * path from the parse error.
  *
- * Rozgałęzienie jest wyczerpujące: nowy błąd domenowy w kontrakcie nie ma
- * gałęzi, więc `assertHandled` przestaje się kompilować.
+ * The branching is exhaustive: a new domain error in the contract has no
+ * branch, so `assertHandled` stops compiling.
  */
 const toMutationError = (
   status: number,
@@ -68,7 +69,7 @@ const toMutationError = (
   if (body?._tag === "ContactNotFound") {
     assertHandled(body._tag)
 
-    return new ContactMutationError("Kontakt nie istnieje", true, {})
+    return new ContactMutationError("Contact does not exist", true, {})
   }
 
   const fieldErrors: Partial<Record<ContactField, string>> = {}
@@ -78,22 +79,22 @@ const toMutationError = (
   }
 
   return new ContactMutationError(
-    `Żądanie nie powiodło się (HTTP ${status})`,
+    `Request failed (HTTP ${status})`,
     false,
     fieldErrors
   )
 }
 
 /**
- * Optymistyczna mutacja listy: ekran pokazuje wynik od razu, cache wraca do
- * poprzedniego stanu przy błędzie, a po zakończeniu lista jest unieważniana —
- * jeden przepis dla dodawania, edycji i usuwania (DESIGN.md §9).
+ * An optimistic mutation of the list: the screen shows the result immediately,
+ * the cache rolls back to its previous state on failure, and once settled the
+ * list is invalidated — one recipe for create, edit and delete (DESIGN.md §9).
  */
 const useOptimisticContacts = () => {
   const queryClient = useQueryClient()
 
   return {
-    /** Zdejmuje w locie zapytania, żeby odpowiedź w drodze nie nadpisała podglądu. */
+    /** Cancels in-flight queries so a response on the wire cannot overwrite the preview. */
     apply: async (change: (contacts: ReadonlyArray<Contact>) => ReadonlyArray<Contact>) => {
       await queryClient.cancelQueries({ queryKey: CONTACTS_QUERY_KEY })
       const previous = queryClient.getQueryData<ReadonlyArray<Contact>>(CONTACTS_QUERY_KEY)
@@ -115,13 +116,13 @@ const useOptimisticContacts = () => {
 }
 
 /**
- * Kontakt widoczny natychmiast, jeszcze przed odpowiedzią serwera. Tymczasowy
- * identyfikator jest lokalny i żyje do unieważnienia listy — prawdziwy nadaje
- * baza (ADR-0003: „Cofnij" i tak tworzy wpis o nowej tożsamości).
+ * A contact visible immediately, before the server answers. The temporary id is
+ * local and lives until the list is invalidated — the real one is assigned by
+ * the database (ADR-0003: "undo" creates an entry with a new identity anyway).
  */
 export const DRAFT_ID_PREFIX = "draft:"
 
-/** Wpis widoczny tylko lokalnie — jeszcze bez tożsamości nadanej przez bazę. */
+/** An entry visible only locally — without an identity from the database yet. */
 export const isDraft = (contact: Contact): boolean => contact.id.startsWith(DRAFT_ID_PREFIX)
 
 const draftContact = (body: CreateContactBody): Contact => {
@@ -173,8 +174,8 @@ export const useUpdateContact = () => {
       cache.apply((contacts) =>
         contacts.map((contact) =>
           contact.id === id
-            ? // Znacznik modyfikacji podnoszony też w podglądzie — inaczej lista
-              // pokazywałaby starą datę aż do unieważnienia (ticket 09).
+            ? // The modification stamp is raised in the preview too — otherwise
+              // the list would show the old date until invalidation (ticket 09).
               { ...contact, ...body, updatedAt: new Date().toISOString() }
             : contact
         )

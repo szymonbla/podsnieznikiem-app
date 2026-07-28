@@ -11,10 +11,10 @@ import {
 import type { SampleContact } from "./seed-data.js"
 
 /**
- * Wiersz tabeli `contacts` — kształt brany z kontraktu, więc nowe pole
- * w `Contact` wymusza zmianę tutaj. Różnica jest jedna: znaczniki czasu
- * przychodzą z pg jako `Date`, nie jako tekst. Nazwy kolumn aliasowane
- * w SQL-u, bez automatycznej transformacji.
+ * A row of the `contacts` table — the shape comes from the contract, so a new
+ * field on `Contact` forces a change here. There is one difference: timestamps
+ * arrive from pg as `Date`, not as text. Column names are aliased in the SQL,
+ * with no automatic transformation.
  */
 const ContactRow = Schema.Struct({
   ...Contact.fields,
@@ -64,10 +64,11 @@ export class ContactsRepository extends Effect.Service<ContactsRepository>()(
       })
 
       /**
-       * Pominięte pole zostaje bez zmian — `coalesce` na parametrze załatwia to
-       * bez sklejania SQL-a z fragmentów, więc zapytanie jest jedno i zawsze
-       * to samo. `updated_at` idzie wprost: znacznik modyfikacji opisuje zapis,
-       * nie to, ile pól się w nim zmieściło.
+       * An omitted field stays unchanged — `coalesce` on the parameter handles
+       * that without stitching the SQL together from fragments, so there is one
+       * query and it is always the same. `updated_at` is set unconditionally:
+       * the modification stamp describes the write, not how many fields fit
+       * into it.
        */
       const updateFields = SqlSchema.findOne({
         Request: Schema.Struct({ id: ContactId, body: UpdateContactBody }),
@@ -100,9 +101,9 @@ export class ContactsRepository extends Effect.Service<ContactsRepository>()(
         )
 
       /**
-       * Usunięcie nieistniejącego kontaktu to `ContactNotFound`, a nie ciche
-       * 204 — właściciel patrzy wtedy na nieaktualną listę i ma się o tym
-       * dowiedzieć (DESIGN.md §8).
+       * Deleting a contact that does not exist is a `ContactNotFound`, not a
+       * silent 204 — the owner is looking at a stale list and should be told
+       * (DESIGN.md §8).
        */
       const remove = (id: ContactId) =>
         sql`delete from contacts where id = ${id} returning id`.pipe(
@@ -125,11 +126,11 @@ export class ContactsRepository extends Effect.Service<ContactsRepository>()(
         `.pipe(Effect.map((rows) => rows.length))
 
       /**
-       * Wstawia te kontakty, których identyczna trójka (nazwa, specjalizacja,
-       * numer) jeszcze w bazie nie leży, i zwraca liczbę dodanych. Sam numer
-       * nie rozstrzyga — nie jest unikalny (CONTEXT.md → Telefon). Całość
-       * w jednej transakcji, żeby zwrócona liczba opisywała stan bazy także
-       * wtedy, gdy któryś wiersz się nie uda.
+       * Inserts the contacts whose identical triple (name, role, phone) is not
+       * in the database yet, and returns how many were added. The number alone
+       * does not decide — it is not unique (CONTEXT.md -> Telefon). All in one
+       * transaction, so the returned count describes the state of the database
+       * even when one of the rows fails.
        */
       const insertManyUnlessIdentical = (contacts: ReadonlyArray<SampleContact>) =>
         Effect.forEach(contacts, insertUnlessIdentical, { concurrency: 1 }).pipe(

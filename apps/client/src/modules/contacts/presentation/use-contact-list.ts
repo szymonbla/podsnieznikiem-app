@@ -7,8 +7,8 @@ import { resolveSearch, toSearchParams, type ResolvedSearch } from "../domain/vi
 import { matchesQuery } from "../integration/search"
 
 /**
- * Trasa podana identyfikatorem, nie importem obiektu trasy — ekran jest
- * wciągany przez router, więc import w drugą stronę zamknąłby cykl.
+ * The route given by id, not by importing the route object — the screen is
+ * pulled in by the router, so an import the other way would close a cycle.
  */
 const CONTACTS_ROUTE = "/kontakty" as const
 
@@ -23,9 +23,9 @@ interface ContactList {
 }
 
 /**
- * Jedno miejsce, w którym stan widoku z adresu zamienia się w wiersze do
- * pokazania. Formatowanie, sortowanie i filtrowanie dzielą ten sam stan, więc
- * rozdzielenie ich oznaczałoby trzykrotne czytanie tego samego adresu.
+ * The one place where view state from the address turns into rows to show.
+ * Formatting, sorting and filtering share the same state, so splitting them
+ * apart would mean reading the same address three times.
  */
 export const useContactList = (contacts: ReadonlyArray<Contact>): ContactList => {
   const search = resolveSearch(useSearch({ from: CONTACTS_ROUTE }))
@@ -51,13 +51,14 @@ export const useContactList = (contacts: ReadonlyArray<Contact>): ContactList =>
     isFiltered: query !== "",
 
     /*
-     * Pisanie podmienia wpis w historii zamiast dokładać nowy — inaczej jedno
-     * słowo zostawiałoby tyle wpisów, ile liter, i „wstecz" przestałoby być
-     * przydatne.
+     * Typing replaces the history entry instead of adding one — otherwise a
+     * single word would leave as many entries as it has letters, and "back"
+     * would stop being useful.
      *
-     * Wyczyszczenie i zmiana sortowania to za to pojedyncze decyzje, więc
-     * dokładają wpis: bez tego „wstecz" po wyczyszczeniu filtra nie miałoby
-     * dokąd wrócić, a spec obiecuje powrót do poprzedniego filtra (historia 26).
+     * Clearing and changing the sort are single decisions, so they do add an
+     * entry: without that, "back" after clearing the filter would have nowhere
+     * to return to, and the spec promises a return to the previous filter
+     * (story 26).
      */
     setQuery: (q) => update({ q }, true),
     clearQuery: () => update({ q: "" }, false),

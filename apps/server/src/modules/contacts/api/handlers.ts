@@ -7,26 +7,26 @@ import { ContactsRepository } from "../integration/repository.js"
 import { contactsGroup } from "./endpoints.js"
 
 /**
- * Uchwyt tylko do typowania handlerów: `HttpApiBuilder.group` wyprowadza tag
- * warstwy z pary (identyfikator API, nazwa grupy). Ten obiekt nigdy nie jest
- * serwowany — serwowane jest `core/api.ts`. Dzięki temu moduł nie importuje
- * kompozycji z `core` i nie powstaje cykl; dodanie kolejnej grupy do API
- * nie wymaga zmian w tym pliku.
+ * A handle used only to type the handlers: `HttpApiBuilder.group` derives the
+ * layer tag from the pair (API identifier, group name). This object is never
+ * served — `core/api.ts` is. That way the module never imports the composition
+ * from `core`, no cycle appears, and adding another group to the API needs no
+ * change here.
  */
 const contactsApi = HttpApi.make(API_ID).add(contactsGroup)
 
 /**
- * Szczegóły awarii zostają w logu serwera — na zewnątrz idzie sam status
- * (DESIGN.md §8). Samo logowanie niczego nie rozstrzyga; o tym, co jest
- * odpowiedzią, a co pięćsetką, decydują `Effect.orDie` i `onlyNotFound`.
+ * Failure details stay in the server log — only the status goes out
+ * (DESIGN.md §8). Logging itself decides nothing; what counts as a response
+ * and what as a 500 is settled by `Effect.orDie` and `onlyNotFound`.
  */
 const logFailure = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
   effect.pipe(Effect.tapErrorCause(Effect.logError))
 
 /**
- * Nieodnaleziony kontakt jest odpowiedzią (404), nie awarią — wszystko inne
- * schodzi do 500. Rozdzielenie musi być jawne: samo `orDie` zabrałoby też błąd
- * domenowy, który endpoint obiecuje w sygnaturze.
+ * A missing contact is a response (404), not a failure — everything else falls
+ * through to a 500. The split has to be explicit: a bare `orDie` would swallow
+ * the domain error too, the one the endpoint promises in its signature.
  */
 const onlyNotFound = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
   effect.pipe(

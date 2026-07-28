@@ -1,41 +1,52 @@
 /**
- * Wszystkie teksty ekranu w jednym miejscu — JSX ich nie zawiera.
- * i18n świadomie pominięte: interfejs jest po polsku (DESIGN.md §3).
+ * All the screen's text in one place — the JSX contains none of it. i18n is
+ * deliberately left out: the interface is Polish (DESIGN.md §3), so the values
+ * here stay Polish while the code around them does not.
  */
 export const contactsCopy = {
   title: "Kontakty",
+  /** The name of the table and its scroll region — a screen reader enters the list with context. */
+  tableLabel: "Lista kontaktów",
   columns: {
     name: "Imię i nazwisko",
     role: "Specjalizacja",
     phone: "Telefon",
-    /** Kolumna akcji nie ma widocznego nagłówka, ale czytnik ekranu musi ją nazwać. */
+    /** The actions column has no visible heading, but a screen reader must name it. */
     actions: "Akcje"
   },
   search: {
     label: "Szukaj kontaktu",
     placeholder: "Nazwisko, fach albo numer",
-    clear: "Wyczyść wyszukiwanie"
+    clear: "Wyczyść wyszukiwanie",
+    /** A hint for the field: the filter works as you type, so say where the result lands. */
+    hint: "Lista filtruje się w trakcie pisania."
   },
   row: {
     call: "Zadzwoń pod numer ",
     copied: "Numer skopiowany do schowka",
     copyFailed: "Nie udało się skopiować numeru",
-    /** Menu nazwane nazwiskiem — na liście jest ich tyle, ile wierszy. */
+    /** The menu is named by the person — there are as many as there are rows. */
     menu: (name: string) => `Akcje kontaktu ${name}`,
-    /** Pozycja menu — bez numeru, bo ten stoi w tym samym wierszu. */
+    /** A menu item — without the number, which sits in the same row. */
     copyItem: "Kopiuj numer",
     edit: "Edytuj",
     remove: "Usuń"
   },
 
-  add: "Dodaj kontakt",
+  add: "Nowy kontakt",
+
+  /**
+   * The note under the list. There is no "save" button outside the dialog, so
+   * the owner has to learn somewhere that nothing will be lost.
+   */
+  autosave: "Zmiany zapisują się automatycznie.",
 
   form: {
     create: {
       title: "Nowy kontakt",
       description: "Imię i nazwisko, fach i numer — tyle wystarczy.",
       submit: "Dodaj kontakt",
-      /** Potwierdzenie z nazwiskiem, żeby nie było wątpliwości, co się zapisało. */
+      /** A confirmation carrying the name, so there is no doubt what was saved. */
       success: (name: string) => `Dodano ${name}`,
       failure: "Nie udało się dodać kontaktu"
     },
@@ -58,8 +69,22 @@ export const contactsCopy = {
     },
     cancel: "Anuluj",
     /**
-     * Ostrzeżenie, nie błąd — zapis przechodzi. Osoba wykonująca dwa fachy to
-     * dwa kontakty dzielące numer (ticket 08).
+     * The design's role suggestions. This is a `datalist`, not a closed list —
+     * the trades around a cottage do not stop at seven, and the field stays
+     * free text.
+     */
+    roleSuggestions: [
+      "Hydraulik",
+      "Elektryk",
+      "Dekarz",
+      "Kominiarz",
+      "Złota rączka",
+      "Serwis AGD",
+      "Sprzątanie"
+    ],
+    /**
+     * A warning, not an error — the save goes through. A person working two
+     * trades is two contacts sharing a number (ticket 08).
      */
     duplicate: (name: string, role: string) => `Ten numer masz już jako ${name} — ${role}`
   },
@@ -74,11 +99,11 @@ export const contactsCopy = {
     failure: "Nie udało się usunąć kontaktu",
     undo: "Cofnij",
     restored: (name: string) => `Przywrócono ${name}`,
-    /** Nie sugeruje, że kontakt wrócił — bo nie wrócił (ticket 10). */
+    /** Does not imply the contact came back — because it did not (ticket 10). */
     restoreFailed: "Nie udało się przywrócić kontaktu"
   },
 
-  /** Lista jest nieaktualna, więc zostanie unieważniona — właściciel ma o tym wiedzieć. */
+  /** The list is stale and will be invalidated — the owner should know. */
   notFound: "Tego kontaktu już nie ma — odświeżam listę",
   loading: "Wczytuję kontakty…",
   emptyList: {
@@ -87,10 +112,10 @@ export const contactsCopy = {
     action: "Dodaj pierwszy kontakt"
   },
   emptySearch: {
-    /** Zapytanie przytoczone, żeby właściciel zobaczył, czego faktycznie szukał. */
+    /** The query is quoted back, so the owner sees what they actually searched for. */
     title: (query: string) => `Nic nie pasuje do „${query}”`,
     description: "Spróbuj krótszego fragmentu nazwiska, fachu albo numeru.",
-    /** Inna nazwa niż krzyżyk w polu, żeby dwa wyjścia z filtra dały się rozróżnić. */
+    /** Named differently from the field's cross, so the two ways out of the filter are told apart. */
     action: "Pokaż wszystkie kontakty"
   },
   loadError: {
@@ -101,9 +126,9 @@ export const contactsCopy = {
 } as const
 
 /**
- * Polska odmiana liczebnika: 1 → *kontakt*, końcówki 2–4 → *kontakty*, reszta →
- * *kontaktów*. Wyjątek na 12–14, bo „12 kontakty" brzmi jak niedokończony
- * interfejs (spec 0001, historia 4).
+ * Polish numeral inflection: 1 -> *kontakt*, endings 2-4 -> *kontakty*, the
+ * rest -> *kontaktów*. 12-14 are the exception, because "12 kontakty" sounds
+ * like an unfinished interface (spec 0001, story 4).
  */
 export const contactsCount = (count: number): string => {
   const lastTwo = count % 100
@@ -116,10 +141,10 @@ export const contactsCount = (count: number): string => {
 }
 
 /**
- * Przy filtrze liczy się wynik na tle całości, nie sama liczba trafień —
- * `3 z 24`, dosłownie jak w DESIGN.md §9. Rzeczownik zostaje pominięty
- * świadomie: po „z" musiałby stanąć w dopełniaczu („z 24 kontaktów"), więc
- * licznik odmieniałby się inaczej niż przy pełnej liście i wyglądałby na
- * niekonsekwentny.
+ * Under a filter what counts is the result against the whole, not the number of
+ * hits alone — `3 z 24`, literally as in DESIGN.md §9. The noun is dropped on
+ * purpose: after "z" it would have to be genitive ("z 24 kontaktów"), so the
+ * counter would inflect differently than for the full list and would look
+ * inconsistent.
  */
 export const contactsMatchCount = (shown: number, total: number): string => `${shown} z ${total}`

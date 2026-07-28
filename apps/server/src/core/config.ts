@@ -2,16 +2,17 @@ import { Config, Redacted, Schema } from "effect"
 
 const DatabaseUrl = Schema.String.pipe(
   Schema.pattern(/^postgres(ql)?:\/\/\S+$/, {
-    message: () => "DATABASE_URL musi być adresem postgres://"
+    message: () => "DATABASE_URL must be a postgres:// address"
   })
 )
 
 const Port = Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 65535))
 
 /**
- * Konfiguracja czytana ze zmiennych środowiskowych i walidowana schematem.
- * To **jedyne** miejsce, które sięga po zmienne — warstwy biorą wartości stąd,
- * żeby walidacja na starcie nie była dekoracją (patrz `core/layers.ts`).
+ * Configuration read from environment variables and validated by a schema.
+ * This is the **only** place that touches the environment — layers take their
+ * values from here, so that start-up validation is not decorative
+ * (see `core/layers.ts`).
  */
 export const appConfig = Config.all({
   databaseUrl: Schema.Config("DATABASE_URL", DatabaseUrl).pipe(Config.map(Redacted.make)),

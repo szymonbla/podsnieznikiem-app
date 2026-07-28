@@ -98,7 +98,15 @@ const layerConfigs = LAYERS.flatMap((layer) => [
 ])
 
 export default tseslint.config(
-  { ignores: ["**/dist/**", "**/node_modules/**", "apps/client/src/generated/**"] },
+  /* `docs/DESIGN/` to dostarczony eksport projektu — cudzy kod, czytany, nie utrzymywany. */
+  {
+    ignores: [
+      "**/dist/**",
+      "**/node_modules/**",
+      "apps/client/src/generated/**",
+      "docs/DESIGN/**"
+    ]
+  },
 
   js.configs.recommended,
   ...tseslint.configs.recommended,

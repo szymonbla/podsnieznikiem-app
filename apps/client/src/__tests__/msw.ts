@@ -4,13 +4,13 @@ import { setupServer } from "msw/node"
 import type { Contact } from "../modules/contacts"
 
 /**
- * Serwer podszywający się pod API — sieć jest jedyną podstawioną granicą szwu 2.
- * Mieszka osobno od `harness.tsx`, bo jego cyklem życia steruje preload (jeden
- * nasłuch na proces), a preload nie może wciągać drzewa Reacta przed
- * zarejestrowaniem DOM-u.
+ * A server standing in for the API — the network is seam 2's only stubbed
+ * boundary. It lives apart from `harness.tsx` because the preload drives its
+ * lifecycle (one listener per process), and the preload must not pull in a
+ * React tree before the DOM is registered.
  *
- * `*` w ścieżkach handlerów rozstrzyga adres bazowy — klient uderza pod
- * względne `/api`, a test nie musi znać originu, na którym stoi happy-dom.
+ * The `*` in the handler paths settles the base URL — the client hits a
+ * relative `/api`, and the test need not know the origin happy-dom runs on.
  */
 export const mockApi = setupServer()
 
@@ -18,13 +18,13 @@ export const apiHandlers = {
   contacts: (contacts: ReadonlyArray<Contact>): HttpHandler =>
     http.get("*/api/contacts", () => HttpResponse.json(contacts)),
 
-  /** Padnięte połączenie — żądanie nie dochodzi, więc nie ma nawet statusu. */
+  /** A dead connection — the request never arrives, so there is not even a status. */
   contactsUnreachable: (): HttpHandler =>
     http.get("*/api/contacts", () => HttpResponse.error()),
 
   /**
-   * Żądanie, które nigdy nie wraca — jedyny sposób, żeby test zdążył zobaczyć
-   * stan ładowania. Obietnica bez rozstrzygnięcia znika razem z procesem testu.
+   * A request that never comes back — the only way for a test to catch the
+   * loading state. The unsettled promise disappears with the test process.
    */
   contactsPending: (): HttpHandler =>
     http.get("*/api/contacts", () => new Promise<never>(() => {}))
@@ -37,16 +37,16 @@ interface WriteBody {
 }
 
 /**
- * API z pamięcią — lista naprawdę rośnie, zmienia się i kurczy po żądaniu.
- * Bez tego test dodania widziałby tylko podgląd optymistyczny i przechodziłby
- * także wtedy, gdy `POST` w ogóle nie dochodzi.
+ * An API with memory — the list really grows, changes and shrinks per request.
+ * Without that, a create test would see only the optimistic preview and would
+ * pass even when the `POST` never arrives.
  *
- * `id` nadaje „serwer", więc odtworzony kontakt dostaje nową tożsamość — tak
- * jak w bazie (ADR-0003).
+ * The "server" assigns the `id`, so a restored contact gets a new identity —
+ * just like in the database (ADR-0003).
  */
 export const contactsApi = (
   initial: ReadonlyArray<Contact> = [],
-  /** Awaria, którą API ma odesłać zamiast wykonać zapis — do ścieżek błędnych. */
+  /** The failure the API should return instead of writing — for the error paths. */
   failWith?: { readonly status: 400 | 404; readonly body: Record<string, unknown> }
 ) => {
   let contacts = [...initial]

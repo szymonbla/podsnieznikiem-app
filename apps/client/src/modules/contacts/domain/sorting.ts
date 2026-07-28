@@ -1,6 +1,6 @@
 import type { Contact } from "./models"
 
-/** Kolumny, po których wolno sortować — te same, które widać w tabeli. */
+/** The columns that may be sorted on — the ones visible in the table. */
 export const SORT_COLUMNS = ["name", "role", "phone"] as const
 
 export type SortColumn = (typeof SORT_COLUMNS)[number]
@@ -10,18 +10,18 @@ export const DEFAULT_SORT: SortColumn = "name"
 export const DEFAULT_DIRECTION: SortDirection = "asc"
 
 /**
- * Porównanie po polsku — „Ł" idzie po „L", nie na koniec alfabetu, bo domyślne
- * porównanie ciągów w JS-ie układa je po kodach znaków (DESIGN.md §9).
- * Collator powstaje raz: tworzenie go per porównanie jest wolniejsze od samego
- * porównania.
+ * Polish collation — "Ł" follows "L" rather than falling to the end of the
+ * alphabet, which is where JavaScript's default string comparison puts it,
+ * since that orders by character code (DESIGN.md §9). The collator is built
+ * once: creating one per comparison costs more than the comparison itself.
  */
 const collator = new Intl.Collator("pl", { numeric: true })
 
 /**
- * Sortowanie po specjalizacji ustawia obok siebie ludzi od jednej dziedziny,
- * ale ich wzajemna kolejność musiałaby wtedy zależeć od kolejności z serwera —
- * czyli skakać. Remis rozstrzyga więc zawsze kolumna z nazwiskiem, rosnąco,
- * niezależnie od kierunku sortowania głównego.
+ * Sorting by role puts people from one trade next to each other, but their
+ * order among themselves would then depend on the order from the server — that
+ * is, it would jump around. So a tie is always broken by the name column,
+ * ascending, whatever the direction of the primary sort.
  */
 export const compareContacts =
   (column: SortColumn, direction: SortDirection) =>

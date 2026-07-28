@@ -1,8 +1,9 @@
 /**
- * Runtime Effecta ma zostać na serwerze (DESIGN.md §3). Lint pilnuje tego na
- * źródłach, ale reguła da się wyłączyć komentarzem, a zależność może wejść
- * pośrednio — przez paczkę, która sama importuje Effecta. Dlatego druga,
- * niezależna kontrola patrzy na to, co naprawdę wyszło z bundlera.
+ * The Effect runtime is meant to stay on the server (DESIGN.md §3). Lint
+ * guards that at the source level, but the rule can be switched off with a
+ * comment, and the dependency can creep in indirectly — through a package that
+ * imports Effect itself. Hence a second, independent check that looks at what
+ * actually came out of the bundler.
  */
 
 import { readdir } from "node:fs/promises"
@@ -11,13 +12,13 @@ import { join } from "node:path"
 const ASSETS = join(import.meta.dirname, "..", "apps", "client", "dist", "assets")
 
 /**
- * Ślady, które Effect zostawia w zbundlowanym kodzie. Nazwy przetrwają
- * minifikację, bo są ciągami znaków — identyfikatorów szukać nie ma sensu.
+ * Traces Effect leaves in bundled code. These names survive minification
+ * because they are string literals — looking for identifiers is pointless.
  */
 const EFFECT_MARKERS = ["effect/Effect", "@effect/platform", "EffectTypeId"]
 
 const files = await readdir(ASSETS).catch(() => {
-  console.error(`Brak katalogu ${ASSETS} — najpierw zbuduj klienta (bun run build:client).`)
+  console.error(`No ${ASSETS} directory — build the client first (bun run build:client).`)
   process.exit(1)
 })
 
@@ -32,9 +33,9 @@ for (const file of files) {
 }
 
 if (offenders.length > 0) {
-  console.error("Runtime Effecta trafił do bundla klienta:")
+  console.error("The Effect runtime made it into the client bundle:")
   for (const offender of offenders) console.error(`  - ${offender}`)
   process.exit(1)
 }
 
-console.log("Bundle klienta bez runtime'u Effecta.")
+console.log("Client bundle is free of the Effect runtime.")

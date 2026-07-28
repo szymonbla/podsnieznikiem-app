@@ -22,9 +22,9 @@ interface TestContext {
 }
 
 /**
- * Szew 1 — test uderza w działający serwer z prawdziwym Postgresem.
- * Serwer wstaje na losowym porcie, migracje idą tak samo jak przy starcie
- * produkcyjnym, a każdy test zaczyna od pustej tabeli.
+ * Seam 1 — the test hits a running server backed by a real Postgres. The
+ * server comes up on a random port, migrations run exactly as they do on a
+ * production start, and every test begins with an empty table.
  */
 export const withServer = <A, E>(
   test: (context: TestContext) => Effect.Effect<A, E, never>
@@ -33,7 +33,7 @@ export const withServer = <A, E>(
     const server = yield* HttpServer.HttpServer
     const address = server.address
     if (address._tag !== "TcpAddress") {
-      return yield* Effect.dieMessage("Serwer testowy nie ma adresu TCP")
+      return yield* Effect.dieMessage("Test server has no TCP address")
     }
 
     const baseUrl = `http://localhost:${address.port}`

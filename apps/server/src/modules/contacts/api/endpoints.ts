@@ -4,45 +4,45 @@ import { Schema } from "effect"
 import { ContactNotFound } from "../domain/errors.js"
 import { Contact, ContactId, CreateContactBody, UpdateContactBody } from "../domain/models.js"
 
-/** Parametr ścieżki dla operacji na pojedynczym kontakcie. */
+/** Path parameter for operations on a single contact. */
 const idParam = Schema.Struct({ id: ContactId })
 
 /**
- * `GET /contacts` zwraca komplet — bez parametrów. Filtrowanie i sortowanie
- * należą do klienta (patrz DESIGN.md §7).
+ * `GET /contacts` returns the whole set — no parameters. Filtering and sorting
+ * belong to the client (see DESIGN.md §7).
  */
 export const contactsGroup = HttpApiGroup.make("contacts")
   .add(
     HttpApiEndpoint.get("list", "/contacts")
       .addSuccess(Schema.Array(Contact))
-      .annotate(OpenApi.Description, "Zwraca wszystkie kontakty, uporządkowane po nazwie")
+      .annotate(OpenApi.Description, "Returns every contact, ordered by name")
   )
   .add(
     HttpApiEndpoint.post("create", "/contacts")
       .setPayload(CreateContactBody)
       .addSuccess(Contact, { status: 201 })
-      .annotate(OpenApi.Description, "Tworzy kontakt; wymaga kompletu trzech pól")
+      .annotate(OpenApi.Description, "Creates a contact; requires all three fields")
   )
   .add(
     /*
-     * Aktualizacja jest częściowa: pominięte pole zostaje bez zmian. `PATCH`,
-     * nie `PUT`, bo klient wysyła to, co właściciel faktycznie zmienił.
+     * The update is partial: an omitted field stays unchanged. `PATCH`, not
+     * `PUT`, because the client sends what the owner actually changed.
      */
     HttpApiEndpoint.patch("update", "/contacts/:id")
       .setPath(idParam)
       .setPayload(UpdateContactBody)
       .addSuccess(Contact)
       .addError(ContactNotFound, { status: 404 })
-      .annotate(OpenApi.Description, "Aktualizuje wskazane pola kontaktu")
+      .annotate(OpenApi.Description, "Updates the given fields of a contact")
   )
   .add(
     /*
-     * Usunięcie jest trwałe — bez `deleted_at` i bez odroczenia
-     * (ADR-0003). „Cofnij" po stronie klienta to ponowne utworzenie.
+     * Deletion is permanent — no `deleted_at`, no deferral (ADR-0003). The
+     * client's "undo" is a re-create.
      */
     HttpApiEndpoint.del("remove", "/contacts/:id")
       .setPath(idParam)
       .addError(ContactNotFound, { status: 404 })
-      .annotate(OpenApi.Description, "Usuwa kontakt trwale")
+      .annotate(OpenApi.Description, "Deletes a contact permanently")
   )
-  .annotate(OpenApi.Title, "Kontakty")
+  .annotate(OpenApi.Title, "Contacts")

@@ -1,9 +1,9 @@
 import { QueryClient, type QueryClientConfig } from "@tanstack/react-query"
 
 /**
- * Fabryka, nie singleton — testy szwu 2 potrzebują świeżego cache'u na każdy
- * przypadek i własnej polityki ponowień. Czasy świeżości należą do konkretnych
- * zapytań (patrz moduł kontaktów), nie tutaj.
+ * A factory, not a singleton — seam 2 tests need a fresh cache per case and
+ * their own retry policy. Staleness times belong to individual queries (see
+ * the contacts module), not here.
  */
 export const createQueryClient = (config?: QueryClientConfig): QueryClient =>
   new QueryClient({

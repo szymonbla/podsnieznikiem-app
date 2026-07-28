@@ -5,25 +5,28 @@ interface EmptyStateProps {
   readonly description: string
   readonly action?: ReactNode
   /**
-   * Błąd wczytywania to komunikat o zdarzeniu, nie opis zastanego stanu —
-   * czytnik ekranu ma go usłyszeć w momencie, w którym się pojawia.
+   * A load error is a message about an event, not a description of the state
+   * found — a screen reader should hear it the moment it appears.
    */
   readonly assertive?: boolean
 }
 
 /**
- * Jedna rama dla wszystkich trzech pustych ekranów — brak kontaktów, brak
- * wyników filtra i błąd połączenia. Nie różnią się układem, tylko treścią
- * i tym, dokąd prowadzą; wspólny kształt trzyma je rozróżnialnymi przez to,
- * co naprawdę je różni.
+ * One frame for all three empty screens — no contacts, no filter matches and a
+ * connection error. They do not differ in layout, only in text and in where
+ * they lead; a shared shape keeps them told apart by what really differs.
  */
 export const EmptyState = ({ title, description, action, assertive }: EmptyStateProps) => (
   <div
     role={assertive === true ? "alert" : "status"}
-    className="flex flex-col items-center gap-2 rounded-card border border-separator bg-surface px-6 py-12 text-center animate-fade-up"
+    className="animate-fade-up rounded-panel border border-dashed border-border-dashed bg-surface px-5 py-10 text-center wide:px-6 wide:py-16"
   >
-    <p className="font-heading text-base font-semibold">{title}</p>
-    <p className="max-w-sm text-muted-foreground">{description}</p>
-    {action !== undefined ? <div className="pt-2">{action}</div> : null}
+    {/*
+      The frame is dashed, not solid — a place where something is not there yet
+      looks different from a place where something is.
+    */}
+    <p className="mb-1.5 font-heading text-xl font-bold tracking-[-0.02em]">{title}</p>
+    <p className="mx-auto mb-5 max-w-[42ch] text-ink-soft">{description}</p>
+    {action}
   </div>
 )

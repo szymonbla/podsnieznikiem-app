@@ -1,7 +1,7 @@
 /**
- * Kształt kontaktu żyje w paczce kontraktów — jest wspólny dla serwera
- * i (przez OpenAPI) klienta. Warstwa `domain` tylko go tu wprowadza,
- * żeby reszta modułu nie sięgała po paczkę bezpośrednio.
+ * The contact shape lives in the contracts package — shared by the server and
+ * (through OpenAPI) the client. The `domain` layer only re-exports it here so
+ * the rest of the module never reaches for the package directly.
  */
 export {
   Contact,

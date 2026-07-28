@@ -3,16 +3,18 @@ import { z } from "zod"
 import { DEFAULT_DIRECTION, DEFAULT_SORT, SORT_COLUMNS, type SortColumn, type SortDirection } from "./sorting"
 
 /**
- * Filtr i sortowanie żyją w adresie, nie w stanie komponentu — dzięki temu
- * działa „wstecz", odświeżenie i wysłany sobie link (DESIGN.md §9).
+ * The filter and the sort live in the address, not in component state — that
+ * is what makes "back", a refresh and a link sent to yourself all work
+ * (DESIGN.md §9).
  *
- * Każde pole ma własny `catch`, więc ręcznie zmajstrowany adres
- * (`?sort=wiek&dir=w-lewo`) nie wywala ekranu, tylko cofa się do wartości
- * domyślnej. Cały schemat z jednym `catch` gubiłby przy okazji pola poprawne.
+ * Every field has its own `catch`, so a hand-crafted address
+ * (`?sort=age&dir=leftwards`) does not blow up the screen but falls back to
+ * the default. One `catch` on the whole schema would drop the valid fields
+ * along with the broken one.
  *
- * Wszystkie pola są opcjonalne, bo domyślnych nie zapisujemy w adresie:
- * zwykła lista to `/kontakty`, nie `/kontakty?q=&sort=name&dir=asc`. Skutkiem
- * ubocznym jest to, że link do ekranu nie musi nieść stanu widoku.
+ * All fields are optional, because defaults are not written into the address:
+ * the plain list is `/kontakty`, not `/kontakty?q=&sort=name&dir=asc`. A side
+ * effect is that a link to the screen need not carry the view state.
  */
 export const contactsSearchSchema = z.object({
   q: z.string().optional().catch(undefined),
@@ -20,10 +22,10 @@ export const contactsSearchSchema = z.object({
   dir: z.enum(["asc", "desc"]).optional().catch(undefined)
 })
 
-/** Stan widoku tak, jak stoi w adresie — z dziurami tam, gdzie panują domyślne. */
+/** The view state as it stands in the address — with holes where defaults rule. */
 export type ContactsSearch = z.output<typeof contactsSearchSchema>
 
-/** Stan widoku po uzupełnieniu dziur — tego używa ekran, nie surowego adresu. */
+/** The view state with the holes filled — this is what the screen uses, not the raw address. */
 export interface ResolvedSearch {
   readonly q: string
   readonly sort: SortColumn
@@ -36,7 +38,7 @@ export const resolveSearch = (search: ContactsSearch): ResolvedSearch => ({
   dir: search.dir ?? DEFAULT_DIRECTION
 })
 
-/** Droga powrotna: wartości domyślne wypadają z adresu, zamiast go zaśmiecać. */
+/** The way back: default values drop out of the address instead of cluttering it. */
 export const toSearchParams = (resolved: ResolvedSearch): ContactsSearch => ({
   q: resolved.q === "" ? undefined : resolved.q,
   sort: resolved.sort === DEFAULT_SORT ? undefined : resolved.sort,

@@ -5,22 +5,23 @@ import { ContactsRepository, seedContacts } from "../modules/contacts/index.js"
 import { DatabaseLive } from "./layers.js"
 
 /**
- * Komenda `db:seed` — osobne wejście, nie migracja. Migracje idą tą samą
- * warstwą co przy starcie serwera, więc świeżo postawiona baza wystarczy.
+ * The `db:seed` command — a separate entry point, not a migration. Migrations
+ * run through the same layer as at server start-up, so a freshly created
+ * database is enough.
  */
 const main = Effect.gen(function* () {
   const inserted = yield* seedContacts
 
   yield* Effect.log(
     inserted === 0
-      ? "Dane przykładowe już są w bazie — nic nie dodano."
-      : `Wgrano dane przykładowe: ${inserted} kontaktów.`
+      ? "Sample data is already in the database — nothing inserted."
+      : `Sample data loaded: ${inserted} contacts.`
   )
 }).pipe(
   Effect.provide(ContactsRepository.Default),
   Effect.provide(DatabaseLive),
   Effect.catchAllCause((cause) =>
-    Effect.logError(`Nie udało się wgrać danych przykładowych. ${Cause.pretty(cause)}`).pipe(
+    Effect.logError(`Failed to load sample data. ${Cause.pretty(cause)}`).pipe(
       Effect.zipRight(Effect.sync(() => process.exit(1)))
     )
   )

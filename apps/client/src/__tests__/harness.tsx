@@ -6,18 +6,19 @@ import { createQueryClient } from "../core/query"
 import { createAppRouter } from "../core/router"
 
 /**
- * Szew 2 — test renderuje ekran razem z routerem i warstwą zapytań, a sieć
- * podstawia serwer podszywający się pod API (MSW), nie atrapa modułu. Dzięki
- * temu klient HTTP, react-query i komponenty są w teście prawdziwe, a jedyną
- * granicą jest to, co naprawdę wychodzi na sieć.
+ * Seam 2 — the test renders the screen together with the router and the query
+ * layer, and the network is stubbed by a server standing in for the API (MSW),
+ * not by a module double. That keeps the HTTP client, react-query and the
+ * components real in the test, with the only boundary being what actually goes
+ * out to the network.
  */
 export { apiHandlers, contactsApi, mockApi } from "./msw"
 export { aContact } from "./contact-builder"
 
 /**
- * Renderuje aplikację pod wskazanym adresem, tak jak zrobiłaby to przeglądarka.
- * Zwraca też router, bo część zachowania widać wyłącznie w adresie — filtr
- * i sortowanie są w nim zapisywane i z niego czytane.
+ * Renders the application at the given address, the way a browser would. It
+ * also returns the router, because some behaviour is visible only in the
+ * address — the filter and the sort are written to and read from it.
  */
 export const renderApp = (initialPath: string) => {
   const queryClient = createQueryClient({
@@ -32,9 +33,9 @@ export const renderApp = (initialPath: string) => {
         <RouterProvider router={router} />
       </QueryClientProvider>
     ),
-    /** Adres tak, jak zobaczyłby go pasek przeglądarki — ze znakiem zapytania. */
+    /** The address as a browser's bar would show it — query string included. */
     currentUrl: () => router.state.location.href,
-    /** „Wstecz" przeglądarki — historia jest w pamięci, więc trzeba ją cofnąć wprost. */
+    /** The browser's "back" — the history is in memory, so it has to be stepped back explicitly. */
     goBack: () => history.back()
   }
 }

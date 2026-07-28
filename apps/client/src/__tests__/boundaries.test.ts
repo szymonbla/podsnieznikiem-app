@@ -23,9 +23,9 @@ interface ModuleReference {
 }
 
 /**
- * Łapie wszystkie cztery sposoby wciągnięcia modułu: `import … from`,
- * `export … from`, `import "x"` dla samego efektu ubocznego i `import("x")`.
- * Tylko pierwsze dwa mogą być `type`-only; pozostałe zawsze wnoszą runtime.
+ * Catches all four ways of pulling a module in: `import … from`,
+ * `export … from`, `import "x"` for the side effect alone and `import("x")`.
+ * Only the first two can be `type`-only; the rest always bring runtime.
  */
 const moduleReferences = (text: string): ReadonlyArray<ModuleReference> => [
   ...[...text.matchAll(/\b(?:import|export)\s+(type\s+)?[^"';]*?\bfrom\s*["']([^"']+)["']/g)].map(
@@ -42,16 +42,16 @@ const moduleReferences = (text: string): ReadonlyArray<ModuleReference> => [
 ]
 
 /**
- * Granica klient/serwer jest fizyczna (DESIGN.md §3). Pilnują jej trzy rzeczy
- * naraz, bo złamanie reguły wciąga runtime Effecta do bundla przeglądarki,
- * a kompilator tego nie zgłosi: reguła ESLinta na źródłach, ten test i kontrola
- * zbudowanego bundla (`scripts/check-bundle.ts`).
+ * The client/server boundary is physical (DESIGN.md §3). Three things guard it
+ * at once, because breaking the rule pulls the Effect runtime into the browser
+ * bundle and the compiler will not report it: an ESLint rule on the sources,
+ * this test, and a check of the built bundle (`scripts/check-bundle.ts`).
  *
- * Test zostaje mimo lintera, bo lint da się wyciszyć komentarzem w miejscu
- * złamania reguły — a tego testu nie.
+ * The test stays despite the linter, because lint can be silenced with a
+ * comment at the point of the violation — this test cannot.
  */
-describe("granica klient/serwer", () => {
-  test("klient nie importuje niczego z aplikacji serwera", async () => {
+describe("client/server boundary", () => {
+  test("the client imports nothing from the server application", async () => {
     const offenders = (await sourceFiles()).filter(({ text }) =>
       moduleReferences(text).some(
         ({ specifier }) =>
@@ -62,7 +62,7 @@ describe("granica klient/serwer", () => {
     expect(offenders.map(({ path }) => path)).toEqual([])
   })
 
-  test("z paczki kontraktów bierze wyłącznie typy — runtime Effecta zostaje na serwerze", async () => {
+  test("takes only types from the contracts package — the Effect runtime stays on the server", async () => {
     const offenders = (await sourceFiles()).filter(({ text }) =>
       moduleReferences(text).some(
         ({ specifier, typeOnly }) =>
@@ -73,7 +73,7 @@ describe("granica klient/serwer", () => {
     expect(offenders.map(({ path }) => path)).toEqual([])
   })
 
-  test("nie sięga po effect ani po żadną jego paczkę", async () => {
+  test("does not reach for effect or any of its packages", async () => {
     const offenders = (await sourceFiles()).filter(({ text }) =>
       moduleReferences(text).some(
         ({ specifier }) => specifier === "effect" || specifier.startsWith("@effect/")

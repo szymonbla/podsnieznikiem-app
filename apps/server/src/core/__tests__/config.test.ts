@@ -10,8 +10,8 @@ const load = (env: Record<string, string>) =>
     )
   )
 
-describe("konfiguracja serwera", () => {
-  test("brak adresu bazy zatrzymuje start z jasnym komunikatem", () => {
+describe("server configuration", () => {
+  test("a missing database url stops start-up with a clear message", () => {
     const result = load({})
 
     expect(Exit.isFailure(result)).toBe(true)
@@ -20,7 +20,7 @@ describe("konfiguracja serwera", () => {
     }
   })
 
-  test("odrzuca adres bazy, który nie jest adresem postgresa", () => {
+  test("rejects a database url that is not a postgres address", () => {
     const result = load({ DATABASE_URL: "localhost:5433" })
 
     expect(Exit.isFailure(result)).toBe(true)
@@ -29,13 +29,13 @@ describe("konfiguracja serwera", () => {
     }
   })
 
-  test("odrzuca port, który nie jest liczbą", () => {
-    const result = load({ DATABASE_URL: "postgres://localhost/x", PORT: "trzy tysiące" })
+  test("rejects a port that is not a number", () => {
+    const result = load({ DATABASE_URL: "postgres://localhost/x", PORT: "three thousand" })
 
     expect(Exit.isFailure(result)).toBe(true)
   })
 
-  test("przyjmuje komplet zmiennych, port ma sensowną wartość domyślną", () => {
+  test("accepts a full set of variables; the port has a sensible default", () => {
     const withPort = load({ DATABASE_URL: "postgres://localhost/x", PORT: "4000" })
     const withoutPort = load({ DATABASE_URL: "postgres://localhost/x" })
 

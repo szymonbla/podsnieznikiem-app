@@ -5,18 +5,20 @@ import { normalizePhone, PHONE_DIGITS } from "../domain/phone"
 import { CONTACT_LIMITS } from "./constraints"
 
 /**
- * Zod opisuje **wyłącznie formularz** — pola, komunikaty i moment walidacji.
- * W kontrakcie z API nie uczestniczy; ten trzyma `effect/Schema` po stronie
- * serwera i wygenerowane typy po stronie klienta (ADR-0001).
+ * Zod describes **only the form** — its fields, messages and the moment of
+ * validation. It takes no part in the API contract; that is held by
+ * `effect/Schema` on the server and the generated types on the client
+ * (ADR-0001).
  *
- * Mieszka w `configuration`, a nie w `domain`, bo sięga po limity długości —
- * a `domain` nie importuje niczego z warstw wyższych (DESIGN.md §3).
+ * It lives in `configuration` rather than `domain` because it reaches for the
+ * length limits — and `domain` imports nothing from higher layers
+ * (DESIGN.md §3).
  */
 
 /**
- * Pole tekstowe wymagane po przycięciu — same spacje to puste pole, nie treść.
- * Przycięcie jest w schemacie, więc do API idzie już wartość czysta, tak jak
- * zakłada ograniczenie bazy (DESIGN.md §6).
+ * A text field required after trimming — whitespace alone is an empty field,
+ * not content. The trim lives in the schema, so the API already receives a
+ * clean value, exactly as the database constraint assumes (DESIGN.md §6).
  */
 const required = (message: string, max: number, tooLong: string) =>
   z
@@ -28,9 +30,9 @@ const required = (message: string, max: number, tooLong: string) =>
 export const CONTACT_FIELDS: ReadonlyArray<ContactField> = ["name", "role", "phone"]
 
 /**
- * Czy ścieżka z odpowiedzi walidacyjnej wskazuje na pole formularza. Serwer
- * mówi o kształcie żądania, formularz o polach — to jedyne miejsce, w którym
- * jedno przechodzi w drugie.
+ * Whether a path from a validation response points at a form field. The server
+ * talks about the request shape, the form about fields — this is the only
+ * place where one turns into the other.
  */
 export const isContactField = (value: unknown): value is ContactField =>
   typeof value === "string" && CONTACT_FIELDS.includes(value as ContactField)
@@ -51,12 +53,12 @@ export const contactFormMessages = {
 } as const
 
 /**
- * Numer wolno wkleić w dowolnym zapisie — odstępy, myślniki i `+48` znikają
- * przy walidacji, zamiast być powodem odrzucenia (spec 0001, historia 37).
- * Transformacja jest częścią schematu, więc **wyjście** schematu to już
- * dziewięć cyfr — dokładnie to, co przyjmuje API.
+ * The number may be pasted in any notation — spaces, dashes and `+48` are
+ * dropped during validation instead of being grounds for rejection (spec 0001,
+ * story 37). The transform is part of the schema, so the schema's **output**
+ * is already nine digits — exactly what the API accepts.
  */
-/** Wzorzec liczony raz — schemat pola sprawdza go przy każdym naciśnięciu klawisza. */
+/** Compiled once — the field schema checks it on every keystroke. */
 const PHONE_PATTERN = new RegExp(`^\\d{${PHONE_DIGITS}}$`)
 
 const phoneField = z
@@ -82,16 +84,17 @@ export const contactFormSchema = z.object({
   phone: phoneField
 })
 
-/** Stan pól tak, jak stoją w formularzu — numer jeszcze w zapisie właściciela. */
+/** The fields as they stand in the form — the number still as the owner typed it. */
 export type ContactFormValues = z.input<typeof contactFormSchema>
 
-/** Wartości po walidacji — numer już znormalizowany, gotowy do wysłania. */
+/** Values after validation — the number normalised and ready to send. */
 export type ContactFormOutput = z.output<typeof contactFormSchema>
 
 /*
- * Powiązanie formularza z kontraktem trzyma asercja typowa, nie dyscyplina:
- * porównuje **wyjście** zoda (stan po transformacji) z ciałem żądania z OpenAPI.
- * Rozjazd jest błędem kompilacji, a nie 400-tką w runtime (DESIGN.md §5).
+ * A type assertion, not discipline, keeps the form tied to the contract: it
+ * compares zod's **output** (the post-transform state) against the request
+ * body from OpenAPI. Drift is a compile error, not a runtime 400
+ * (DESIGN.md §5).
  */
 type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
   ? true

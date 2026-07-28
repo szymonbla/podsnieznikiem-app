@@ -1,6 +1,6 @@
 /**
- * PLIK GENEROWANY — nie edytować ręcznie.
- * Źródło: dokument OpenAPI serwera. Regeneracja: `bun run gen:api`.
+ * GENERATED FILE — do not edit by hand.
+ * Source: the server's OpenAPI document. Regenerate with `bun run gen:api`.
  */
 
 export interface paths {
@@ -11,10 +11,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Zwraca wszystkie kontakty, uporządkowane po nazwie */
+        /** @description Returns every contact, ordered by name */
         get: operations["contacts.list"];
         put?: never;
-        /** @description Tworzy kontakt; wymaga kompletu trzech pól */
+        /** @description Creates a contact; requires all three fields */
         post: operations["contacts.create"];
         delete?: never;
         options?: never;
@@ -32,11 +32,11 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** @description Usuwa kontakt trwale */
+        /** @description Deletes a contact permanently */
         delete: operations["contacts.remove"];
         options?: never;
         head?: never;
-        /** @description Aktualizuje wskazane pola kontaktu */
+        /** @description Updates the given fields of a contact */
         patch: operations["contacts.update"];
         trace?: never;
     };

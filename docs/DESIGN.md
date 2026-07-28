@@ -38,7 +38,7 @@ bez `any`, uruchamiane lokalnie.
 | Serwer danych | **TanStack Query** | |
 | Klient HTTP | **`openapi-fetch`** + **`openapi-typescript`** | kontrakt wymuszany typami, 0 kB runtime'u |
 | Formularze | **react-hook-form** + **zod** | ([ADR-0001](./adr/0001-effect-na-serwerze-zod-na-froncie.md)) |
-| UI | **shadcn/ui** + **Tailwind v4** | tokeny nadpisane paletą z projektu |
+| UI | **shadcn/ui** + **Tailwind v4** | komponenty dociągane CLI do `libs/ui`, warianty przepisane na paletę z projektu |
 | Toasty | **sonner** | ma `action` — obsługuje "Cofnij" |
 | Ikony | **lucide-react** | |
 
@@ -91,7 +91,9 @@ apps/
           index.css            # @theme — tokeny
           fonts.css
       libs/
-        ui/                    # shadcn — button, input, dialog, table, ...
+        ui/                    # shadcn — button, input, label, table, badge,
+                               #   dialog, alert-dialog, dropdown-menu, sonner
+          utils.ts             #   `cn` — scalanie klas, którego oczekuje shadcn
       modules/
         contacts/
           index.ts
@@ -155,41 +157,75 @@ zbudowanego bundla (`scripts/check-bundle.ts`).
 Wyciągnięte z dostarczonego HTML-a. Wchodzą do `apps/client/src/core/style/index.css`
 jako `@theme` Tailwinda v4, dzięki czemu shadcn dziedziczy paletę zamiast domyślnej.
 
+Sama paleta nie wystarcza: domyślne warianty shadcn zakładają, że przycisk
+główny ma kolor akcentu, a w tym projekcie akcent nigdy nie kładzie się na dużej
+płaszczyźnie. Warianty w `libs/ui/button.tsx`, `badge.tsx` i `sonner.tsx` są
+więc przepisane — komponenty shadcn są nasze, nie zaciągane w czasie budowania,
+i to jest właściwe miejsce na taką różnicę.
+
 ### Kolory
+
+**Aplikacja jest biała — także sidebar.** Płaszczyzny rozdziela linia
+(`--color-separator`), nie różnica jasności. Szarość należy do pojedynczych
+elementów: aktywnej pozycji nawigacji, podświetleń, przycisku czyszczącego filtr.
 
 | Token | Wartość | Zastosowanie |
 |---|---|---|
-| `--color-foreground` | `#2D3142` | tekst, tło sidebara |
-| `--color-foreground-strong` | `#1D2130` | hover na ciemnym |
-| `--color-primary` | `#2E7C82` | akcent, linki, focus ring |
-| `--color-primary-subtle` | `rgba(46,124,130,0.12)` | tło aktywnej pozycji nawigacji |
-| `--color-background` | `#FFFFFF` | |
-| `--color-muted` | `#F4F5F7` | tło treści, nagłówek tabeli |
-| `--color-muted-hover` | `#F0F1F4` | |
-| `--color-surface` | `#FCFCFD` / `#FAFBFC` | karty, wiersze |
+| `--color-foreground` | `#2D3142` | tekst, **przycisk główny**, powiadomienie |
+| `--color-foreground-strong` | `#1D2130` | hover przycisku głównego |
+| `--color-primary` | `#2E7C82` | akcent: ikony, linki, focus ring — **nigdy duże płaszczyzny** |
+| `--color-primary-subtle` | `rgba(46,124,130,0.12)` | poświata fokusu na polu formularza |
+| `--color-accent-teal` | `#EAF4F4` | tło pigułki specjalizacji |
+| `--color-accent-teal-foreground` | `#215F65` | treść pigułki specjalizacji |
+| `--color-avatar` | `#E6F3F4` | tło inicjałów właściciela |
+| `--color-mark` | `#A8D8DC` | znak graficzny domku |
+| `--color-background` | `#FFFFFF` | tło aplikacji i sidebara |
+| `--color-muted` | `#F4F5F7` | aktywna pozycja nawigacji, podświetlenie pozycji menu |
+| `--color-muted-hover` | `#F0F1F4` | hover przycisków ikonowych |
+| `--color-muted-active` | `#E3E5E9` | hover przycisku czyszczącego filtr |
+| `--color-surface` | `#FCFCFD` | stan pusty |
+| `--color-surface-sunken` | `#FAFBFC` | hover wiersza listy |
 | `--color-destructive` | `#C4462A` | usuwanie |
+| `--color-destructive-hover` | `#A63A22` | hover przycisku usuwania |
 | `--color-destructive-subtle` | `#FDEEE7` | tło ostrzeżenia |
 
 Przezroczystości tekstu na białym — `rgba(45,49,66,α)`:
-`0.70` nagłówki tabeli · `0.55` tekst drugorzędny · `0.38` placeholder ·
-`0.16` obramowanie · `0.09` separator.
+`0.70` nagłówki kolumn i przypisy · `0.60` treść okna ostrzegawczego ·
+`0.55` tekst drugorzędny · `0.50` podpowiedź modala i sekcje „Wkrótce" ·
+`0.42` ścieżka przed tytułem · `0.38` placeholder · `0.34` nagłówek grupy ·
+`0.18` ramka kreskowana · `0.16` obramowanie pola · `0.12` ramka menu ·
+`0.09` separator · `0.07` linia między wierszami.
 
 ### Typografia
 
-- Nagłówki: **Bricolage Grotesque** 600/700, `letter-spacing: -0.02em` / `-0.03em`
-- Tekst: **Nunito** 400/500
-- Skala: 12 / 13 / 14 / 15 / 19 px. `14px` to domyślny rozmiar interfejsu.
-- Etykiety wersalikami: 12 px, `letter-spacing: 0.03em`
+- Nagłówki: **Bricolage Grotesque** 700, `letter-spacing: -0.02em` / `-0.03em`
+  (tytuł ekranu)
+- Tekst: **Nunito** 400/500/600/700
+- Skala: 11 / 12 / 13 / 14 / 15 / 16 / 18 / 19 / 26 px. `14px` to domyślny
+  rozmiar interfejsu; 26 px tytuł ekranu, 19 px tytuł modala, 18 px nagłówek
+  stanu pustego, 16 px nazwa domku, 15 px numer telefonu i pole filtra.
+- Nagłówek kolumny: 12 px, 700, `letter-spacing: 0.03em`, **bez wersalików**
+- Nagłówek grupy w nawigacji („Wkrótce"): 11 px, 700, `letter-spacing: 0.08em`,
+  wersaliki — jedyne wersaliki w projekcie
 - Fonty **hostowane lokalnie** (woff2 wypakowane z bundla), nie z Google Fonts —
   jedna zależność sieciowa mniej i brak wysyłki IP do Google.
 
 ### Kształt i przestrzeń
 
-- Promienie: `8px` pola i przyciski · `10–12px` karty i modale · `16px` duże
-  powierzchnie · `999px` pigułki
-- Powłoka: `grid-template-columns: 264px 1fr`
-- Wiersz tabeli: `minmax(0,2fr) minmax(0,1.4fr) minmax(110px,170px) 44px`
-- Odstępy: `24px` wewnątrz kart · `10px 12px` w polach · `10px 18px` w przyciskach
+- Promienie: `8px` pigułka specjalizacji i pozycja menu · `9px` przycisk
+  ikonowy w wierszu · `10px` pola formularza i pozycje nawigacji · `11px`
+  przyciski drugorzędne i niszczące · `12px` przycisk główny, menu, karta
+  stopki · `14px` stan pusty · `16px` modale · `999px` awatary i pigułki
+- Powłoka: `grid-template-columns: 264px 1fr`; sidebar `position: sticky`,
+  oddzielony linią, `padding: 22px 14px`
+- Wiersz tabeli: `minmax(0,2fr) minmax(0,1.4fr) minmax(110px,170px) 44px`,
+  minimalna wysokość `56px`. Numer i jego nagłówek stoją przy prawej krawędzi.
+- Odstępy: `26px 32px 18px` nagłówek ekranu · `0 32px 14px` pasek filtra ·
+  `22px 32px 64px` treść · `24px` wewnątrz modali · `10px 12px` w polach ·
+  `11px 18px` w przyciskach
+- Cienie: menu `0 18px 40px -18px rgba(45,49,66,.45)` · modal
+  `0 30px 70px -30px rgba(45,49,66,.6)` · powiadomienie
+  `0 14px 36px -14px rgba(45,49,66,.6)`
 
 ### Zachowanie
 
@@ -330,10 +366,19 @@ kompilację klienta**, dopóki nie zostanie obsłużony.
 Zachowanie odwzorowane z dostarczonego HTML-a. To specyfikacja, nie sugestia.
 
 ### Powłoka
-Sidebar 264 px: nazwa domku · `Kontakty` (aktywne) · grupa **Wkrótce** →
-`Rezerwacje`, `Finanse`, `Zapytania` (nieaktywne, `aria-disabled`) · stopka:
-awatar `SB`, "Szymon Błażyński", "Właściciel". Poniżej 900 px sidebar staje się
-poziomym paskiem, grupa "Wkrótce" i stopka znikają.
+Sidebar 264 px, biały: znak graficzny i nazwa domku · `Kontakty` (aktywne, na
+`--color-muted`, z ikoną w kolorze akcentu) · grupa **Wkrótce** →
+`Rezerwacje`, `Finanse`, `Zapytania` (nieaktywne, `aria-disabled`, każde
+z ikoną) · stopka w ramce: awatar `SB`, "Szymon Błażyński", "Właściciel".
+Poniżej 900 px sidebar staje się poziomym paskiem, grupa "Wkrótce" i stopka
+znikają.
+
+### Nagłówek ekranu
+Tytuł poprzedza ścieżka `Pod Śnieżnikiem / ` w `rgba(45,49,66,0.42)`. Domek jest
+jeden, więc ścieżka jest etykietą, nie nawigacją — nie jest linkiem. Po prawej
+przycisk główny **Nowy kontakt** z ikoną plusa. Pod spodem pasek filtra
+zamknięty linią: lupa, pole bez własnej ramki, licznik przy prawej krawędzi.
+Pod listą przypis „Zmiany zapisują się automatycznie.".
 
 ### Lista
 - Kolumny: **Imię i nazwisko** · **Specjalizacja** · **Telefon** · menu
@@ -359,6 +404,8 @@ i etykieta przycisku. `Enter` zapisuje, `Escape` zamyka, fokus uwięziony
 w modalu.
 
 - Walidacja `onBlur`, ponowna przy zapisie
+- Specjalizacja ma `datalist` z siedmioma najczęstszymi fachami — podpowiedź,
+  nie lista zamknięta. Pole zostaje tekstowe, więc jego rola ARIA to `combobox`.
 - Telefon: normalizacja przy zapisie (usunięcie spacji, myślników, `+48`),
   wymagane dziewięć cyfr
 - **Ostrzeżenie o duplikacie** — jeśli numer już istnieje, pod polem pojawia się

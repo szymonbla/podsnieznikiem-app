@@ -1,8 +1,9 @@
 /*
- * Fonty hostowane lokalnie (DESIGN.md §4) — pakiety `@fontsource-variable`
- * wnoszą pliki woff2 do bundla, więc przeglądarka nie odpytuje Google Fonts
- * i nie wysyła tam adresu IP właściciela. Warianty zmienne dają całą oś wagi
- * (600/700 dla nagłówków, 400/500 dla tekstu) w jednym pliku na krój.
+ * Fonts hosted locally (DESIGN.md §4) — the `@fontsource-variable` packages
+ * pull the woff2 files into the bundle, so the browser never calls Google
+ * Fonts and never sends the owner's IP address there. The variable cuts give
+ * the whole weight axis (600/700 for headings, 400/500 for body) in one file
+ * per typeface.
  */
 @import "@fontsource-variable/bricolage-grotesque";
 @import "@fontsource-variable/nunito";

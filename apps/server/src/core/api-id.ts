@@ -1,6 +1,6 @@
 /**
- * Identyfikator API. Osobny plik, żeby moduły mogły budować własne warstwy
- * handlerów bez importowania `core/api.ts` — inaczej powstałby cykl.
+ * API identifier. Kept in its own file so modules can build their own handler
+ * layers without importing `core/api.ts` — that would create a cycle.
  */
 export const API_ID = "podsnieznikiem"
 export type API_ID = typeof API_ID

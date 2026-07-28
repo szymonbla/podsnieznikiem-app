@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event"
 import { aContact, contactsApi, mockApi, renderApp } from "../../../__tests__/harness"
 
 const openForm = async (user: ReturnType<typeof userEvent.setup>) => {
-  await user.click(await screen.findByRole("button", { name: "Dodaj kontakt" }))
+  await user.click(await screen.findByRole("button", { name: "Nowy kontakt" }))
 
   return screen.findByRole("dialog")
 }
@@ -18,7 +18,7 @@ const fill = async (
     await user.type(screen.getByRole("textbox", { name: "Imię i nazwisko" }), values.name)
   }
   if (values.role !== undefined) {
-    await user.type(screen.getByRole("textbox", { name: "Specjalizacja" }), values.role)
+    await user.type(screen.getByRole("combobox", { name: "Specjalizacja" }), values.role)
   }
   if (values.phone !== undefined) {
     await user.type(screen.getByRole("textbox", { name: "Telefon" }), values.phone)
@@ -31,8 +31,8 @@ const visibleNames = () =>
     .slice(1)
     .map((row) => within(row).getAllByRole("cell")[0]?.textContent)
 
-describe("dodawanie kontaktu", () => {
-  test("dodaje kontakt i pokazuje go na liście we właściwym miejscu", async () => {
+describe("adding a contact", () => {
+  test("adds a contact and shows it in the right place in the list", async () => {
     const user = userEvent.setup()
     const api = contactsApi([aContact({ name: "Zofia Wilk", role: "Sprzątanie" })])
     mockApi.use(...api.handlers)
@@ -41,7 +41,7 @@ describe("dodawanie kontaktu", () => {
 
     await openForm(user)
     await fill(user, { name: "Anna Kowalska", role: "Księgowa", phone: "600100200" })
-    await user.click(screen.getByRole("button", { name: "Dodaj kontakt", hidden: false }))
+    await user.click(screen.getByRole("button", { name: "Dodaj kontakt" }))
 
     expect(await screen.findByText("Dodano Anna Kowalska")).toBeDefined()
     await waitFor(() => {
@@ -49,7 +49,7 @@ describe("dodawanie kontaktu", () => {
     })
   })
 
-  test("normalizuje numer przy zapisie — do API idzie dziewięć cyfr", async () => {
+  test("normalises the number on save — nine digits go to the API", async () => {
     const user = userEvent.setup()
     const api = contactsApi()
     mockApi.use(...api.handlers)
@@ -58,7 +58,7 @@ describe("dodawanie kontaktu", () => {
 
     await openForm(user)
     await fill(user, { name: "Marek Nowak", role: "Hydraulik", phone: "+48 602-118-447" })
-    await user.click(screen.getByRole("button", { name: "Dodaj kontakt", hidden: false }))
+    await user.click(screen.getByRole("button", { name: "Dodaj kontakt" }))
 
     await waitFor(() => {
       expect(api.requests.filter((request) => request.method === "POST")).toHaveLength(1)
@@ -66,7 +66,7 @@ describe("dodawanie kontaktu", () => {
     expect(api.requests[0]?.body.phone).toBe("602118447")
   })
 
-  test("nie krzyczy w trakcie pisania — błąd pojawia się dopiero po opuszczeniu pola", async () => {
+  test("does not shout while typing — the error appears only after the field is left", async () => {
     const user = userEvent.setup()
     mockApi.use(...contactsApi().handlers)
 
@@ -84,7 +84,7 @@ describe("dodawanie kontaktu", () => {
     expect(await screen.findByText("Podaj imię i nazwisko")).toBeDefined()
   })
 
-  test("odrzuca numer o złej długości i mówi to przy polu numeru", async () => {
+  test("rejects a wrong-length number and says so at the number field", async () => {
     const user = userEvent.setup()
     const api = contactsApi()
     mockApi.use(...api.handlers)
@@ -93,19 +93,19 @@ describe("dodawanie kontaktu", () => {
 
     await openForm(user)
     await fill(user, { name: "Marek Nowak", role: "Hydraulik", phone: "602 118" })
-    await user.click(screen.getByRole("button", { name: "Dodaj kontakt", hidden: false }))
+    await user.click(screen.getByRole("button", { name: "Dodaj kontakt" }))
 
     expect(await screen.findByText("Numer musi mieć 9 cyfr")).toBeDefined()
     expect(api.requests).toHaveLength(0)
   })
 
-  test("Escape zamyka okno i oddaje fokus przyciskowi, który je otworzył", async () => {
+  test("Escape closes the dialog and returns focus to the button that opened it", async () => {
     const user = userEvent.setup()
     mockApi.use(...contactsApi().handlers)
 
     renderApp("/kontakty")
 
-    const trigger = await screen.findByRole("button", { name: "Dodaj kontakt" })
+    const trigger = await screen.findByRole("button", { name: "Nowy kontakt" })
     await user.click(trigger)
     await screen.findByRole("dialog")
 
@@ -114,14 +114,14 @@ describe("dodawanie kontaktu", () => {
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).toBeNull()
     })
-    /* Porównanie po tekście, nie po węźle — nieudana asercja na elemencie DOM-u
-       wypisuje całe drzewo happy-doma i zabija czytelność wyniku. */
+    /* Compared by text rather than by node — a failed assertion on a DOM
+       element prints the whole happy-dom tree and destroys readability. */
     await waitFor(() => {
       expect(document.activeElement?.textContent).toBe(trigger.textContent)
     })
   })
 
-  test("trzyma fokus w oknie — Tab nie wyprowadza w tło", async () => {
+  test("keeps focus inside the dialog — Tab does not lead out to the background", async () => {
     const user = userEvent.setup()
     mockApi.use(...contactsApi([aContact()]).handlers)
 
@@ -129,7 +129,7 @@ describe("dodawanie kontaktu", () => {
 
     const dialog = await openForm(user)
 
-    /* Obejście całego okna klawiszem Tab musi zostawić fokus w środku. */
+    /* Walking the whole dialog with Tab has to leave focus inside. */
     const escaped: Array<number> = []
     for (let step = 0; step < 8; step += 1) {
       await user.tab()
@@ -140,8 +140,8 @@ describe("dodawanie kontaktu", () => {
   })
 })
 
-describe("odpowiedź błędna z serwera", () => {
-  test("walidacja z serwera ląduje przy polu, którego dotyczy", async () => {
+describe("an error response from the server", () => {
+  test("server-side validation lands at the field it concerns", async () => {
     const user = userEvent.setup()
     mockApi.use(
       ...contactsApi([], {
@@ -157,12 +157,12 @@ describe("odpowiedź błędna z serwera", () => {
 
     await openForm(user)
     await fill(user, { name: "Marek Nowak", role: "Hydraulik", phone: "602118447" })
-    await user.click(screen.getByRole("button", { name: "Dodaj kontakt", hidden: false }))
+    await user.click(screen.getByRole("button", { name: "Dodaj kontakt" }))
 
     expect(await screen.findByText("Specjalizacja odrzucona")).toBeDefined()
   })
 
-  test("nieodnaleziony kontakt zamyka formularz i mówi, że lista była nieaktualna", async () => {
+  test("a missing contact closes the form and says the list was stale", async () => {
     const user = userEvent.setup()
     mockApi.use(
       ...contactsApi([aContact({ name: "Marek Nowak" })], {
@@ -185,8 +185,8 @@ describe("odpowiedź błędna z serwera", () => {
   })
 })
 
-describe("ostrzeżenie o duplikacie numeru", () => {
-  test("mówi, do kogo numer już należy, i nie blokuje zapisu", async () => {
+describe("the duplicate-number warning", () => {
+  test("says who already owns the number, and does not block the save", async () => {
     const user = userEvent.setup()
     const api = contactsApi([
       aContact({ name: "Grzegorz Sobczak", role: "Złota rączka", phone: "602118447" })
@@ -196,14 +196,14 @@ describe("ostrzeżenie o duplikacie numeru", () => {
     renderApp("/kontakty")
 
     await openForm(user)
-    /* Inny zapis tego samego numeru — porównanie idzie po wartości znormalizowanej. */
+    /* A different notation of the same number — the comparison runs on the normalised value. */
     await fill(user, { name: "Marek Nowak", role: "Hydraulik", phone: "+48 602 118 447" })
 
     expect(
       await screen.findByText("Ten numer masz już jako Grzegorz Sobczak — Złota rączka")
     ).toBeDefined()
 
-    await user.click(screen.getByRole("button", { name: "Dodaj kontakt", hidden: false }))
+    await user.click(screen.getByRole("button", { name: "Dodaj kontakt" }))
 
     expect(await screen.findByText("Dodano Marek Nowak")).toBeDefined()
   })
@@ -226,8 +226,8 @@ describe("ostrzeżenie o duplikacie numeru", () => {
   })
 })
 
-describe("edycja kontaktu", () => {
-  test("otwiera formularz z obecnymi danymi i zapisuje zmianę na liście", async () => {
+describe("editing a contact", () => {
+  test("opens the form with the current data and saves the change into the list", async () => {
     const user = userEvent.setup()
     const api = contactsApi([
       aContact({ name: "Marek Nowak", role: "Hydraulik", phone: "602118447" })
@@ -245,7 +245,7 @@ describe("edycja kontaktu", () => {
       (screen.getByRole("textbox", { name: "Imię i nazwisko" }) as HTMLInputElement).value
     ).toBe("Marek Nowak")
 
-    const role = screen.getByRole("textbox", { name: "Specjalizacja" })
+    const role = screen.getByRole("combobox", { name: "Specjalizacja" })
     await user.clear(role)
     await user.type(role, "Elektryk")
     await user.click(screen.getByRole("button", { name: "Zapisz zmiany" }))
@@ -254,7 +254,7 @@ describe("edycja kontaktu", () => {
     expect(await screen.findByText("Elektryk")).toBeDefined()
   })
 
-  test("po zamknięciu okna fokus wraca na menu wiersza, z którego je otwarto", async () => {
+  test("once the dialog closes, focus returns to the row menu it was opened from", async () => {
     const user = userEvent.setup()
     mockApi.use(...contactsApi([aContact({ name: "Marek Nowak" })]).handlers)
 
@@ -277,11 +277,11 @@ describe("edycja kontaktu", () => {
     })
   })
 
-  test("menu wiersza zamyka się kliknięciem obok", async () => {
+  test("the row menu closes on a click beside it", async () => {
     /*
-     * Otwarte menu ustawia `pointer-events: none` na dokumencie, żeby tło było
-     * nieklikalne — a to jest właśnie badane zachowanie, więc kontrola tej
-     * własności w symulowanym kliknięciu musi ustąpić.
+     * An open menu sets `pointer-events: none` on the document so the
+     * background is unclickable — and that is exactly the behaviour under test,
+     * so the check on that property in the simulated click has to give way.
      */
     const user = userEvent.setup({ pointerEventsCheck: 0 })
     mockApi.use(...contactsApi([aContact()]).handlers)
@@ -299,7 +299,7 @@ describe("edycja kontaktu", () => {
   })
 })
 
-describe("usuwanie kontaktu", () => {
+describe("deleting a contact", () => {
   const openDelete = async (user: ReturnType<typeof userEvent.setup>) => {
     await user.click(await screen.findByRole("button", { name: /Akcje kontaktu/ }))
     await user.click(await screen.findByRole("menuitem", { name: "Usuń" }))
@@ -307,7 +307,7 @@ describe("usuwanie kontaktu", () => {
     return screen.findByRole("alertdialog")
   }
 
-  test("pyta o potwierdzenie z nazwiskiem i specjalizacją usuwanego kontaktu", async () => {
+  test("asks for confirmation carrying the name and role of the contact being deleted", async () => {
     const user = userEvent.setup()
     mockApi.use(
       ...contactsApi([aContact({ name: "Marek Nowak", role: "Hydraulik" })]).handlers
@@ -343,7 +343,7 @@ describe("usuwanie kontaktu", () => {
     })
   })
 
-  test("cofnięcie usunięcia przywraca kontakt jako nowy wpis", async () => {
+  test("undoing a deletion restores the contact as a new entry", async () => {
     const user = userEvent.setup()
     const api = contactsApi([aContact({ name: "Marek Nowak", role: "Hydraulik" })])
     mockApi.use(...api.handlers)
@@ -361,7 +361,7 @@ describe("usuwanie kontaktu", () => {
       expect(visibleNames()).toEqual(["Marek Nowak"])
     })
 
-    /* Ta sama treść, nowa tożsamość — to utworzenie, nie odwrócenie (ADR-0003). */
+    /* The same content, a new identity — this is a create, not a reversal (ADR-0003). */
     const [restored] = api.current()
     expect(restored?.id).not.toBe(original?.id)
   })

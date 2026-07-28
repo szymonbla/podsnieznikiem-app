@@ -4,9 +4,9 @@ import { ContactsRepository } from "./repository.js"
 import { sampleContacts } from "./seed-data.js"
 
 /**
- * Wgrywa zestaw przykładowy i zwraca liczbę faktycznie dodanych kontaktów —
- * przy powtórnym uruchomieniu zero. Osobno od migracji: migracje opisują
- * schemat, nie treść (DESIGN.md §10).
+ * Loads the sample set and returns how many contacts were actually inserted —
+ * zero on a repeat run. Kept apart from migrations: migrations describe the
+ * schema, not the content (DESIGN.md §10).
  */
 export const seedContacts = Effect.flatMap(ContactsRepository, (repository) =>
   repository.insertManyUnlessIdentical(sampleContacts)

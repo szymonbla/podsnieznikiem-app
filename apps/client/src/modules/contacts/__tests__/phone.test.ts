@@ -3,11 +3,11 @@ import { describe, expect, test } from "bun:test"
 import { formatPhone, normalizePhone, phoneHref } from "../domain/phone"
 
 describe("czytelny zapis numeru", () => {
-  test("dzieli dziewięć cyfr na trójki, żeby dało się je przepisać bez pomyłki", () => {
+  test("splits nine digits into threes so they can be copied without a slip", () => {
     expect(formatPhone("602118447")).toBe("602 118 447")
   })
 
-  test("numer o nietypowej długości pokazuje surowo, zamiast ciąć go w przypadkowym miejscu", () => {
+  test("shows a number of unusual length raw instead of cutting it at a random place", () => {
     expect(formatPhone("12345")).toBe("12345")
     expect(formatPhone("6021184471234")).toBe("6021184471234")
   })
@@ -17,21 +17,21 @@ describe("czytelny zapis numeru", () => {
   })
 })
 
-describe("sprowadzanie numeru do porównywalnej postaci", () => {
-  test("pomija odstępy i myślniki, więc numer wklejony skądkolwiek pasuje", () => {
+describe("reducing a number to a comparable form", () => {
+  test("ignores spaces and dashes, so a number pasted from anywhere matches", () => {
     expect(normalizePhone("602 118 447")).toBe("602118447")
     expect(normalizePhone("602-118-447")).toBe("602118447")
     expect(normalizePhone("(602) 118 447")).toBe("602118447")
   })
 
-  test("ścina prefiks kierunkowy w każdym zapisie, w jakim ludzie go wklejają", () => {
+  test("strips the dialling prefix in every notation people paste it in", () => {
     expect(normalizePhone("+48602118447")).toBe("602118447")
     expect(normalizePhone("+48 602 118 447")).toBe("602118447")
     expect(normalizePhone("0048602118447")).toBe("602118447")
     expect(normalizePhone("48602118447")).toBe("602118447")
   })
 
-  test("ścina kierunkowy także z fragmentu, gdy zapisano go jawnie", () => {
+  test("strips the prefix from a fragment too, when it is written explicitly", () => {
     expect(normalizePhone("+48 602")).toBe("602")
   })
 
@@ -40,7 +40,7 @@ describe("sprowadzanie numeru do porównywalnej postaci", () => {
     expect(normalizePhone("48 60")).toBe("4860")
   })
 
-  test("z tekstu bez cyfr nie zostaje nic, więc nie udaje zapytania o numer", () => {
+  test("text without digits leaves nothing, so it does not pose as a number query", () => {
     expect(normalizePhone("hydraulik")).toBe("")
   })
 })

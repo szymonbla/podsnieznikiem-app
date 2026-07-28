@@ -28,13 +28,13 @@ export const Contact = Schema.Struct({
 export type Contact = typeof Contact.Type
 
 /**
- * Tworzenie wymaga kompletu trzech pól — `POST` bez specjalizacji to 400
+ * Creating requires all three fields — a `POST` without a role is a 400
  * (DESIGN.md §7).
  *
- * Ograniczenia liczą się **po przycięciu** (spec 0001 → API), więc pola wejścia
- * przycinają, a nie odrzucają: `"  Marek  "` to poprawne nazwisko, nie błąd.
- * Dlatego kształt nie jest wyprowadzony z `Contact` — tam te same reguły stoją
- * jako warunek na wartości już przyciętej, którą zwraca baza.
+ * The constraints are measured **after trimming** (spec 0001 -> API), so the
+ * input fields trim rather than reject: `"  Marek  "` is a valid name, not an
+ * error. That is why the shape is not derived from `Contact` — there the same
+ * rules stand as a condition on the already-trimmed value the database returns.
  */
 export const CreateContactBody = Schema.Struct({
   name: Schema.Trim.pipe(Schema.minLength(1), Schema.maxLength(100)),
@@ -44,9 +44,9 @@ export const CreateContactBody = Schema.Struct({
 export type CreateContactBody = typeof CreateContactBody.Type
 
 /**
- * Edycja jest częściowa — pominięte pole zostaje bez zmian. Pola nie mogą być
- * puste, więc raz ustawionej specjalizacji nie da się wyczyścić, tylko
- * nadpisać. Świadome uproszczenie MVP (spec 0001 → API).
+ * The edit is partial — an omitted field stays unchanged. Fields cannot be
+ * empty, so a role once set cannot be cleared, only overwritten. A deliberate
+ * MVP simplification (spec 0001 -> API).
  */
 export const UpdateContactBody = Schema.partial(CreateContactBody)
 export type UpdateContactBody = typeof UpdateContactBody.Type

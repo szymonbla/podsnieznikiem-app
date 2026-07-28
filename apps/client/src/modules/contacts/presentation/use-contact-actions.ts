@@ -13,7 +13,7 @@ import {
 import { contactsCopy } from "./copy"
 
 interface ContactActions {
-  /** Kontakt w oknie formularza; `undefined` przy dodawaniu. */
+  /** The contact in the form dialog; `undefined` when adding. */
   readonly edited: Contact | undefined
   readonly isFormOpen: boolean
   readonly removed: Contact | undefined
@@ -22,7 +22,7 @@ interface ContactActions {
   readonly openEdit: (contact: Contact, opener: HTMLElement | null) => void
   readonly setFormOpen: (open: boolean) => void
   readonly askRemove: (contact: Contact, opener: HTMLElement | null) => void
-  /** Fokus wraca tam, skąd okno otwarto (spec 0001, historia 64). */
+  /** Focus returns to wherever the dialog was opened from (spec 0001, story 64). */
   readonly restoreFocus: () => void
   readonly cancelRemove: () => void
   readonly confirmRemove: () => void
@@ -31,7 +31,7 @@ interface ContactActions {
   ) => Promise<Readonly<Record<string, string>> | undefined>
 }
 
-/** Dane kontaktu bez tożsamości — tyle wystarczy, żeby stworzyć go na nowo. */
+/** Contact data without identity — enough to create it again. */
 const bodyOf = (contact: Contact): CreateContactBody => ({
   name: contact.name,
   role: contact.role,
@@ -39,9 +39,9 @@ const bodyOf = (contact: Contact): CreateContactBody => ({
 })
 
 /**
- * Jedno miejsce, w którym decyzje właściciela („dodaj", „popraw", „usuń",
- * „cofnij") zamieniają się w mutacje i powiadomienia. Ekran zostaje przy swoim
- * zadaniu — pokazywaniu listy — a okna dostają gotowe wywołania zwrotne.
+ * The one place where the owner's decisions ("add", "fix", "delete", "undo")
+ * turn into mutations and notifications. The screen keeps to its own job —
+ * showing the list — and the dialogs get ready-made callbacks.
  */
 export const useContactActions = (): ContactActions => {
   const [isFormOpen, setFormOpen] = useState(false)
@@ -54,16 +54,16 @@ export const useContactActions = (): ContactActions => {
   const remove = useDeleteContact()
 
   /**
-   * Rozdziela awarię na dwie drogi: to, co należy do pola formularza, wraca
-   * wywołującemu, a reszta idzie w powiadomienie. Nieodnaleziony kontakt znaczy,
-   * że lista jest nieaktualna — mutacja i tak unieważnia ją w `onSettled`,
-   * więc zostaje powiedzieć to właścicielowi (DESIGN.md §8).
+   * Splits a failure two ways: what belongs to a form field goes back to the
+   * caller, the rest becomes a notification. A missing contact means the list
+   * is stale — the mutation invalidates it in `onSettled` anyway, so all that
+   * is left is to tell the owner (DESIGN.md §8).
    */
   const reportFailure = (error: unknown, fallback: string) => {
     if (error instanceof ContactMutationError) {
       if (error.notFound) {
         toast.error(contactsCopy.notFound)
-        /* Formularz kontaktu, którego już nie ma, nie ma czego zapisać. */
+        /* A form for a contact that no longer exists has nothing to save. */
         setFormOpen(false)
 
         return undefined
@@ -79,7 +79,7 @@ export const useContactActions = (): ContactActions => {
   const restore = (contact: Contact) => {
     create.mutate(bodyOf(contact), {
       onSuccess: () => toast.success(contactsCopy.remove.restored(contact.name)),
-      // Bez sugerowania, że kontakt wrócił — bo nie wrócił (ticket 10).
+      // Without implying the contact came back — because it did not (ticket 10).
       onError: () => toast.error(contactsCopy.remove.restoreFailed)
     })
   }
@@ -102,9 +102,10 @@ export const useContactActions = (): ContactActions => {
     },
     setFormOpen,
     /*
-     * Fokus przywracany jawnie, bo przy oknie otwieranym z pozycji menu (a nie
-     * z własnego wyzwalacza) biblioteka nie ma czego zapamiętać — element,
-     * który miał fokus w chwili otwarcia, znika razem z menu.
+     * Focus is restored explicitly, because for a dialog opened from a menu
+     * item (rather than from its own trigger) the library has nothing to
+     * remember — the element focused at the moment of opening disappears along
+     * with the menu.
      */
     restoreFocus: () => {
       const target = opener.current
@@ -141,9 +142,9 @@ export const useContactActions = (): ContactActions => {
           toast.success(contactsCopy.form.create.success(created.name))
         } else {
           /*
-           * Aktualizacja jest częściowa, ale formularz i tak pokazuje komplet
-           * pól — wysłanie całej trójki jest zgodne z kontraktem i nie wymaga
-           * pilnowania, które pole właściciel naprawdę ruszył.
+           * The update is partial, but the form shows all the fields anyway —
+           * sending the whole triple matches the contract and saves tracking
+           * which field the owner actually touched.
            */
           const saved = await update.mutateAsync({ id: target.id, body: values })
           toast.success(contactsCopy.form.edit.success(saved.name))

@@ -1,17 +1,17 @@
 import type { Contact } from "../modules/contacts"
 
 /*
- * Osobno od `harness.tsx`, bo testy szwu 3 potrzebują tylko kontaktu, a nie
- * całego drzewa Reacta — sięganie po budowniczego przez powłokę wciągałoby
- * router i klienta HTTP do testu funkcji czystej.
+ * Kept apart from `harness.tsx`, because seam 3 tests need only a contact, not
+ * a whole React tree — reaching for the builder through the harness would pull
+ * the router and the HTTP client into a test of a pure function.
  */
 
 let sequence = 0
 
 /**
- * Kontakt o kompletnym kształcie kontraktu — test nadpisuje tylko to, co bada.
- * Typ pochodzi z modułu, więc nowe pole na serwerze psuje kompilację tutaj,
- * zamiast po cichu zostawić nieaktualną atrapę.
+ * A contact in the contract's full shape — a test overrides only what it is
+ * examining. The type comes from the module, so a new field on the server
+ * breaks compilation here instead of quietly leaving a stale fixture.
  */
 export const aContact = (overrides: Partial<Contact> = {}): Contact => {
   sequence += 1

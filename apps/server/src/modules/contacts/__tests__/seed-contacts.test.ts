@@ -5,7 +5,7 @@ import { Effect, Layer } from "effect"
 import { withServer } from "../../../__tests__/harness.js"
 import { ContactsRepository, seedContacts } from "../index.js"
 
-/** Komenda dostaje repozytorium z warstwy aplikacji; test wiąże je tak samo. */
+/** The command gets its repository from the application layer; the test wires it the same way. */
 const seed = (sql: SqlClient.SqlClient) =>
   seedContacts.pipe(
     Effect.provide(
@@ -15,8 +15,8 @@ const seed = (sql: SqlClient.SqlClient) =>
 
 const hasPolishCharacters = (value: string) => /[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/.test(value)
 
-describe("dane przykładowe", () => {
-  test("wgrywa komplet 24 kontaktów do pustej bazy", () =>
+describe("sample data", () => {
+  test("loads the full set of 24 contacts into an empty database", () =>
     withServer(({ client, sql }) =>
       Effect.gen(function* () {
         const inserted = yield* seed(sql)
@@ -28,7 +28,7 @@ describe("dane przykładowe", () => {
       })
     ))
 
-  test("nie tworzy zdublowanego zestawu przy ponownym uruchomieniu", () =>
+  test("does not create a duplicate set on a repeat run", () =>
     withServer(({ client, sql }) =>
       Effect.gen(function* () {
         yield* seed(sql)
@@ -41,7 +41,7 @@ describe("dane przykładowe", () => {
       })
     ))
 
-  test("zostawia w bazie kontakty dodane ręcznie", () =>
+  test("leaves manually added contacts in the database", () =>
     withServer(({ client, sql }) =>
       Effect.gen(function* () {
         yield* sql`
@@ -56,7 +56,7 @@ describe("dane przykładowe", () => {
       })
     ))
 
-  test("wgrywa numer powtórzony przy dwóch specjalizacjach jednej osoby", () =>
+  test("loads a number repeated across two roles of one person", () =>
     withServer(({ client, sql }) =>
       Effect.gen(function* () {
         yield* seed(sql)
@@ -74,7 +74,7 @@ describe("dane przykładowe", () => {
       })
     ))
 
-  test("wgrywa polskie znaki bez zniekształceń", () =>
+  test("loads Polish characters without mangling them", () =>
     withServer(({ client, sql }) =>
       Effect.gen(function* () {
         yield* seed(sql)

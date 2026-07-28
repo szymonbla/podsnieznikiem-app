@@ -1,15 +1,19 @@
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema"
-import { useEffect, type ReactNode } from "react"
+import { useEffect, useId, type ReactNode } from "react"
 import { useForm, type UseFormRegisterReturn } from "react-hook-form"
 
-import { buttonClass } from "../../../libs/ui/button"
+import { Button } from "../../../libs/ui/button"
 import {
   Dialog,
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle
 } from "../../../libs/ui/dialog"
+import { Input } from "../../../libs/ui/input"
+import { Label } from "../../../libs/ui/label"
 import {
   contactFormSchema,
   isContactField,
@@ -24,14 +28,14 @@ import { contactsCopy } from "./copy"
 interface ContactFormDialogProps {
   readonly open: boolean
   readonly onOpenChange: (open: boolean) => void
-  /** Podany kontakt przełącza okno w tryb edycji; jego brak to dodawanie. */
+  /** A given contact switches the dialog into edit mode; its absence means adding. */
   readonly contact?: Contact
-  /** Cała lista — ostrzeżenie o duplikacie liczone lokalnie, bez zapytania do API. */
+  /** The whole list — the duplicate warning is computed locally, with no API call. */
   readonly contacts: ReadonlyArray<Contact>
   /**
-   * Zwrócone błędy pól to odpowiedź walidacyjna serwera (400) — trafiają na
-   * konkretne pole, tak samo jak błędy lokalne, zamiast lądować w toaście
-   * (DESIGN.md §8).
+   * The returned field errors are the server's validation response (400) —
+   * they land on a specific field, just like local errors, instead of ending up
+   * in a toast (DESIGN.md §8).
    */
   readonly onSubmit: (
     values: ContactFormOutput
@@ -42,50 +46,80 @@ interface ContactFormDialogProps {
 
 const EMPTY: ContactFormValues = { name: "", role: "", phone: "" }
 
-const fieldClass =
-  "w-full rounded-[var(--radius)] border border-input bg-background px-3 py-[10px] text-sm placeholder:text-ink-placeholder"
-
 interface FieldProps {
   readonly label: string
   readonly placeholder: string
   readonly registration: UseFormRegisterReturn
   readonly error: string | undefined
-  /** Treść pod polem, która nie jest błędem — dziś ostrzeżenie o duplikacie. */
+  /** Content under the field that is not an error — today, the duplicate warning. */
   readonly note?: ReactNode
   readonly inputMode?: "tel"
+  /** The suggestions list (`datalist`) — today only on the role field. */
+  readonly listId?: string
 }
 
 /**
- * Pole formularza wraz z etykietą i komunikatem — trzy pola różnią się tylko
- * treścią, więc rozpisane osobno różniłyby się głównie miejscem na literówkę.
+ * A form field together with its label and message — the three fields differ
+ * only in text, so written out separately they would differ mainly in where a
+ * typo could hide.
  */
-const Field = ({ label, placeholder, registration, error, note, inputMode }: FieldProps) => (
-  <label className="flex flex-col gap-1.5">
-    <span className="font-medium">{label}</span>
-    <input
-      {...registration}
-      {...(inputMode === undefined ? {} : { inputMode })}
-      placeholder={placeholder}
-      aria-invalid={error !== undefined}
-      className={fieldClass}
-    />
-    {error !== undefined ? (
-      <span role="alert" className="text-xs text-destructive">
-        {error}
-      </span>
-    ) : null}
-    {note}
-  </label>
-)
+const Field = ({
+  label,
+  placeholder,
+  registration,
+  error,
+  note,
+  inputMode,
+  listId
+}: FieldProps) => {
+  /*
+   * The message under the field has to be tied to it by id, not by proximity:
+   * `role="alert"` reads the error once, as it appears, but on a later return
+   * to the field a screen reader repeats only what the field points at through
+   * `aria-describedby`.
+   */
+  const id = useId()
+  const errorId = `${id}-error`
+  const noteId = `${id}-note`
+  const hasNote = note !== undefined && note !== null && note !== false
+  const described = [error === undefined ? null : errorId, hasNote ? noteId : null]
+    .filter((value) => value !== null)
+    .join(" ")
+
+  return (
+    <Label className="flex flex-col items-start gap-1.5">
+      <span>{label}</span>
+      <Input
+        {...registration}
+        {...(inputMode === undefined ? {} : { inputMode })}
+        {...(listId === undefined ? {} : { list: listId })}
+        {...(described === "" ? {} : { "aria-describedby": described })}
+        placeholder={placeholder}
+        aria-invalid={error !== undefined}
+        className={inputMode === "tel" ? "tabular-nums" : undefined}
+      />
+      {error !== undefined ? (
+        <span id={errorId} role="alert" className="text-2xs font-medium text-destructive">
+          {error}
+        </span>
+      ) : null}
+      {hasNote ? (
+        <div id={noteId} className="w-full">
+          {note}
+        </div>
+      ) : null}
+    </Label>
+  )
+}
 
 /**
- * Jedno okno obsługuje dodawanie i edycję — różni je tytuł, podpowiedź
- * i etykieta przycisku (DESIGN.md §9). Dwa osobne komponenty musiałyby dzielić
- * walidację, normalizację numeru i ostrzeżenie o duplikacie, więc dzieliłyby
- * wszystko poza trzema napisami.
+ * One dialog serves both adding and editing — they differ in the title, the
+ * hint and the button label (DESIGN.md §9). Two separate components would have
+ * to share validation, phone normalisation and the duplicate warning, so they
+ * would share everything but three strings.
  *
- * `Enter` zapisuje (zwykły `<form>`), `Escape` zamyka, a uwięzienie i powrót
- * fokusu przynosi prymityw okna.
+ * `Enter` saves (a plain `<form>`), `Escape` closes, and the focus trap and
+ * restore come from the dialog primitive.
  */
 export const ContactFormDialog = ({
   open,
@@ -108,16 +142,16 @@ export const ContactFormDialog = ({
     formState: { errors }
   } = useForm<ContactFormValues, unknown, ContactFormOutput>({
     resolver: standardSchemaResolver(contactFormSchema),
-    // Formularz nie krzyczy w trakcie pisania: błąd pokazuje się dopiero po
-    // opuszczeniu pola i ponownie przy zapisie (spec 0001, historia 39).
+    // The form does not shout while typing: an error appears only after the
+    // field is left, and again on save (spec 0001, story 39).
     mode: "onBlur",
     defaultValues: EMPTY
   })
 
   /*
-   * Okno żyje w drzewie także zamknięte, więc pola trzeba przestawić przy
-   * każdym otwarciu — inaczej edycja pokazywałaby dane poprzedniego kontaktu,
-   * a dodawanie resztki po edycji.
+   * The dialog stays in the tree while closed, so the fields have to be reset
+   * on every open — otherwise editing would show the previous contact's data,
+   * and adding would show leftovers from an edit.
    */
   useEffect(() => {
     if (!open) return
@@ -128,7 +162,7 @@ export const ContactFormDialog = ({
     )
   }, [open, contact, reset])
 
-  /* Duplikat liczony po numerze znormalizowanym, nie po tym, co widać w polu. */
+  /* The duplicate is found by the normalised number, not by what the field shows. */
   const duplicate = findPhoneOwner(contacts, watch("phone"), contact?.id)
 
   return (
@@ -140,10 +174,10 @@ export const ContactFormDialog = ({
           onCloseAutoFocus()
         }}
       >
-        <DialogTitle>{copy.title}</DialogTitle>
-        <DialogDescription id="contact-form-description" className="pt-1">
-          {copy.description}
-        </DialogDescription>
+        <DialogHeader>
+          <DialogTitle>{copy.title}</DialogTitle>
+          <DialogDescription id="contact-form-description">{copy.description}</DialogDescription>
+        </DialogHeader>
 
         <form
           noValidate
@@ -155,7 +189,7 @@ export const ContactFormDialog = ({
               }
             })(event)
           }}
-          className="flex flex-col gap-4 pt-5"
+          className="flex flex-col gap-3"
         >
           <Field
             label={contactsCopy.form.fields.name}
@@ -169,7 +203,14 @@ export const ContactFormDialog = ({
             placeholder={contactsCopy.form.placeholders.role}
             registration={register("role")}
             error={errors.role?.message}
+            listId="contact-role-suggestions"
           />
+
+          <datalist id="contact-role-suggestions">
+            {contactsCopy.form.roleSuggestions.map((role) => (
+              <option key={role} value={role} />
+            ))}
+          </datalist>
 
           <Field
             label={contactsCopy.form.fields.phone}
@@ -179,13 +220,13 @@ export const ContactFormDialog = ({
             inputMode="tel"
             note={
               /*
-                `status`, nie `alert` — to informacja do rozważenia, nie powód,
-                żeby przerwać. Zapis przechodzi mimo niej (ticket 08).
+                `status`, not `alert` — this is information to weigh, not a
+                reason to stop. The save goes through regardless (ticket 08).
               */
               duplicate === undefined ? null : (
                 <span
                   role="status"
-                  className="rounded-[var(--radius)] bg-destructive-subtle px-3 py-2 text-xs"
+                  className="w-full rounded-[var(--radius)] bg-destructive-subtle px-3 py-2 text-2xs font-medium text-foreground"
                 >
                   {contactsCopy.form.duplicate(duplicate.name, duplicate.role)}
                 </span>
@@ -193,14 +234,16 @@ export const ContactFormDialog = ({
             }
           />
 
-          <div className="flex justify-end gap-2 pt-2">
-            <DialogClose className={buttonClass("secondary")} type="button">
-              {contactsCopy.form.cancel}
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="outline">
+                {contactsCopy.form.cancel}
+              </Button>
             </DialogClose>
-            <button type="submit" disabled={pending} className={buttonClass()}>
+            <Button type="submit" disabled={pending}>
               {copy.submit}
-            </button>
-          </div>
+            </Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

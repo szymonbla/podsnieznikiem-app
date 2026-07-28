@@ -3,8 +3,8 @@ import { Effect } from "effect"
 
 import { withServer } from "../../../__tests__/harness.js"
 
-describe("lista kontaktów", () => {
-  test("zwraca pustą listę, gdy nie ma żadnego kontaktu", () =>
+describe("contact list", () => {
+  test("returns an empty list when there is no contact", () =>
     withServer(({ client }) =>
       Effect.gen(function* () {
         const contacts = yield* client.contacts.list()
@@ -13,7 +13,7 @@ describe("lista kontaktów", () => {
       })
     ))
 
-  test("zwraca wszystkie kontakty z bazy wraz z kompletem pól", () =>
+  test("returns every contact from the database with all its fields", () =>
     withServer(({ client, sql }) =>
       Effect.gen(function* () {
         yield* sql`
@@ -38,7 +38,7 @@ describe("lista kontaktów", () => {
       })
     ))
 
-  test("porządkuje kontakty po nazwie, niezależnie od kolejności wstawienia", () =>
+  test("orders contacts by name, whatever the insertion order", () =>
     withServer(({ client, sql }) =>
       Effect.gen(function* () {
         yield* sql`
@@ -58,7 +58,7 @@ describe("lista kontaktów", () => {
       })
     ))
 
-  test("ignoruje parametry zapytania — endpoint zwraca zawsze komplet", () =>
+  test("ignores query parameters — the endpoint always returns the whole set", () =>
     withServer(({ baseUrl, sql }) =>
       Effect.gen(function* () {
         yield* sql`
@@ -78,8 +78,8 @@ describe("lista kontaktów", () => {
     ))
 })
 
-describe("dokumentacja API", () => {
-  test("wystawia Swagger UI pod /docs", () =>
+describe("API documentation", () => {
+  test("serves Swagger UI at /docs", () =>
     withServer(({ baseUrl }) =>
       Effect.gen(function* () {
         const response = yield* Effect.promise(() => fetch(`${baseUrl}/docs`))
@@ -90,7 +90,7 @@ describe("dokumentacja API", () => {
       })
     ))
 
-  test("wyprowadza OpenAPI z definicji API — zawiera ścieżkę kontaktów", () =>
+  test("derives OpenAPI from the API definition — it contains the contacts path", () =>
     withServer(({ baseUrl }) =>
       Effect.gen(function* () {
         const response = yield* Effect.promise(() => fetch(`${baseUrl}/docs/openapi.json`))

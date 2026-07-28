@@ -2,16 +2,17 @@ import type { Contact } from "./models"
 import { normalizePhone } from "./phone"
 
 /**
- * Kto już ma ten numer — liczone lokalnie, na pobranej liście, bez dodatkowego
- * zapytania do API (spec 0001 → Klient). Porównanie idzie po numerze
- * znormalizowanym, nie po tym, co widać w polu: `"+48 602-118-447"` i
- * `"602118447"` to ten sam numer.
+ * Who already has this number — computed locally, on the fetched list, with no
+ * extra API call (spec 0001 -> Klient). The comparison runs on the normalised
+ * number, not on what the field shows: `"+48 602-118-447"` and `"602118447"`
+ * are the same number.
  *
- * `excludeId` wyłącza edytowany kontakt — inaczej ostrzegałby sam o sobie
- * przy każdej zmianie nazwiska (ticket 08).
+ * `excludeId` leaves out the contact being edited — otherwise it would warn
+ * about itself on every change of the name (ticket 08).
  *
- * Duplikat jest **ostrzeżeniem, nie błędem**: jedna osoba wykonująca dwa fachy
- * to dwa kontakty dzielące numer (CONTEXT.md → Telefon), więc zapis przechodzi.
+ * A duplicate is a **warning, not an error**: one person working two trades is
+ * two contacts sharing a number (CONTEXT.md -> Telefon), so the save goes
+ * through.
  */
 export const findPhoneOwner = (
   contacts: ReadonlyArray<Contact>,

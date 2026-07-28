@@ -1,19 +1,20 @@
 import type { Contact } from "../domain/models.js"
 
 /**
- * Kontakt bez tożsamości i znaczników czasu — dokładnie to, co da się wpisać
- * do bazy. Kształt pochodzi z kontraktu, więc nowe pole `Contact` psuje
- * kompilację tutaj, zamiast po cichu wypaść z zestawu.
+ * A contact without identity or timestamps — exactly what can be written to
+ * the database. The shape comes from the contract, so a new `Contact` field
+ * breaks compilation here instead of quietly dropping out of the set.
  */
 export type SampleContact = Pick<Contact, "name" | "role" | "phone">
 
 /**
- * Zestaw przykładowy — fachowcy, do których dzwoni właściciel domku.
- * Numery to same cyfry, tak jak w bazie (DESIGN.md §6).
+ * The sample set — the tradespeople the cottage owner calls. Phone numbers are
+ * digits only, just like in the database (DESIGN.md §6). The names and roles
+ * stay Polish: they are domain data, not code.
  *
- * Grzegorz Sobczak występuje **dwa razy** pod jednym numerem, z dwiema
- * specjalizacjami. To nie pomyłka w danych, tylko przypadek pod ostrzeżenie
- * o powtórzonym numerze (CONTEXT.md → Telefon).
+ * Grzegorz Sobczak appears **twice** under one number, with two specialities.
+ * That is not a mistake in the data but the case behind the duplicate-number
+ * warning (CONTEXT.md -> Telefon).
  */
 export const sampleContacts: ReadonlyArray<SampleContact> = [
   { name: "Grzegorz Sobczak", role: "Złota rączka", phone: "602118447" },

@@ -13,7 +13,7 @@ const main = Effect.gen(function* () {
 }).pipe(
   Effect.catchTag("ConfigError", (error) =>
     Effect.logError(
-      `Serwer nie wystartował — nieprawidłowa konfiguracja. ${Cause.pretty(Cause.fail(error))}`
+      `Server did not start — invalid configuration. ${Cause.pretty(Cause.fail(error))}`
     ).pipe(Effect.zipRight(Effect.die(error)))
   )
 )

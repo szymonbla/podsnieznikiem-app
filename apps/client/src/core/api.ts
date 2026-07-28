@@ -3,21 +3,21 @@ import createClient from "openapi-fetch"
 import type { paths } from "../generated/api"
 
 /**
- * Cienki, typowany wrapper na `fetch`. Ścieżki i kształty odpowiedzi bierze
- * z `generated/api.d.ts`, czyli z kontraktu serwera — nie z ręcznego
- * przepisania. Zero runtime'u poza samym `openapi-fetch` (DESIGN.md §5).
+ * A thin, typed wrapper around `fetch`. Paths and response shapes come from
+ * `generated/api.d.ts` — that is, from the server contract, not from a hand
+ * transcription. No runtime beyond `openapi-fetch` itself (DESIGN.md §5).
  *
- * Adres bazowy jest zawsze **tym samym originem** co aplikacja: w dev proxy
- * Vite kieruje `/api` na serwer Effecta, docelowo obie stoją pod jedną domeną.
- * Origin doklejamy jawnie, bo `fetch` poza przeglądarką (testy szwu 2)
- * nie rozwija adresów względnych.
+ * The base URL is always the **same origin** as the app: in dev the Vite proxy
+ * points `/api` at the Effect server, and in the end both live under one
+ * domain. The origin is spelled out because `fetch` outside a browser (seam 2
+ * tests) does not resolve relative addresses.
  */
 export const API_BASE_URL = new URL("/api", window.location.origin).toString()
 
 export const apiClient = createClient<paths>({
   baseUrl: API_BASE_URL,
-  // `openapi-fetch` zapamiętałby `globalThis.fetch` w chwili importu. Sięgamy
-  // po niego przy każdym żądaniu, żeby podstawienie sieci w testach szwu 2
-  // działało niezależnie od kolejności importów.
+  // `openapi-fetch` would capture `globalThis.fetch` at import time. We reach
+  // for it on every request so that swapping the network in seam 2 tests works
+  // regardless of import order.
   fetch: (request) => globalThis.fetch(request)
 })

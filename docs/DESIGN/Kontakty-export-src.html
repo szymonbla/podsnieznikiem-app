@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<template id="__bundler_thumbnail" data-bg-color="#2D3142">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#2D3142"/>
+    <rect x="360" y="250" width="480" height="300" rx="36" fill="#FFFFFF"/>
+    <rect x="420" y="322" width="200" height="22" rx="11" fill="#2D3142"/>
+    <rect x="420" y="382" width="360" height="16" rx="8" fill="#EAF4F4"/>
+    <rect x="420" y="426" width="300" height="16" rx="8" fill="#EAF4F4"/>
+    <rect x="420" y="470" width="340" height="16" rx="8" fill="#EAF4F4"/>
+    <circle cx="762" cy="330" r="26" fill="#215F65"/>
+    <path d="M752 320h6l3 7-4 2a17 17 0 007 7l2-4 7 3v6a2 2 0 01-2 2 23 23 0 01-21-21 2 2 0 012-2z" fill="#FFFFFF"/>
+  </svg>
+</template>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; background: #FFFFFF; }
+  * { box-sizing: border-box; }
+  input, button, textarea, select { font: inherit; }
+  a { color: #2E7C82; text-decoration: none; }
+  a:hover { color: #2D3142; }
+  ::placeholder { color: rgba(45,49,66,0.38); }
+  :focus-visible { outline: 2px solid #2E7C82; outline-offset: 2px; border-radius: 8px; }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes popIn { from { opacity: 0; transform: translateY(-4px) scale(.98); } to { opacity: 1; transform: none; } }
+  @media (max-width: 900px) {
+    [data-shell] { grid-template-columns: 1fr !important; }
+    [data-side] { position: static !important; height: auto !important; border-right: 0 !important; border-bottom: 1px solid rgba(45,49,66,0.09) !important; }
+    [data-sidenav] { display: flex !important; flex-wrap: wrap !important; gap: 4px !important; }
+    [data-sidefoot], [data-sidegroup] { display: none !important; }
+  }
+</style>
+</helmet>
+<div data-shell="" style="min-height: 100vh; display: grid; grid-template-columns: 264px 1fr; background: #FFFFFF; font-family: 'Nunito', system-ui, sans-serif; color: #2D3142">
+
+  <aside data-side="" style="position: sticky; top: 0; height: 100vh; border-right: 1px solid rgba(45,49,66,0.09); padding: 22px 14px; display: flex; flex-direction: column; gap: 20px; background: #FFFFFF">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+      <div style="width: 28px; height: 28px; flex: none; border-radius: 999px; background: #2D3142; display: grid; place-items: center">
+        <div style="width: 10px; height: 10px; border-radius: 3px; background: #A8D8DC"></div>
+      </div>
+      <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: -0.03em; color: #2D3142; line-height: 1.1">{{ cottageName }}</span>
+    </div>
+
+    <nav data-sidenav="" style="display: flex; flex-direction: column; gap: 2px">
+      <span aria-current="page" style="display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; font-size: 14px; font-weight: 700; color: #2D3142; background: #F4F5F7">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2E7C82" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a12 12 0 005 5L15 13l5 2v4a1 1 0 01-1.1 1A16 16 0 014 5.1 1 1 0 015 4z"></path></svg>
+        Kontakty
+      </span>
+      <sc-if value="{{ showSoon }}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <span data-sidegroup="" style="display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(45,49,66,0.34); padding: 16px 10px 6px">Wkrótce</span>
+          <span aria-disabled="true" style="display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; font-size: 14px; font-weight: 600; color: rgba(45,49,66,0.50); cursor: default">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
+            Rezerwacje
+          </span>
+          <span aria-disabled="true" style="display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; font-size: 14px; font-weight: 600; color: rgba(45,49,66,0.50); cursor: default">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h16v12H4z"></path><path d="M4 11h16"></path></svg>
+            Finanse
+          </span>
+          <span aria-disabled="true" style="display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; font-size: 14px; font-weight: 600; color: rgba(45,49,66,0.50); cursor: default">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 15a3 3 0 01-3 3H8l-4 3V6a3 3 0 013-3h10a3 3 0 013 3z"></path></svg>
+            Zapytania
+          </span>
+        </div>
+      </sc-if>
+    </nav>
+
+    <div data-sidefoot="" style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid rgba(45,49,66,0.10); border-radius: 12px">
+      <div style="width: 28px; height: 28px; border-radius: 999px; background: #E6F3F4; display: grid; place-items: center; font-size: 12px; font-weight: 800; color: #2E7C82">SB</div>
+      <div style="min-width: 0">
+        <div style="font-size: 13px; font-weight: 700; color: #2D3142; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Szymon Błażyński</div>
+        <div style="font-size: 12px; color: rgba(45,49,66,0.45)">Właściciel</div>
+      </div>
+    </div>
+  </aside>
+
+  <main style="min-width: 0; display: flex; flex-direction: column">
+
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 26px 32px 18px">
+      <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.03em; color: #2D3142">
+        <span style="color: rgba(45,49,66,0.42)">{{ crumb }}</span>Kontakty
+      </h1>
+      <button onClick="{{ openForm }}" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; color: #FFFFFF; background: #2D3142; border: 0; border-radius: 12px; padding: 11px 18px; cursor: pointer; transition: background .12s, transform .12s" style-hover="background: #1D2130" style-active="transform: translateY(1px)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+        Nowy kontakt
+      </button>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 0 32px 14px; border-bottom: 1px solid rgba(45,49,66,0.09)">
+      <div style="display: flex; align-items: center; gap: 10px; flex: 1 1 240px; min-width: 0">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(45,49,66,0.40)" stroke-width="2.1" stroke-linecap="round" style="flex: none"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        <input value="{{ query }}" onChange="{{ setQuery }}" aria-label="Wyszukaj kontakt" placeholder="Wyszukaj kontakt" style="flex: 1 1 auto; min-width: 0; border: 0; background: transparent; font-size: 15px; color: #2D3142; padding: 8px 0; outline: none" />
+        <sc-if value="{{ hasQuery }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ clearQuery }}" aria-label="Wyczyść wyszukiwanie" style="flex: none; border: 0; background: #F0F1F4; border-radius: 999px; width: 26px; height: 26px; display: grid; place-items: center; cursor: pointer; color: rgba(45,49,66,0.55); transition: background .12s" style-hover="background: #E3E5E9; color: #2D3142">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+          </button>
+        </sc-if>
+      </div>
+      <span style="font-size: 13px; color: rgba(45,49,66,0.70); white-space: nowrap">{{ countLabel }}</span>
+    </div>
+
+    <div style="padding: 22px 32px 64px; display: flex; flex-direction: column; gap: 18px">
+
+      <sc-if value="{{ hasRows }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <div style="position: sticky; top: 0; z-index: 5; background: #FFFFFF; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr) minmax(110px, 170px) 44px; align-items: center; gap: 16px; padding: 10px 12px; border-bottom: 1px solid rgba(45,49,66,0.09)">
+            <button onClick="{{ sortName }}" aria-label="{{ nameAria }}" aria-sort="{{ nameSort }}" style="justify-self: start; display: inline-flex; align-items: center; gap: 6px; border: 0; background: transparent; padding: 4px 0; cursor: pointer; font-size: 12px; font-weight: 700; letter-spacing: 0.03em; color: {{ nameFg }}">Imię i nazwisko
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="opacity: {{ nameOp }}"><path d="{{ namePath }}"></path></svg>
+            </button>
+            <button onClick="{{ sortRole }}" aria-label="{{ roleAria }}" aria-sort="{{ roleSort }}" style="justify-self: start; display: inline-flex; align-items: center; gap: 6px; border: 0; background: transparent; padding: 4px 0; cursor: pointer; font-size: 12px; font-weight: 700; letter-spacing: 0.03em; color: {{ roleFg }}">Specjalizacja
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="opacity: {{ roleOp }}"><path d="{{ rolePath }}"></path></svg>
+            </button>
+            <button onClick="{{ sortPhone }}" aria-label="{{ phoneAria }}" aria-sort="{{ phoneSort }}" style="justify-self: end; display: inline-flex; align-items: center; gap: 6px; border: 0; background: transparent; padding: 4px 0; cursor: pointer; font-size: 12px; font-weight: 700; letter-spacing: 0.03em; color: {{ phoneFg }}">Telefon
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="opacity: {{ phoneOp }}"><path d="{{ phonePath }}"></path></svg>
+            </button>
+            <span></span>
+          </div>
+          <sc-for list="{{ rows }}" as="c" hint-placeholder-count="8">
+            <div style="position: relative; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr) minmax(110px, 170px) 44px; align-items: center; gap: 16px; padding: 10px 12px; min-height: 56px; border-bottom: 1px solid rgba(45,49,66,0.07); transition: background .12s" style-hover="background: #FAFBFC">
+              <span style="min-width: 0; font-size: 14px; font-weight: 700; color: #2D3142; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ c.name }}</span>
+              <span style="min-width: 0; font-size: 13px; font-weight: 600; color: #215F65; background: #EAF4F4; border-radius: 8px; padding: 4px 10px; justify-self: start; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">{{ c.role }}</span>
+              <a href="{{ c.tel }}" title="{{ c.callHint }}" style="justify-self: end; padding: 8px 4px; font-size: 15px; font-weight: 700; color: #2D3142; font-variant-numeric: tabular-nums; white-space: nowrap" style-hover="color: #2E7C82">{{ c.phone }}</a>
+              <button onClick="{{ c.toggleMenu }}" aria-haspopup="menu" aria-expanded="{{ c.menuOpen }}" aria-label="{{ c.menuLabel }}" title="Więcej" style="justify-self: end; border: 0; background: transparent; border-radius: 9px; width: 40px; height: 40px; display: grid; place-items: center; cursor: pointer; color: rgba(45,49,66,0.55); transition: background .12s, color .12s" style-hover="background: #F0F1F4; color: #2D3142">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"></circle><circle cx="12" cy="12" r="1.7"></circle><circle cx="19" cy="12" r="1.7"></circle></svg>
+              </button>
+              <sc-if value="{{ c.menuOpen }}" hint-placeholder-val="{{ false }}">
+                <div role="menu" style="position: absolute; right: 8px; top: 50px; z-index: 25; width: 200px; background: #FFFFFF; border: 1px solid rgba(45,49,66,0.12); border-radius: 12px; box-shadow: 0 18px 40px -18px rgba(45,49,66,0.45); padding: 6px; display: flex; flex-direction: column; animation: popIn .12s ease">
+                  <button onClick="{{ c.copy }}" style="display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; border-radius: 8px; padding: 9px 10px; font-size: 14px; font-weight: 600; color: #2D3142; cursor: pointer; text-align: left; transition: background .12s" style-hover="background: #F4F5F7">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(45,49,66,0.55)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 012-2h10"></path></svg>
+                    Kopiuj numer
+                  </button>
+                  <button onClick="{{ c.edit }}" style="display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; border-radius: 8px; padding: 9px 10px; font-size: 14px; font-weight: 600; color: #2D3142; cursor: pointer; text-align: left; transition: background .12s" style-hover="background: #F4F5F7">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(45,49,66,0.55)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"></path></svg>
+                    Edytuj
+                  </button>
+                  <div style="height: 1px; background: rgba(45,49,66,0.09); margin: 5px 6px"></div>
+                  <button onClick="{{ c.askRemove }}" style="display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; border-radius: 8px; padding: 9px 10px; font-size: 14px; font-weight: 600; color: #C4462A; cursor: pointer; text-align: left; transition: background .12s" style-hover="background: #FDEEE7">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V5h4v2M8 7l1 12h6l1-12"></path></svg>
+                    Usuń
+                  </button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="border: 1px dashed rgba(45,49,66,0.18); border-radius: 14px; padding: 64px 24px; text-align: center; background: #FCFCFD">
+          <h3 style="margin: 0 0 6px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.02em; color: #2D3142">{{ emptyTitle }}</h3>
+          <p style="margin: 0 auto 20px; font-size: 14px; color: rgba(45,49,66,0.52); max-width: 42ch">{{ emptyText }}</p>
+          <button onClick="{{ openForm }}" style="font-weight: 700; font-size: 14px; color: #FFFFFF; background: #2D3142; border: 0; border-radius: 11px; padding: 10px 18px; cursor: pointer; transition: background .12s" style-hover="background: #1D2130">Nowy kontakt</button>
+        </div>
+      </sc-if>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 4px">
+        <span style="font-size: 12px; color: rgba(45,49,66,0.70)">Zmiany zapisują się automatycznie.</span>
+        <button onClick="{{ toggleDemo }}" style="border: 0; background: transparent; font-size: 12px; font-weight: 700; color: rgba(45,49,66,0.70); cursor: pointer; text-decoration: underline; text-underline-offset: 3px" style-hover="color: #2D3142">{{ demoLabel }}</button>
+      </div>
+    </div>
+  </main>
+
+  <sc-if value="{{ editOpen }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" style="position: fixed; inset: 0; z-index: 60; background: rgba(45,49,66,0.40); display: grid; place-items: center; padding: 24px">
+      <div style="width: 100%; max-width: 460px; background: #FFFFFF; border-radius: 16px; box-shadow: 0 30px 70px -30px rgba(45,49,66,0.6); padding: 24px; animation: fadeUp .18s ease">
+        <h2 style="margin: 0 0 4px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: -0.02em; color: #2D3142">{{ modalTitle }}</h2>
+        <p style="margin: 0 0 18px; font-size: 13px; color: rgba(45,49,66,0.50)">{{ modalHint }}</p>
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 12px; font-weight: 700; color: rgba(45,49,66,0.55)">Imię i nazwisko</span>
+            <input value="{{ fName }}" onChange="{{ setName }}" onKeyDown="{{ onKey }}" autoFocus="{{ true }}" placeholder="Jan Kowalski" style="background: #FFFFFF; border: 1px solid rgba(45,49,66,0.16); border-radius: 10px; color: #2D3142; font-size: 14px; padding: 10px 12px; outline: none; transition: border-color .12s, box-shadow .12s" style-focus="border-color: #2E7C82; box-shadow: 0 0 0 3px rgba(46,124,130,0.12)" />
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 12px; font-weight: 700; color: rgba(45,49,66,0.55)">Specjalizacja</span>
+            <input value="{{ fRole }}" onChange="{{ setRole }}" onKeyDown="{{ onKey }}" list="role-list" placeholder="Hydraulik" style="background: #FFFFFF; border: 1px solid rgba(45,49,66,0.16); border-radius: 10px; color: #2D3142; font-size: 14px; padding: 10px 12px; outline: none; transition: border-color .12s, box-shadow .12s" style-focus="border-color: #2E7C82; box-shadow: 0 0 0 3px rgba(46,124,130,0.12)" />
+            <datalist id="role-list">
+              <option value="Hydraulik"></option>
+              <option value="Elektryk"></option>
+              <option value="Dekarz"></option>
+              <option value="Kominiarz"></option>
+              <option value="Złota rączka"></option>
+              <option value="Serwis AGD"></option>
+              <option value="Sprzątanie"></option>
+            </datalist>
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 12px; font-weight: 700; color: rgba(45,49,66,0.55)">Telefon</span>
+            <input value="{{ fPhone }}" onChange="{{ setPhone }}" onKeyDown="{{ onKey }}" inputMode="tel" placeholder="510 907 654" style="background: #FFFFFF; border: 1px solid rgba(45,49,66,0.16); border-radius: 10px; color: #2D3142; font-size: 14px; padding: 10px 12px; outline: none; font-variant-numeric: tabular-nums; transition: border-color .12s, box-shadow .12s" style-focus="border-color: #2E7C82; box-shadow: 0 0 0 3px rgba(46,124,130,0.12)" />
+          </label>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px">
+          <button onClick="{{ closeModals }}" style="border: 1px solid rgba(45,49,66,0.16); background: #FFFFFF; border-radius: 11px; padding: 10px 16px; font-size: 14px; font-weight: 700; color: #2D3142; cursor: pointer; transition: background .12s" style-hover="background: #F4F5F7">Anuluj</button>
+          <button onClick="{{ saveContact }}" style="border: 0; background: #2D3142; border-radius: 11px; padding: 10px 18px; font-size: 14px; font-weight: 700; color: #FFFFFF; cursor: pointer; transition: background .12s" style-hover="background: #1D2130">{{ saveLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ deleteOpen }}" hint-placeholder-val="{{ false }}">
+    <div role="alertdialog" aria-modal="true" style="position: fixed; inset: 0; z-index: 60; background: rgba(45,49,66,0.40); display: grid; place-items: center; padding: 24px">
+      <div style="width: 100%; max-width: 420px; background: #FFFFFF; border-radius: 16px; box-shadow: 0 30px 70px -30px rgba(45,49,66,0.6); padding: 24px; animation: fadeUp .18s ease">
+        <h2 style="margin: 0 0 8px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: -0.02em; color: #2D3142">Usunąć kontakt?</h2>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: rgba(45,49,66,0.60)">{{ deleteText }}</p>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px">
+          <button onClick="{{ closeModals }}" style="border: 1px solid rgba(45,49,66,0.16); background: #FFFFFF; border-radius: 11px; padding: 10px 16px; font-size: 14px; font-weight: 700; color: #2D3142; cursor: pointer; transition: background .12s" style-hover="background: #F4F5F7">Anuluj</button>
+          <button onClick="{{ confirmRemove }}" style="border: 0; background: #C4462A; border-radius: 11px; padding: 10px 18px; font-size: 14px; font-weight: 700; color: #FFFFFF; cursor: pointer; transition: background .12s" style-hover="background: #A63A22">Usuń kontakt</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div role="status" aria-live="polite" style="position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; background: #2D3142; color: #FFFFFF; font-weight: 700; font-size: 13px; padding: 10px 12px 10px 18px; border-radius: 11px; box-shadow: 0 14px 36px -14px rgba(45,49,66,0.6); z-index: 70; animation: fadeUp .2s ease">
+      <span>{{ toast }}</span>
+      <sc-if value="{{ canUndo }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ undo }}" style="border: 0; background: rgba(255,255,255,0.14); color: #FFFFFF; border-radius: 8px; padding: 6px 12px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background .12s" style-hover="background: rgba(255,255,255,0.26)">Cofnij</button>
+      </sc-if>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showSoon&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Nawigacja&quot;},&quot;cottageName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Pod Śnieżnikiem&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Nawigacja&quot;}}">
+const SEED = [
+  ["Adam Nowak", "Elektryk", "602118447"],
+  ["Anna Wiśniewska", "Sprzątanie", "504221980"],
+  ["Bartosz Lis", "Kominiarz", "601773204"],
+  ["Dariusz Zawada", "Dekarz", "512440871"],
+  ["Ewa Krupa", "Księgowa", "608310256"],
+  ["Filip Marzec", "Hydraulik", "533016742"],
+  ["Grzegorz Sobczak", "Złota rączka", "697245118"],
+  ["Halina Dudek", "Pralnia", "515338907"],
+  ["Ireneusz Bąk", "Serwis pieca", "606814235"],
+  ["Jacek Ostrowski", "Studnia i pompa", "691402778"],
+  ["Jan Kowalski", "Hydraulik", "510907654"],
+  ["Karolina Mazur", "Ogród", "664120583"],
+  ["Krzysztof Wilk", "Odśnieżanie", "600457312"],
+  ["Lidia Piątek", "Opiekunka domku", "534871009"],
+  ["Marek Stec", "Stolarz", "692305174"],
+  ["Monika Baran", "Serwis AGD", "578114620"],
+  ["Norbert Cichy", "Internet", "801505050"],
+  ["Olga Rutkowska", "Zdjęcia ofertowe", "662907441"],
+  ["Paweł Górski", "Szambo i wywóz", "509612330"],
+  ["Renata Lech", "Alarm i monitoring", "587220164"],
+  ["Sławomir Duda", "Deratyzacja", "605339812"],
+  ["Tomasz Zieliński", "Drobne remonty", "693114520"],
+  ["Urszula Pawlak", "Dostawa drewna", "515604278"],
+  ["Wojciech Malec", "Pomoc drogowa", "601999042"]
+];
+
+class Component extends DCLogic {
+  state = {
+    contacts: SEED.map((c, i) => ({ id: i + 1, name: c[0], role: c[1], phone: c[2] })),
+    undoItem: null,
+    query: "",
+    sortKey: "name",
+    sortDir: 1,
+    formOpen: false,
+    menuId: null,
+    editId: null,
+    deleteId: null,
+    fName: "", fRole: "", fPhone: "",
+    toast: "",
+    demoEmpty: false
+  };
+
+  componentDidMount() {
+    this._away = () => { if (this.state.menuId !== null) this.setState({ menuId: null }); };
+    this._esc = e => {
+      const dialog = document.querySelector('[role="dialog"], [role="alertdialog"]');
+      if (e.key === "Tab" && dialog) {
+        const f = Array.prototype.filter.call(
+          dialog.querySelectorAll('button, input, [href], select, textarea, [tabindex]:not([tabindex="-1"])'),
+          el => !el.disabled && el.offsetParent !== null
+        );
+        if (!f.length) return;
+        const first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        return;
+      }
+      if (e.key !== "Escape") return;
+      const s = this.state;
+      if (s.menuId !== null) this.setState({ menuId: null });
+      else if (s.editId !== null || s.deleteId !== null || s.formOpen) {
+        this.setState({ editId: null, deleteId: null, formOpen: false, fName: "", fRole: "", fPhone: "" });
+        this._restore();
+      }
+    };
+    document.addEventListener("click", this._away);
+    document.addEventListener("keydown", this._esc);
+  }
+  componentWillUnmount() {
+    document.removeEventListener("click", this._away);
+    document.removeEventListener("keydown", this._esc);
+    clearTimeout(this._t);
+  }
+
+  _restore() {
+    const t = this._trigger;
+    this._trigger = null;
+    if (!t) return;
+    setTimeout(() => { if (t.isConnected) t.focus(); }, 0);
+  }
+
+  _rowTrigger(e) {
+    const row = e.currentTarget && e.currentTarget.closest ? e.currentTarget.closest("div[style*='position: relative']") : null;
+    return (row && row.querySelector("button[aria-haspopup]")) || document.activeElement;
+  }
+
+  fmt(p) {
+    const d = String(p).replace(/\D/g, "");
+    return d.length === 9 ? d.slice(0, 3) + " " + d.slice(3, 6) + " " + d.slice(6) : p;
+  }
+
+  plural(n) {
+    const d = n % 10, h = n % 100;
+    if (n === 1) return "kontakt";
+    if (d >= 2 && d <= 4 && !(h >= 12 && h <= 14)) return "kontakty";
+    return "kontaktów";
+  }
+
+  flash(msg, undoItem) {
+    clearTimeout(this._t);
+    this.setState({ toast: msg, undoItem: undoItem || null });
+    this._t = setTimeout(() => this.setState({ toast: "", undoItem: null }), undoItem ? 6000 : 1800);
+  }
+
+  save() {
+    const name = this.state.fName.trim();
+    const phone = this.state.fPhone.trim();
+    if (!name || !phone) { this.flash("Podaj imię i numer"); return; }
+    const role = this.state.fRole.trim() || "Bez kategorii";
+    if (this.state.editId) {
+      this.setState(s => ({
+        contacts: s.contacts.map(c => c.id === s.editId ? { ...c, name, role, phone } : c),
+        editId: null, fName: "", fRole: "", fPhone: ""
+      }));
+      this.flash("Zapisano zmiany");
+      this._restore();
+    } else {
+      this.setState(s => ({
+        contacts: s.contacts.concat([{ id: Date.now(), name, role, phone }]),
+        formOpen: false, fName: "", fRole: "", fPhone: "", demoEmpty: false
+      }));
+      this.flash("Dodano kontakt: " + name);
+      this._restore();
+    }
+  }
+
+  renderVals() {
+    const s = this.state;
+    const all = s.demoEmpty ? [] : s.contacts;
+    const q = s.query.trim().toLowerCase();
+    const qd = q.replace(/\D/g, "");
+    const filtered = all.filter(c =>
+      !q || c.name.toLowerCase().includes(q) || c.role.toLowerCase().includes(q) || (qd && c.phone.includes(qd)));
+    const sorted = filtered.slice().sort((a, b) => {
+      const k = s.sortKey;
+      const v = k === "phone" ? a.phone.localeCompare(b.phone) : a[k].localeCompare(b[k], "pl") || a.name.localeCompare(b.name, "pl");
+      return v * s.sortDir;
+    });
+    const BOTH = "M8 4v16M8 20l-3-3M16 20V4M16 4l3 3";
+    const UP = "M12 20V5M6 11l6-6 6 6";
+    const DOWN = "M12 4v15M6 13l6 6 6-6";
+    const hdr = k => {
+      const on = s.sortKey === k;
+      return {
+        fg: on ? "#2D3142" : "rgba(45,49,66,0.70)",
+        op: on ? "1" : "0.55",
+        path: on ? (s.sortDir === 1 ? UP : DOWN) : BOTH,
+        aria: on ? (s.sortDir === 1 ? "ascending" : "descending") : "none",
+        state: on ? (s.sortDir === 1 ? " — sortowanie rosnąco" : " — sortowanie malejąco") : "",
+        go: () => this.setState(st => (st.sortKey === k ? { sortDir: -st.sortDir } : { sortKey: k, sortDir: 1 }))
+      };
+    };
+    const hName = hdr("name"), hRole = hdr("role"), hPhone = hdr("phone");
+
+    const rows = sorted.map(c => ({
+      id: c.id,
+      name: c.name,
+      role: c.role,
+      phone: this.fmt(c.phone),
+      tel: "tel:+48" + c.phone.replace(/\D/g, ""),
+      menuOpen: s.menuId === c.id,
+      menuLabel: "Więcej opcji — " + c.name,
+      callHint: "Zadzwoń: " + c.name,
+      toggleMenu: e => {
+        e.stopPropagation();
+        this.setState(st => ({ menuId: st.menuId === c.id ? null : c.id }));
+      },
+      copy: e => {
+        e.stopPropagation();
+        const txt = this.fmt(c.phone);
+        if (navigator.clipboard) navigator.clipboard.writeText(txt).catch(() => {});
+        this.setState({ menuId: null });
+        this.flash("Skopiowano " + txt);
+      },
+      edit: e => {
+        e.stopPropagation();
+        this._trigger = this._rowTrigger(e);
+        this.setState({ menuId: null, editId: c.id, fName: c.name, fRole: c.role, fPhone: this.fmt(c.phone) });
+      },
+      askRemove: e => {
+        e.stopPropagation();
+        this._trigger = this._rowTrigger(e);
+        this.setState({ menuId: null, deleteId: c.id });
+      }
+    }));
+
+    const del = s.contacts.find(c => c.id === s.deleteId);
+
+    const cottage = this.props.cottageName || "Pod Śnieżnikiem";
+
+    return {
+      rows,
+      cottageName: cottage,
+      crumb: cottage + " / ",
+      showSoon: this.props.showSoon !== false,
+      hasRows: rows.length > 0,
+      showEmpty: rows.length === 0,
+      query: s.query,
+      hasQuery: q.length > 0,
+      setQuery: e => this.setState({ query: e.target.value }),
+      clearQuery: () => this.setState({ query: "" }),
+      nameFg: hName.fg, nameOp: hName.op, namePath: hName.path, nameSort: hName.aria, sortName: hName.go,
+      roleFg: hRole.fg, roleOp: hRole.op, rolePath: hRole.path, roleSort: hRole.aria, sortRole: hRole.go,
+      phoneFg: hPhone.fg, phoneOp: hPhone.op, phonePath: hPhone.path, phoneSort: hPhone.aria, sortPhone: hPhone.go,
+      nameAria: "Sortuj po nazwisku" + hName.state,
+      roleAria: "Sortuj po specjalizacji" + hRole.state,
+      phoneAria: "Sortuj po numerze" + hPhone.state,
+      countLabel: !all.length ? "Brak kontaktów" : (q ? rows.length + " z " + all.length : all.length + " " + this.plural(all.length)),
+      emptyTitle: q ? "Nic nie znaleziono" : "Brak kontaktów",
+      emptyText: q ? "Żaden kontakt nie pasuje do „" + s.query.trim() + "”. Spróbuj innego nazwiska albo fachu." : "Dodaj pierwszy numer, żeby wiedzieć, do kogo dzwonić przy awarii.",
+      formOpen: s.formOpen,
+      onKey: e => {
+        if (e.key === "Enter") { e.preventDefault(); this.save(); }
+      },
+      fName: s.fName, fRole: s.fRole, fPhone: s.fPhone,
+      setName: e => this.setState({ fName: e.target.value }),
+      setRole: e => this.setState({ fRole: e.target.value }),
+      setPhone: e => this.setState({ fPhone: e.target.value }),
+      openForm: e => {
+        this._trigger = (e && e.currentTarget) || document.activeElement;
+        this.setState({ formOpen: true, editId: null, fName: "", fRole: "", fPhone: "" });
+      },
+      closeForm: () => this.setState({ formOpen: false, fName: "", fRole: "", fPhone: "" }),
+      saveContact: () => this.save(),
+      editOpen: s.editId !== null || s.formOpen,
+      modalTitle: s.editId !== null ? "Edytuj kontakt" : "Nowy kontakt",
+      modalHint: s.editId !== null ? "Zmiany zapiszą się od razu na liście." : "Wystarczy imię i numer.",
+      saveLabel: s.editId !== null ? "Zapisz zmiany" : "Dodaj kontakt",
+      deleteOpen: s.deleteId !== null,
+      deleteText: del ? "Kontakt " + del.name + " (" + del.role.toLowerCase() + ") zniknie z listy. Przez chwilę będzie można cofnąć." : "",
+      closeModals: () => {
+        this.setState({ editId: null, deleteId: null, formOpen: false, fName: "", fRole: "", fPhone: "" });
+        this._restore();
+      },
+      confirmRemove: () => {
+        const c = del;
+        this.setState(st => ({ contacts: st.contacts.filter(x => x.id !== st.deleteId), deleteId: null }));
+        this._restore();
+        if (c) this.flash("Usunięto kontakt: " + c.name, c);
+      },
+      canUndo: !!s.undoItem,
+      undo: () => {
+        const item = s.undoItem;
+        if (!item) return;
+        clearTimeout(this._t);
+        this.setState(st => ({ contacts: st.contacts.concat([item]), undoItem: null }));
+        this.flash("Przywrócono kontakt: " + item.name);
+      },
+      toggleDemo: () => this.setState(st => ({ demoEmpty: !st.demoEmpty })),
+      demoLabel: s.demoEmpty ? "Przywróć przykładowe dane" : "Pokaż stan pusty",
+      toast: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>
