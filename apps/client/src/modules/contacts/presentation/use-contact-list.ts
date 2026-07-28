@@ -4,28 +4,13 @@ import { useMemo } from "react"
 import type { Contact } from "../domain/models"
 import { compareContacts, type SortColumn } from "../domain/sorting"
 import { resolveSearch, toSearchParams, type ResolvedSearch } from "../domain/view-state"
-import { normalizePhone } from "../integration/format"
+import { matchesQuery } from "../integration/search"
 
 /**
  * Trasa podana identyfikatorem, nie importem obiektu trasy — ekran jest
  * wciągany przez router, więc import w drugą stronę zamknąłby cykl.
  */
 const CONTACTS_ROUTE = "/kontakty" as const
-
-/**
- * Zapytanie idzie po trzech polach naraz, bo właściciel nie wybiera, czym
- * szuka — wpisuje to, co pamięta (spec 0001, historie 9–11). Numer porównuje
- * się po samych cyfrach, więc `"602 118"` i `"+48 602"` trafiają tak samo.
- */
-const matches = (contact: Contact, query: string): boolean => {
-  const text = query.toLocaleLowerCase("pl")
-  if (contact.name.toLocaleLowerCase("pl").includes(text)) return true
-  if (contact.role.toLocaleLowerCase("pl").includes(text)) return true
-
-  const digits = normalizePhone(query)
-
-  return digits.length > 0 && contact.phone.includes(digits)
-}
 
 interface ContactList {
   readonly search: ResolvedSearch
@@ -49,7 +34,8 @@ export const useContactList = (contacts: ReadonlyArray<Contact>): ContactList =>
   const query = search.q.trim()
 
   const rows = useMemo(() => {
-    const filtered = query === "" ? contacts : contacts.filter((c) => matches(c, query))
+    const filtered =
+      query === "" ? contacts : contacts.filter((contact) => matchesQuery(contact, query))
 
     return [...filtered].sort(compareContacts(search.sort, search.dir))
   }, [contacts, query, search.sort, search.dir])
@@ -67,10 +53,14 @@ export const useContactList = (contacts: ReadonlyArray<Contact>): ContactList =>
     /*
      * Pisanie podmienia wpis w historii zamiast dokładać nowy — inaczej jedno
      * słowo zostawiałoby tyle wpisów, ile liter, i „wstecz" przestałoby być
-     * przydatne. Zmiana sortowania to pojedyncza decyzja, więc dokłada wpis.
+     * przydatne.
+     *
+     * Wyczyszczenie i zmiana sortowania to za to pojedyncze decyzje, więc
+     * dokładają wpis: bez tego „wstecz" po wyczyszczeniu filtra nie miałoby
+     * dokąd wrócić, a spec obiecuje powrót do poprzedniego filtra (historia 26).
      */
     setQuery: (q) => update({ q }, true),
-    clearQuery: () => update({ q: "" }, true),
+    clearQuery: () => update({ q: "" }, false),
     toggleSort: (column) =>
       update(
         search.sort === column

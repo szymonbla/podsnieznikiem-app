@@ -25,8 +25,8 @@ export const contactsCopy = {
   loading: "Wczytuję kontakty…",
   emptyList: {
     title: "Nie masz jeszcze żadnego kontaktu",
-    description: "Dodaj pierwszy numer, żeby wiedzieć, do kogo dzwonić przy awarii.",
-    action: "Dodaj kontakt"
+    // Przycisk prowadzący do dodania dokłada ticket 07 — `EmptyState` ma na niego `action`.
+    description: "Dodaj pierwszy numer, żeby wiedzieć, do kogo dzwonić przy awarii."
   },
   emptySearch: {
     /** Zapytanie przytoczone, żeby właściciel zobaczył, czego faktycznie szukał. */
@@ -58,11 +58,10 @@ export const contactsCount = (count: number): string => {
 }
 
 /**
- * Przy filtrze liczy się wynik na tle całości, nie sama liczba trafień.
- *
- * Przyimek „z" rządzi dopełniaczem, więc odmiana z licznika tu nie działa:
- * jest „3 z 24 kontaktów", nie „3 z 24 kontakty". Dopełniacz mnogi ma jedną
- * formę dla każdej liczby poza jedynką, więc cała reguła to ten jeden wyjątek.
+ * Przy filtrze liczy się wynik na tle całości, nie sama liczba trafień —
+ * `3 z 24`, dosłownie jak w DESIGN.md §9. Rzeczownik zostaje pominięty
+ * świadomie: po „z" musiałby stanąć w dopełniaczu („z 24 kontaktów"), więc
+ * licznik odmieniałby się inaczej niż przy pełnej liście i wyglądałby na
+ * niekonsekwentny.
  */
-export const contactsMatchCount = (shown: number, total: number): string =>
-  `${shown} z ${total} ${total === 1 ? "kontaktu" : "kontaktów"}`
+export const contactsMatchCount = (shown: number, total: number): string => `${shown} z ${total}`

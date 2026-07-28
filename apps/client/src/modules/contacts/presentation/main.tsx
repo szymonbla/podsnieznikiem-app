@@ -19,6 +19,23 @@ export const ContactsScreen = () => {
     data ?? []
   )
 
+  /*
+   * Stan ekranu nazwany raz, zamiast rozstrzygany po kolei w drzewie JSX —
+   * kolejność sprawdzania jest tu regułą („błąd bije pustkę, pustka bije
+   * filtr"), a nie przypadkiem zagnieżdżenia.
+   */
+  const view = ((): "loading" | "error" | "empty" | "no-matches" | "list" => {
+    if (isPending) return "loading"
+    if (isError) return "error"
+    if (total === 0) return "empty"
+    if (rows.length === 0) return "no-matches"
+
+    return "list"
+  })()
+
+  /* Licznik i filtr mają sens dopiero wtedy, gdy jest co liczyć i co filtrować. */
+  const hasRows = view === "no-matches" || view === "list"
+
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-6 p-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
@@ -28,24 +45,26 @@ export const ContactsScreen = () => {
             Licznik milczy, dopóki nie ma czego liczyć — „0 kontaktów" w trakcie
             wczytywania byłoby zwykłą nieprawdą.
           */}
-          {isPending || isError ? null : (
+          {hasRows || view === "empty" ? (
             <p className="text-muted-foreground">
               {isFiltered ? contactsMatchCount(rows.length, total) : contactsCount(total)}
             </p>
-          )}
+          ) : null}
         </div>
 
         {/* Bez ani jednego kontaktu nie ma czego filtrować — pole tylko zaśmiecałoby ekran. */}
-        {!isPending && !isError && total > 0 ? (
+        {hasRows ? (
           <SearchField value={search.q} onChange={setQuery} onClear={clearQuery} />
         ) : null}
       </header>
 
-      {isPending ? (
+      {view === "loading" ? (
         <p role="status" className="text-muted-foreground">
           {contactsCopy.loading}
         </p>
-      ) : isError ? (
+      ) : null}
+
+      {view === "error" ? (
         <EmptyState
           assertive
           title={contactsCopy.loadError.title}
@@ -56,12 +75,16 @@ export const ContactsScreen = () => {
             </button>
           }
         />
-      ) : total === 0 ? (
+      ) : null}
+
+      {view === "empty" ? (
         <EmptyState
           title={contactsCopy.emptyList.title}
           description={contactsCopy.emptyList.description}
         />
-      ) : rows.length === 0 ? (
+      ) : null}
+
+      {view === "no-matches" ? (
         <EmptyState
           title={contactsCopy.emptySearch.title(search.q.trim())}
           description={contactsCopy.emptySearch.description}
@@ -71,7 +94,9 @@ export const ContactsScreen = () => {
             </button>
           }
         />
-      ) : (
+      ) : null}
+
+      {view === "list" ? (
         <div className="overflow-hidden rounded-card border border-separator">
           <ContactsTable
             contacts={rows}
@@ -80,7 +105,7 @@ export const ContactsScreen = () => {
             onSort={toggleSort}
           />
         </div>
-      )}
+      ) : null}
     </main>
   )
 }

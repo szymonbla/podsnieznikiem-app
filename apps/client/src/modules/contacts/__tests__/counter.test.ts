@@ -34,7 +34,7 @@ describe("odmiana liczebnika przy kontaktach", () => {
   })
 
   test("przy filtrze pokazuje wynik na tle całości", () => {
-    expect(contactsMatchCount(3, 24)).toBe("3 z 24 kontaktów")
-    expect(contactsMatchCount(0, 1)).toBe("0 z 1 kontaktu")
+    expect(contactsMatchCount(3, 24)).toBe("3 z 24")
+    expect(contactsMatchCount(0, 1)).toBe("0 z 1")
   })
 })

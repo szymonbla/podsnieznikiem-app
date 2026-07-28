@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
 
-import { aContact } from "../../../__tests__/harness"
+import { aContact } from "../../../__tests__/contact-builder"
 import { compareContacts } from "../domain/sorting"
 
 /** Zwraca same nazwiska — asercja na kolejności czyta się wtedy jak lista. */

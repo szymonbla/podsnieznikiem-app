@@ -12,6 +12,18 @@ interface ContactsTableProps {
   readonly onSort: (column: SortColumn) => void
 }
 
+/**
+ * Szerokości kolumn z projektu (DESIGN.md §4): nazwisko i specjalizacja dzielą
+ * miejsce w proporcji 2 : 1,4, numer dostaje stałe 170 px, kolumna akcji 44 px.
+ * Razem z `table-fixed` trzymają się swojego niezależnie od długości treści —
+ * inaczej jedno długie nazwisko rozpychałoby całą tabelę.
+ */
+const COLUMN_WIDTH: Record<SortColumn, string> = {
+  name: "w-[45%]",
+  role: "w-[31%]",
+  phone: "w-[170px]"
+}
+
 /** Strzałka jest ozdobą — kierunek dla czytnika ekranu niesie `aria-sort`. */
 const SortMark = ({ direction }: { readonly direction: SortDirection | null }) => (
   <span aria-hidden="true" className="ml-1 inline-block w-3 text-ink-placeholder">
@@ -37,7 +49,7 @@ const copyPhone = async (phone: string) => {
  * opierają się właśnie na niej.
  */
 export const ContactsTable = ({ contacts, sort, direction, onSort }: ContactsTableProps) => (
-  <table className="w-full border-collapse text-left">
+  <table className="w-full table-fixed border-collapse text-left">
     <thead>
       <tr className="bg-muted">
         {SORT_COLUMNS.map((column) => {
@@ -49,14 +61,14 @@ export const ContactsTable = ({ contacts, sort, direction, onSort }: ContactsTab
               key={column}
               scope="col"
               aria-sort={active ? (direction === "asc" ? "ascending" : "descending") : "none"}
-              className="p-0 label-caps font-medium text-ink-heading"
+              className={`p-0 label-caps font-medium text-ink-heading ${COLUMN_WIDTH[column]}`}
             >
               {/*
                 Bez `aria-label`: nazwą przycisku jest sama etykieta kolumny,
                 a kierunek niesie `aria-sort` na nagłówku — tak działa wzorzec
                 sortowalnej tabeli w ARIA. Wpisanie kierunku jeszcze raz
-                w etykietę kazałoby czytnikowi przeczytać go dwa razy,
-                za każdym razem inaczej.
+                w etykietę kazałoby czytnikowi przeczytać go dwa razy, za
+                każdym razem inaczej.
               */}
               <button
                 type="button"
@@ -80,8 +92,8 @@ export const ContactsTable = ({ contacts, sort, direction, onSort }: ContactsTab
 
         return (
           <tr key={contact.id} className="border-t border-separator bg-surface">
-            <td className="px-4 py-3 font-medium">{contact.name}</td>
-            <td className="px-4 py-3 text-muted-foreground">{contact.role}</td>
+            <td className="truncate px-4 py-3 font-medium">{contact.name}</td>
+            <td className="truncate px-4 py-3 text-muted-foreground">{contact.role}</td>
             <td className="px-4 py-3">
               <a
                 href={phoneHref(contact.phone)}

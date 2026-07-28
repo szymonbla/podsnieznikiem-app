@@ -4,12 +4,16 @@ import userEvent from "@testing-library/user-event"
 
 import { aContact, apiHandlers, mockApi, renderApp } from "../../../__tests__/harness"
 
-/** Nazwiska w kolejności, w jakiej stoją na ekranie — bez wiersza nagłówka. */
+/**
+ * Nazwiska w kolejności, w jakiej stoją na ekranie — bez wiersza nagłówka.
+ * Idzie po rolach, nie po znacznikach, więc przebudowa tabeli nie psuje testu,
+ * dopóki wiersze i komórki zostają wierszami i komórkami.
+ */
 const visibleNames = () =>
   screen
     .getAllByRole("row")
     .slice(1)
-    .map((row) => row.querySelectorAll("td")[0]?.textContent)
+    .map((row) => within(row).getAllByRole("cell")[0]?.textContent)
 
 describe("lista kontaktów na ekranie", () => {
   test("pokazuje kontakty pobrane z API w tabeli", async () => {
@@ -100,7 +104,7 @@ describe("licznik kontaktów", () => {
 
     await user.type(await screen.findByRole("searchbox"), "Hydraulik")
 
-    expect(await screen.findByText("1 z 3 kontaktów")).toBeDefined()
+    expect(await screen.findByText("1 z 3")).toBeDefined()
   })
 })
 
@@ -150,8 +154,12 @@ describe("sortowanie listy", () => {
 
     renderApp("/kontakty")
 
+    /* Kierunek niesie nagłówek, a nazywa go przycisk w środku — stąd ta para. */
     const sortStateOf = (label: string) =>
-      screen.getByRole("button", { name: label }).closest("th")?.getAttribute("aria-sort")
+      screen
+        .getAllByRole("columnheader")
+        .find((header) => within(header).queryByRole("button", { name: label }) !== null)
+        ?.getAttribute("aria-sort")
 
     await screen.findByRole("table")
     expect(sortStateOf("Imię i nazwisko")).toBe("ascending")
@@ -260,6 +268,24 @@ describe("filtr i sortowanie w adresie", () => {
 
     await screen.findByRole("table")
     expect(visibleNames()).toEqual(["Anna Kowalska", "Marek Nowak", "Ewa Lis"])
+  })
+
+  test("wstecz po wyczyszczeniu filtra wraca do poprzedniego filtra", async () => {
+    const user = userEvent.setup()
+    mockApi.use(apiHandlers.contacts(trio()))
+
+    const { goBack } = renderApp("/kontakty")
+
+    await user.type(await screen.findByRole("searchbox"), "hydraulik")
+    expect(visibleNames()).toEqual(["Marek Nowak"])
+
+    await user.click(screen.getByRole("button", { name: "Wyczyść wyszukiwanie" }))
+    expect(visibleNames()).toHaveLength(3)
+
+    goBack()
+    // Historia cofa się poza pętlą zdarzeń, więc router odbiera to dopiero teraz.
+    await screen.findByDisplayValue("hydraulik")
+    expect(visibleNames()).toEqual(["Marek Nowak"])
   })
 
   test("zapisuje zmianę filtra i sortowania w adresie", async () => {

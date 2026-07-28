@@ -4,7 +4,6 @@ import { render } from "@testing-library/react"
 
 import { createQueryClient } from "../core/query"
 import { createAppRouter } from "../core/router"
-import type { Contact } from "../modules/contacts"
 
 /**
  * Szew 2 — test renderuje ekran razem z routerem i warstwą zapytań, a sieć
@@ -13,26 +12,7 @@ import type { Contact } from "../modules/contacts"
  * granicą jest to, co naprawdę wychodzi na sieć.
  */
 export { apiHandlers, mockApi } from "./msw"
-
-let sequence = 0
-
-/**
- * Kontakt o kompletnym kształcie kontraktu — test nadpisuje tylko to, co bada.
- * Typ pochodzi z modułu, więc nowe pole na serwerze psuje kompilację tutaj,
- * zamiast po cichu zostawić nieaktualną atrapę.
- */
-export const aContact = (overrides: Partial<Contact> = {}): Contact => {
-  sequence += 1
-  return {
-    id: `00000000-0000-4000-8000-${String(sequence).padStart(12, "0")}`,
-    name: "Grzegorz Sobczak",
-    role: "Złota rączka",
-    phone: "602118447",
-    createdAt: "2026-01-01T10:00:00.000Z",
-    updatedAt: "2026-01-01T10:00:00.000Z",
-    ...overrides
-  }
-}
+export { aContact } from "./contact-builder"
 
 /**
  * Renderuje aplikację pod wskazanym adresem, tak jak zrobiłaby to przeglądarka.
@@ -43,9 +23,8 @@ export const renderApp = (initialPath: string) => {
   const queryClient = createQueryClient({
     defaultOptions: { queries: { retry: false } }
   })
-  const router = createAppRouter({
-    history: createMemoryHistory({ initialEntries: [initialPath] })
-  })
+  const history = createMemoryHistory({ initialEntries: [initialPath] })
+  const router = createAppRouter({ history })
 
   return {
     ...render(
@@ -54,6 +33,8 @@ export const renderApp = (initialPath: string) => {
       </QueryClientProvider>
     ),
     /** Adres tak, jak zobaczyłby go pasek przeglądarki — ze znakiem zapytania. */
-    currentUrl: () => router.state.location.href
+    currentUrl: () => router.state.location.href,
+    /** „Wstecz" przeglądarki — historia jest w pamięci, więc trzeba ją cofnąć wprost. */
+    goBack: () => history.back()
   }
 }
