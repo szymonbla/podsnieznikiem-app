@@ -53,6 +53,14 @@ Numer **nie jest unikalny** — jedna osoba może występować jako kilka kontak
 o różnych specjalizacjach. Powtórzony numer jest ostrzeżeniem w interfejsie,
 nie błędem.
 
+### Kontakt bez tożsamości (Draft)
+Kontakt widoczny na liście, zanim serwer potwierdzi zapis. Ma komplet danych
+wpisanych przez właściciela, ale nie ma jeszcze `id` z bazy — nosi tylko
+tymczasowe oznaczenie lokalne. Tożsamość nadaje baza.
+
+Konsekwencja: taki wiersz nie ma menu akcji — nie ma pod czym go edytować ani
+usunąć. Jego tymczasowe id nie trafia do żadnego żądania.
+
 ### Usunięcie kontaktu (Deletion)
 Usunięcie jest natychmiastowe i trwałe. Przez chwilę po nim można je **cofnąć**,
 co tworzy kontakt na nowo z tych samych danych — nie przywraca poprzedniego

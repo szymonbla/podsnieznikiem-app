@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { apiClient } from "../../../core/api"
 import { CONTACTS_QUERY_KEY, CONTACTS_STALE_TIME_MS } from "../configuration/query-settings"
 import { isContactField } from "../configuration/schema"
+import { draftContact } from "../domain/drafts"
 import type {
   Contact,
   ContactField,
@@ -113,22 +114,6 @@ const useOptimisticContacts = () => {
       void queryClient.invalidateQueries({ queryKey: CONTACTS_QUERY_KEY })
     }
   }
-}
-
-/**
- * A contact visible immediately, before the server answers. The temporary id is
- * local and lives until the list is invalidated — the real one is assigned by
- * the database (ADR-0003: "undo" creates an entry with a new identity anyway).
- */
-export const DRAFT_ID_PREFIX = "draft:"
-
-/** An entry visible only locally — without an identity from the database yet. */
-export const isDraft = (contact: Contact): boolean => contact.id.startsWith(DRAFT_ID_PREFIX)
-
-const draftContact = (body: CreateContactBody): Contact => {
-  const now = new Date().toISOString()
-
-  return { id: `${DRAFT_ID_PREFIX}${crypto.randomUUID()}`, ...body, createdAt: now, updatedAt: now }
 }
 
 export const useCreateContact = () => {

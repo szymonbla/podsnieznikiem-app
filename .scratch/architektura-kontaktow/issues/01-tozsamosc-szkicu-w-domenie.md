@@ -14,10 +14,10 @@ i musi mieć skąd wziąć to pojęcie.
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Prefiks szkicu, rozpoznanie szkicu i tworzenie szkicu mieszkają w `domain`
-- [ ] Prezentacja nie importuje niczego z `integration` po to pojęcie
-- [ ] CONTEXT.md ma hasło o kontakcie bez tożsamości, z konsekwencją: szkic nie
+- [x] Prefiks szkicu, rozpoznanie szkicu i tworzenie szkicu mieszkają w `domain`
+- [x] Prezentacja nie importuje niczego z `integration` po to pojęcie
+- [x] CONTEXT.md ma hasło o kontakcie bez tożsamości, z konsekwencją: szkic nie
       ma akcji w wierszu, a jego id nie trafia do żadnego żądania
-- [ ] Cały zestaw testów przechodzi bez zmian w treści testów
+- [x] Cały zestaw testów przechodzi bez zmian w treści testów
