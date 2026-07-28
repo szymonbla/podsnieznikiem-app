@@ -1,61 +1,55 @@
 # Pod Śnieżnikiem
 
-Platforma do obsługi jednego domku na wynajem.
+Narzędzie wewnętrzne do obsługi **jednego** domku na wynajem. Jeden użytkownik —
+właściciel. Bez logowania, bez ról, bez wyboru domku.
 
-Słownik: [`CONTEXT.md`](./CONTEXT.md) · Architektura: [`docs/DESIGN.md`](./docs/DESIGN.md) ·
-Decyzje: [`docs/adr/`](./docs/adr) · Specyfikacje: [`docs/specs/`](./docs/specs)
+Ta jedność nie jest uproszczeniem na później, tylko założeniem architektury:
+nie ma „wybranego domku" ani autora zmiany, bo odpowiedź zawsze byłaby ta sama.
 
-## Uruchomienie lokalne
+## Stan
 
-Wymagane: [bun](https://bun.sh) i Docker.
+Gotowa domena **Kontakty** — fachowcy, do których dzwoni właściciel: lista
+z sortowaniem i wyszukiwaniem, dodawanie, edycja, usuwanie z „Cofnij",
+ostrzeżenie o powtórzonym numerze.
+
+Rezerwacje, Finanse i Zapytania są w nawigacji jako „Wkrótce". Architektura ma
+je przyjąć, nie zgadywać.
+
+## Jak to jest zbudowane
+
+TypeScript bez `any`, po obu stronach. **Effect** na serwerze — błędy siedzą
+w sygnaturze, a dokument OpenAPI powstaje z definicji API, nie obok niej.
+Z niego generują się typy klienta, więc rozjazd kontraktu psuje build zamiast
+produkcji. **React 19** i **TanStack** (Router, Query) na froncie, **Postgres**
+od pierwszego dnia — pod przyszłe Rezerwacje, których terminów nie da się
+uczciwie pilnować bez `EXCLUDE USING gist`.
+
+Testy uderzają w trzy szwy: repozytorium w prawdziwą bazę, ekran w router
+z zapytaniami, klient w kontrakt serwera.
+
+Runtime, package manager i test runner to **bun**.
+
+## Dokumentacja
+
+| Gdzie | Co |
+|---|---|
+| [`CONTEXT.md`](./CONTEXT.md) | słownik domenowy — co znaczy „kontakt", „specjalizacja" |
+| [`docs/DESIGN.md`](./docs/DESIGN.md) | architektura: warstwy, kontrakt, baza, błędy |
+| [`docs/adr/`](./docs/adr) | decyzje z uzasadnieniem |
+| [`docs/specs/`](./docs/specs) | specyfikacje domen |
+
+## Uruchomienie
+
+Potrzebne: [bun](https://bun.sh) i Docker.
 
 ```bash
-bun install
-cp .env.example .env
-bun run db:up        # Postgres 16 w kontenerze
-bun run dev          # serwer :3000, migracje idą na starcie
-# w osobnym terminalu:
-bun run dev:client   # klient :5173, proxy /api → :3000
+bun install && cp .env.example .env
+bun run db:up      # Postgres 16 w kontenerze
+bun run dev        # serwer :3000, migracje idą na starcie
+bun run dev:client # osobny terminal — klient :5173
 ```
 
-- `http://localhost:5173/kontakty` — ekran Kontakty
-- `GET http://localhost:3000/contacts` — komplet kontaktów
-- `http://localhost:3000/docs` — Swagger UI
-- `http://localhost:3000/docs/openapi.json` — dokument OpenAPI
+Ekran: `localhost:5173/kontakty`. Kontrakt: `localhost:3000/docs`.
 
-Typy klienta powstają z dokumentu OpenAPI: `bun run gen:api` podnosi serwer,
-pobiera kontrakt i zapisuje `apps/client/src/generated/api.d.ts`. Plik jest
-commitowany — po zmianie API trzeba go przegenerować.
-
-Konfiguracja przez zmienne środowiskowe, walidowana schematem na starcie —
-brak `DATABASE_URL` zatrzymuje serwer natychmiast.
-
-## Komendy
-
-| Komenda | Co robi |
-|---|---|
-| `bun run db:up` | podnosi Postgresa |
-| `bun run dev` | serwer z przeładowaniem |
-| `bun run dev:client` | klient Vite |
-| `bun run start` | serwer bez przeładowania |
-| `bun run gen:api` | regeneruje typy klienta z OpenAPI |
-| `bun run typecheck` | `tsc --noEmit` na serwerze i na kliencie |
-| `bun run lint` | ESLint, w tym granice modułów |
-| `bun run test` | pełny zestaw testów (wymaga działającego Postgresa) |
-| `bun run test:server` | szew 1 i 3 — repozytorium na prawdziwej bazie, kontrakty |
-| `bun run test:client` | sam szew 2 — ekran z routerem, zapytaniami i MSW |
-| `bun run build:client` | produkcyjny build klienta |
-| `bun run check:api` | pilnuje, że `api.d.ts` nadąża za OpenAPI |
-| `bun run check:bundle` | pilnuje, że runtime Effecta nie trafia do przeglądarki |
-
-Package manager, runtime i test runner to **bun**. Nigdy npm/pnpm/yarn.
-
-CI ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)) puszcza to samo na każdym
-PR-ze i pushu na `main`, z Postgresem jako usługą.
-
-## Dane
-
-Repo nie zawiera prawdziwych danych — kontakty w testach i w makietach
-`docs/DESIGN/` są zmyślone, a numery telefonów nie należą do nikogo znanego
-autorowi. Konfiguracja idzie przez `.env` (ignorowany); `.env.example` trzyma
-wyłącznie lokalne wartości deweloperskie.
+Repo nie zawiera prawdziwych danych — kontakty w testach i makietach są
+zmyślone. Konfiguracja idzie przez `.env`, ignorowany przez git.
