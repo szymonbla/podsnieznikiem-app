@@ -12,6 +12,8 @@ cp .env.example .env
 bun run db:up        # Postgres 16 w kontenerze
 bun install
 bun run dev          # serwer :3000, migracje idą na starcie
+# w osobnym terminalu:
+bun run db:seed      # 24 kontakty przykładowe (opcjonalnie, można powtarzać)
 bun run dev:client   # klient :5173, proxy /api → :3000
 ```
 
@@ -32,6 +34,7 @@ brak `DATABASE_URL` zatrzymuje serwer natychmiast.
 | Komenda | Co robi |
 |---|---|
 | `bun run db:up` | podnosi Postgresa |
+| `bun run db:seed` | wgrywa 24 kontakty przykładowe; ponowne uruchomienie nic nie dubluje |
 | `bun run dev` | serwer z przeładowaniem |
 | `bun run dev:client` | klient Vite |
 | `bun run gen:api` | regeneruje typy klienta z OpenAPI |

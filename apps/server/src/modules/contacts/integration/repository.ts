@@ -2,6 +2,7 @@ import { SqlClient, SqlSchema } from "@effect/sql"
 import { Effect, Schema } from "effect"
 
 import { Contact } from "../domain/models.js"
+import type { SampleContact } from "./seed-data.js"
 
 /**
  * Wiersz tabeli `contacts` — kształt brany z kontraktu, więc nowe pole
@@ -37,7 +38,33 @@ export class ContactsRepository extends Effect.Service<ContactsRepository>()(
         `
       })
 
-      return { findAll: () => findAll() } as const
+      const insertUnlessIdentical = (contact: SampleContact) =>
+        sql`
+          insert into contacts (name, role, phone)
+          select ${contact.name}, ${contact.role}, ${contact.phone}
+          where not exists (
+            select 1 from contacts
+            where name = ${contact.name}
+              and role = ${contact.role}
+              and phone = ${contact.phone}
+          )
+          returning id
+        `.pipe(Effect.map((rows) => rows.length))
+
+      /**
+       * Wstawia te kontakty, których identyczna trójka (nazwa, specjalizacja,
+       * numer) jeszcze w bazie nie leży, i zwraca liczbę dodanych. Sam numer
+       * nie rozstrzyga — nie jest unikalny (CONTEXT.md → Telefon). Całość
+       * w jednej transakcji, żeby zwrócona liczba opisywała stan bazy także
+       * wtedy, gdy któryś wiersz się nie uda.
+       */
+      const insertManyUnlessIdentical = (contacts: ReadonlyArray<SampleContact>) =>
+        Effect.forEach(contacts, insertUnlessIdentical, { concurrency: 1 }).pipe(
+          Effect.map((counts) => counts.reduce((total, count) => total + count, 0)),
+          sql.withTransaction
+        )
+
+      return { findAll: () => findAll(), insertManyUnlessIdentical } as const
     }),
     dependencies: []
   }

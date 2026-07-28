@@ -7,9 +7,9 @@ i wyszukiwanie.
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Osobna komenda (`db:seed`), **nie migracja** — migracje opisują schemat, nie treść
-- [ ] 24 kontakty z projektu, z polskimi znakami w nazwiskach i specjalizacjach
-- [ ] Zestaw zawiera co najmniej jedną osobę występującą dwa razy z tym samym numerem i różną specjalizacją — pod ostrzeżenie o duplikacie
-- [ ] Ponowne uruchomienie komendy nie tworzy zdublowanego zestawu
+- [x] Osobna komenda (`db:seed`), **nie migracja** — migracje opisują schemat, nie treść
+- [x] 24 kontakty z projektu, z polskimi znakami w nazwiskach i specjalizacjach
+- [x] Zestaw zawiera co najmniej jedną osobę występującą dwa razy z tym samym numerem i różną specjalizacją — pod ostrzeżenie o duplikacie
+- [x] Ponowne uruchomienie komendy nie tworzy zdublowanego zestawu
