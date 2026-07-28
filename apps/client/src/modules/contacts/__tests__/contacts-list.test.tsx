@@ -74,7 +74,8 @@ describe("numer telefonu", () => {
 
     renderApp("/kontakty")
 
-    await user.click(await screen.findByRole("button", { name: "Kopiuj numer 602 118 447" }))
+    await user.click(await screen.findByRole("button", { name: /Akcje kontaktu/ }))
+    await user.click(await screen.findByRole("menuitem", { name: "Kopiuj numer" }))
 
     expect(await navigator.clipboard.readText()).toBe("602 118 447")
     expect(await screen.findByText("Numer skopiowany do schowka")).toBeDefined()

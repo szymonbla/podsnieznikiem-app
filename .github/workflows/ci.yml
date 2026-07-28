@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # Bramki jakości z DESIGN.md §3 i §5 — reguły, które dotąd były ustaleniem
+  # w dokumencie, tu przestają zależeć od pamięci autora (ticket 11).
+  check:
+    runs-on: ubuntu-latest
+
+    services:
+      # Szew 1 uderza w prawdziwego Postgresa — bez niego testy serwera nie mają sensu.
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: podsnieznikiem
+          POSTGRES_PASSWORD: podsnieznikiem
+          POSTGRES_DB: podsnieznikiem
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U podsnieznikiem"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://podsnieznikiem:podsnieznikiem@localhost:5432/podsnieznikiem
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      # Typy bez `any` — ograniczenie przyjęte na wejściu (DESIGN.md §1).
+      - name: Typecheck
+        run: bun run typecheck
+
+      # Granice modułów i granica klient/serwer.
+      - name: Lint
+        run: bun run lint
+
+      # Nieaktualny wygenerowany kontrakt wywala build, zamiast po cichu
+      # kompilować klienta na wczorajszym API (DESIGN.md §5).
+      - name: Wygenerowane typy są aktualne
+        run: bun run check:api
+
+      - name: Testy szwu 1 i szwu 3 (serwer, kontrakty)
+        run: bun run test:server
+
+      - name: Testy szwu 2 i szwu 3 (klient)
+        run: bun run test:client
+
+      - name: Build klienta
+        run: bun run build:client
+
+      # Druga, niezależna kontrola granicy: runtime Effecta nie w przeglądarce.
+      - name: Runtime Effecta poza bundlem klienta
+        run: bun run check:bundle

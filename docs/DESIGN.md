@@ -97,12 +97,17 @@ apps/
           index.ts
           domain/
             models.ts          #   typy z generated/api.d.ts
-            schema.ts          #   schematy zod dla formularza
+            phone.ts           #   formatowanie i normalizacja numeru
+            sorting.ts         #   porównanie do sortowania
+            duplicates.ts      #   właściciel numeru na pobranej liście
+            view-state.ts      #   stan filtra i sortowania w URL-u
           configuration/
             constraints.ts     #   limity długości, wzorzec telefonu
+            schema.ts          #   schematy zod dla formularza
+            query-settings.ts  #   klucz cache'u, świeżość, okno na „Cofnij"
           integration/
             queries.ts         #   hooki react-query
-            format.ts          #   formatowanie i normalizacja numeru
+            search.ts          #   dopasowanie zapytania do kontaktu
           presentation/
             main.tsx           #   ekran
             copy.ts            #   wszystkie teksty
@@ -111,7 +116,9 @@ apps/
             delete-dialog.tsx
             row-menu.tsx
             empty-state.tsx
+            search-field.tsx
             use-contact-list.ts  # filtrowanie, sortowanie, stan z URL
+            use-contact-actions.ts # mutacje, okna, powiadomienia
           __tests__/
       generated/
         api.d.ts               # z OpenAPI, commitowany
@@ -128,14 +135,18 @@ docker-compose.yml             # tylko Postgres
   (`modules/contacts/integration/...`) blokowany przez ESLint.
 - Warstwy wewnątrz modułu idą w jedną stronę:
   `domain` ← `configuration` ← `integration` ← `presentation`. `domain` nie
-  importuje niczego z pozostałych.
+  importuje niczego z pozostałych. Stąd dwa umiejscowienia, które mogą zaskoczyć:
+  normalizacja numeru siedzi w `domain` (sięga po nią schemat formularza),
+  a sam schemat zoda w `configuration` (sięga po limity długości).
 - Teksty widoczne dla użytkownika żyją w `copy.ts`, nie w JSX.
 - `core/` to powłoka aplikacji — nie wolno w nim trzymać logiki domenowej.
 
 **Granica klient/serwer** jest fizyczna — przebiega po `apps/`. Klient nigdy nie
 importuje z `apps/server`. Z `packages/contracts` wolno mu brać wyłącznie typy
 (`import type`), nigdy wartości — inaczej runtime Effecta ląduje w przeglądarce.
-Pilnuje tego reguła ESLint `no-restricted-imports` i weryfikacja rozmiaru bundla.
+Pilnują tego trzy niezależne bramki, bo lint da się wyciszyć komentarzem: reguła
+ESLint `no-restricted-imports`, test `boundaries.test.ts` na źródłach i kontrola
+zbudowanego bundla (`scripts/check-bundle.ts`).
 
 ---
 
@@ -213,7 +224,7 @@ Zod **nie uczestniczy** w tym łańcuchu. Opisuje wyłącznie formularz — pola
 komunikaty, moment walidacji. Powiązanie z kontraktem trzyma asercja typowa:
 
 ```ts
-// apps/client/src/modules/contacts/domain/schema.ts
+// apps/client/src/modules/contacts/configuration/schema.ts
 type _EnsureContract = Expect<
   Equal<z.output<typeof createContactSchema>, CreateContactBody>
 >

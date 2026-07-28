@@ -2,9 +2,13 @@
  * Numer żyje w bazie jako dziewięć gołych cyfr (DESIGN.md §6). Czytelny format
  * i prefiks kierunkowy powstają dopiero tutaj, po drodze na ekran — żeby
  * istniała jedna reprezentacja do porównywania i jedna do pokazywania.
+ *
+ * Mieszka w `domain`, nie w `integration`, bo sięga po to schemat formularza,
+ * a `domain` nie wolno importować z warstw wyższych.
  */
 
-const PHONE_DIGITS = 9
+/** Numer trafia do bazy jako dokładnie tyle cyfr, bez prefiksu i formatowania. */
+export const PHONE_DIGITS = 9
 
 /** Prefiks kierunkowy w trzech zapisach, jakie ludzie faktycznie wklejają. */
 const DIALING_PREFIX = /^(?:\+48|0048|48)/

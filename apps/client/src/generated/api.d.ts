@@ -14,11 +14,30 @@ export interface paths {
         /** @description Zwraca wszystkie kontakty, uporządkowane po nazwie */
         get: operations["contacts.list"];
         put?: never;
-        post?: never;
+        /** @description Tworzy kontakt; wymaga kompletu trzech pól */
+        post: operations["contacts.create"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/contacts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Usuwa kontakt trwale */
+        delete: operations["contacts.remove"];
+        options?: never;
+        head?: never;
+        /** @description Aktualizuje wskazane pola kontaktu */
+        patch: operations["contacts.update"];
         trace?: never;
     };
 }
@@ -50,6 +69,15 @@ export interface components {
             /** @enum {string} */
             _tag: "symbol";
             key: string;
+        };
+        ContactNotFound: {
+            /**
+             * Format: uuid
+             * @description a Universally Unique Identifier
+             */
+            id: string;
+            /** @enum {string} */
+            _tag: "ContactNotFound";
         };
     };
     responses: never;
@@ -105,6 +133,177 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HttpApiDecodeError"];
+                };
+            };
+        };
+    };
+    "contacts.create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description a string that will be trimmed */
+                    name: string;
+                    /** @description a string that will be trimmed */
+                    role: string;
+                    /** @description a string matching the pattern ^\d{9}$ */
+                    phone: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * Format: uuid
+                         * @description a Universally Unique Identifier
+                         */
+                        id: string;
+                        /**
+                         * maxLength(100)
+                         * @description a string at most 100 character(s) long
+                         */
+                        name: string;
+                        /**
+                         * maxLength(60)
+                         * @description a string at most 60 character(s) long
+                         */
+                        role: string;
+                        /** @description a string matching the pattern ^\d{9}$ */
+                        phone: string;
+                        createdAt: components["schemas"]["DateTimeUtc"];
+                        updatedAt: components["schemas"]["DateTimeUtc"];
+                    };
+                };
+            };
+            /** @description The request did not match the expected schema */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HttpApiDecodeError"];
+                };
+            };
+        };
+    };
+    "contacts.remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description a Universally Unique Identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request did not match the expected schema */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HttpApiDecodeError"];
+                };
+            };
+            /** @description ContactNotFound */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactNotFound"];
+                };
+            };
+        };
+    };
+    "contacts.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description a Universally Unique Identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description a string that will be trimmed */
+                    name?: string;
+                    /** @description a string that will be trimmed */
+                    role?: string;
+                    /** @description a string matching the pattern ^\d{9}$ */
+                    phone?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * Format: uuid
+                         * @description a Universally Unique Identifier
+                         */
+                        id: string;
+                        /**
+                         * maxLength(100)
+                         * @description a string at most 100 character(s) long
+                         */
+                        name: string;
+                        /**
+                         * maxLength(60)
+                         * @description a string at most 60 character(s) long
+                         */
+                        role: string;
+                        /** @description a string matching the pattern ^\d{9}$ */
+                        phone: string;
+                        createdAt: components["schemas"]["DateTimeUtc"];
+                        updatedAt: components["schemas"]["DateTimeUtc"];
+                    };
+                };
+            };
+            /** @description The request did not match the expected schema */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HttpApiDecodeError"];
+                };
+            };
+            /** @description ContactNotFound */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactNotFound"];
                 };
             };
         };

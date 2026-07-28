@@ -18,15 +18,73 @@ export const contactsCopy = {
   },
   row: {
     call: "Zadzwoń pod numer ",
-    copy: "Kopiuj numer ",
     copied: "Numer skopiowany do schowka",
-    copyFailed: "Nie udało się skopiować numeru"
+    copyFailed: "Nie udało się skopiować numeru",
+    /** Menu nazwane nazwiskiem — na liście jest ich tyle, ile wierszy. */
+    menu: (name: string) => `Akcje kontaktu ${name}`,
+    /** Pozycja menu — bez numeru, bo ten stoi w tym samym wierszu. */
+    copyItem: "Kopiuj numer",
+    edit: "Edytuj",
+    remove: "Usuń"
   },
+
+  add: "Dodaj kontakt",
+
+  form: {
+    create: {
+      title: "Nowy kontakt",
+      description: "Imię i nazwisko, fach i numer — tyle wystarczy.",
+      submit: "Dodaj kontakt",
+      /** Potwierdzenie z nazwiskiem, żeby nie było wątpliwości, co się zapisało. */
+      success: (name: string) => `Dodano ${name}`,
+      failure: "Nie udało się dodać kontaktu"
+    },
+    edit: {
+      title: "Edycja kontaktu",
+      description: "Popraw to, co się zmieniło — reszta zostaje bez zmian.",
+      submit: "Zapisz zmiany",
+      success: (name: string) => `Zapisano zmiany — ${name}`,
+      failure: "Nie udało się zapisać zmian"
+    },
+    fields: {
+      name: "Imię i nazwisko",
+      role: "Specjalizacja",
+      phone: "Telefon"
+    },
+    placeholders: {
+      name: "Grzegorz Sobczak",
+      role: "Złota rączka",
+      phone: "602 118 447"
+    },
+    cancel: "Anuluj",
+    /**
+     * Ostrzeżenie, nie błąd — zapis przechodzi. Osoba wykonująca dwa fachy to
+     * dwa kontakty dzielące numer (ticket 08).
+     */
+    duplicate: (name: string, role: string) => `Ten numer masz już jako ${name} — ${role}`
+  },
+
+  remove: {
+    title: "Usunąć kontakt?",
+    description: (name: string, role: string) =>
+      `${name} — ${role} zniknie z listy. Usunięcie jest trwałe, ale przez chwilę da się je cofnąć.`,
+    confirm: "Usuń kontakt",
+    cancel: "Zostaw",
+    success: (name: string) => `Usunięto ${name}`,
+    failure: "Nie udało się usunąć kontaktu",
+    undo: "Cofnij",
+    restored: (name: string) => `Przywrócono ${name}`,
+    /** Nie sugeruje, że kontakt wrócił — bo nie wrócił (ticket 10). */
+    restoreFailed: "Nie udało się przywrócić kontaktu"
+  },
+
+  /** Lista jest nieaktualna, więc zostanie unieważniona — właściciel ma o tym wiedzieć. */
+  notFound: "Tego kontaktu już nie ma — odświeżam listę",
   loading: "Wczytuję kontakty…",
   emptyList: {
     title: "Nie masz jeszcze żadnego kontaktu",
-    // Przycisk prowadzący do dodania dokłada ticket 07 — `EmptyState` ma na niego `action`.
-    description: "Dodaj pierwszy numer, żeby wiedzieć, do kogo dzwonić przy awarii."
+    description: "Dodaj pierwszy numer, żeby wiedzieć, do kogo dzwonić przy awarii.",
+    action: "Dodaj pierwszy kontakt"
   },
   emptySearch: {
     /** Zapytanie przytoczone, żeby właściciel zobaczył, czego faktycznie szukał. */

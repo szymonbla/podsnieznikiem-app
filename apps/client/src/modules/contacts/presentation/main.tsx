@@ -1,12 +1,15 @@
+import { buttonClass } from "../../../libs/ui/button"
 import { useContacts } from "../integration/queries"
+import { ContactFormDialog } from "./contact-form-dialog"
 import { ContactsTable } from "./contacts-table"
 import { contactsCopy, contactsCount, contactsMatchCount } from "./copy"
+import { DeleteDialog } from "./delete-dialog"
 import { EmptyState } from "./empty-state"
 import { SearchField } from "./search-field"
+import { useContactActions } from "./use-contact-actions"
 import { useContactList } from "./use-contact-list"
 
-const actionClass =
-  "rounded-[var(--radius)] bg-primary px-[18px] py-[10px] font-medium text-primary-foreground hover:bg-foreground-strong"
+const actionClass = buttonClass()
 
 /**
  * Ekran Kontaktów. Pusty ekran nigdy nie jest dwuznaczny — ładowanie, brak
@@ -15,9 +18,10 @@ const actionClass =
  */
 export const ContactsScreen = () => {
   const { data, isPending, isError, refetch } = useContacts()
-  const { search, rows, total, isFiltered, setQuery, clearQuery, toggleSort } = useContactList(
-    data ?? []
-  )
+  const contacts = data ?? []
+  const { search, rows, total, isFiltered, setQuery, clearQuery, toggleSort } =
+    useContactList(contacts)
+  const actions = useContactActions()
 
   /*
    * Stan ekranu nazwany raz, zamiast rozstrzygany po kolei w drzewie JSX —
@@ -52,10 +56,21 @@ export const ContactsScreen = () => {
           ) : null}
         </div>
 
-        {/* Bez ani jednego kontaktu nie ma czego filtrować — pole tylko zaśmiecałoby ekran. */}
-        {hasRows ? (
-          <SearchField value={search.q} onChange={setQuery} onClear={clearQuery} />
-        ) : null}
+        <div className="flex items-center gap-3">
+          {/* Bez ani jednego kontaktu nie ma czego filtrować — pole tylko zaśmiecałoby ekran. */}
+          {hasRows ? (
+            <SearchField value={search.q} onChange={setQuery} onClear={clearQuery} />
+          ) : null}
+          {/*
+            Dodawanie milczy w trakcie wczytywania i przy błędzie: dopisywanie
+            do listy, której nie znamy, kończyłoby się duplikatem.
+          */}
+          {view !== "loading" && view !== "error" ? (
+            <button type="button" onClick={(event) => actions.openCreate(event.currentTarget)} className={actionClass}>
+              {contactsCopy.add}
+            </button>
+          ) : null}
+        </div>
       </header>
 
       {view === "loading" ? (
@@ -81,6 +96,11 @@ export const ContactsScreen = () => {
         <EmptyState
           title={contactsCopy.emptyList.title}
           description={contactsCopy.emptyList.description}
+          action={
+            <button type="button" onClick={(event) => actions.openCreate(event.currentTarget)} className={actionClass}>
+              {contactsCopy.emptyList.action}
+            </button>
+          }
         />
       ) : null}
 
@@ -103,9 +123,30 @@ export const ContactsScreen = () => {
             sort={search.sort}
             direction={search.dir}
             onSort={toggleSort}
+            onEdit={actions.openEdit}
+            onRemove={actions.askRemove}
           />
         </div>
       ) : null}
+
+      <ContactFormDialog
+        open={actions.isFormOpen}
+        onOpenChange={actions.setFormOpen}
+        {...(actions.edited === undefined ? {} : { contact: actions.edited })}
+        contacts={contacts}
+        onSubmit={actions.submit}
+        pending={actions.isSaving}
+        onCloseAutoFocus={actions.restoreFocus}
+      />
+
+      <DeleteDialog
+        contact={actions.removed}
+        onOpenChange={(open) => {
+          if (!open) actions.cancelRemove()
+        }}
+        onConfirm={actions.confirmRemove}
+        onCloseAutoFocus={actions.restoreFocus}
+      />
     </main>
   )
 }

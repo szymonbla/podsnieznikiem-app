@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
 
-import { formatPhone, normalizePhone, phoneHref } from "../integration/format"
+import { formatPhone, normalizePhone, phoneHref } from "../domain/phone"
 
 describe("czytelny zapis numeru", () => {
   test("dzieli dziewięć cyfr na trójki, żeby dało się je przepisać bez pomyłki", () => {

@@ -42,9 +42,13 @@ const moduleReferences = (text: string): ReadonlyArray<ModuleReference> => [
 ]
 
 /**
- * Granica klient/serwer jest fizyczna (DESIGN.md §3). Ten test pilnuje jej
- * na źródłach, bo lintera w repo jeszcze nie ma, a złamanie reguły wciąga
- * runtime Effecta do bundla przeglądarki — czego kompilator nie zgłosi.
+ * Granica klient/serwer jest fizyczna (DESIGN.md §3). Pilnują jej trzy rzeczy
+ * naraz, bo złamanie reguły wciąga runtime Effecta do bundla przeglądarki,
+ * a kompilator tego nie zgłosi: reguła ESLinta na źródłach, ten test i kontrola
+ * zbudowanego bundla (`scripts/check-bundle.ts`).
+ *
+ * Test zostaje mimo lintera, bo lint da się wyciszyć komentarzem w miejscu
+ * złamania reguły — a tego testu nie.
  */
 describe("granica klient/serwer", () => {
   test("klient nie importuje niczego z aplikacji serwera", async () => {

@@ -1,5 +1,5 @@
 import type { Contact } from "../domain/models"
-import { normalizePhone } from "./format"
+import { normalizePhone } from "../domain/phone"
 
 /** Zapytanie złożone z samych cyfr, odstępów i myślników — czyli numer, nie tekst. */
 const looksLikeNumber = (query: string): boolean => /^[\d\s\-()+.]+$/.test(query)

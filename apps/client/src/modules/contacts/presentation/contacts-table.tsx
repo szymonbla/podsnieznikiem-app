@@ -2,14 +2,18 @@ import { toast } from "sonner"
 
 import type { Contact } from "../domain/models"
 import { SORT_COLUMNS, type SortColumn, type SortDirection } from "../domain/sorting"
-import { formatPhone, phoneHref } from "../integration/format"
+import { formatPhone, phoneHref } from "../domain/phone"
+import { isDraft } from "../integration/queries"
 import { contactsCopy } from "./copy"
+import { RowMenu } from "./row-menu"
 
 interface ContactsTableProps {
   readonly contacts: ReadonlyArray<Contact>
   readonly sort: SortColumn
   readonly direction: SortDirection
   readonly onSort: (column: SortColumn) => void
+  readonly onEdit: (contact: Contact, opener: HTMLElement | null) => void
+  readonly onRemove: (contact: Contact, opener: HTMLElement | null) => void
 }
 
 /**
@@ -48,7 +52,14 @@ const copyPhone = async (phone: string) => {
  * Semantyka `table` daje rolę wiersza i nagłówka za darmo; testy szwu 2
  * opierają się właśnie na niej.
  */
-export const ContactsTable = ({ contacts, sort, direction, onSort }: ContactsTableProps) => (
+export const ContactsTable = ({
+  contacts,
+  sort,
+  direction,
+  onSort,
+  onEdit,
+  onRemove
+}: ContactsTableProps) => (
   <table className="w-full table-fixed border-collapse text-left">
     <thead>
       <tr className="bg-muted">
@@ -104,14 +115,19 @@ export const ContactsTable = ({ contacts, sort, direction, onSort }: ContactsTab
               </a>
             </td>
             <td className="px-2 py-3">
-              <button
-                type="button"
-                onClick={() => void copyPhone(contact.phone)}
-                aria-label={`${contactsCopy.row.copy}${readable}`}
-                className="rounded-[var(--radius)] px-2 py-1 text-muted-foreground hover:bg-muted-hover"
-              >
-                <span aria-hidden="true">⧉</span>
-              </button>
+              {/*
+                Wpis czekający jeszcze na odpowiedź serwera nie ma tożsamości,
+                pod którą dałoby się go edytować ani usunąć — menu pojawia się
+                razem z nią.
+              */}
+              {isDraft(contact) ? null : (
+              <RowMenu
+                contact={contact}
+                onCopy={() => void copyPhone(contact.phone)}
+                onEdit={(opener) => onEdit(contact, opener)}
+                onRemove={(opener) => onRemove(contact, opener)}
+              />
+              )}
             </td>
           </tr>
         )

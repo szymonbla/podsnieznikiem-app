@@ -11,11 +11,11 @@ kontrakcie. Dlatego to osobny, jawny ticket.
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** ready-for-human
 
-- [ ] Lint blokuje import w głąb cudzego modułu — wejściem jest wyłącznie barrel
-- [ ] Lint pilnuje kierunku warstw wewnątrz modułu; warstwa domenowa nie importuje niczego
-- [ ] Lint blokuje import z aplikacji serwera do klienta i import **wartości** (nie typów) z paczki kontraktów do klienta
-- [ ] CI regeneruje typy z OpenAPI i wywala build, gdy commitowany plik jest nieaktualny
-- [ ] CI: typecheck bez `any`, lint i wszystkie trzy szwy testowe
-- [ ] Weryfikacja, że runtime Effecta nie trafia do bundla klienta
+- [x] Lint blokuje import w głąb cudzego modułu — wejściem jest wyłącznie barrel
+- [x] Lint pilnuje kierunku warstw wewnątrz modułu; warstwa domenowa nie importuje niczego
+- [x] Lint blokuje import z aplikacji serwera do klienta i import **wartości** (nie typów) z paczki kontraktów do klienta
+- [x] CI regeneruje typy z OpenAPI i wywala build, gdy commitowany plik jest nieaktualny
+- [x] CI: typecheck bez `any`, lint i wszystkie trzy szwy testowe
+- [x] Weryfikacja, że runtime Effecta nie trafia do bundla klienta

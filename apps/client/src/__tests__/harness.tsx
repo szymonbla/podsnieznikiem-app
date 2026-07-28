@@ -11,7 +11,7 @@ import { createAppRouter } from "../core/router"
  * temu klient HTTP, react-query i komponenty są w teście prawdziwe, a jedyną
  * granicą jest to, co naprawdę wychodzi na sieć.
  */
-export { apiHandlers, mockApi } from "./msw"
+export { apiHandlers, contactsApi, mockApi } from "./msw"
 export { aContact } from "./contact-builder"
 
 /**

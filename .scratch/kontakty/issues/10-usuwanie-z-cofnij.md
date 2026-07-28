@@ -9,13 +9,13 @@ odwrócenie operacji, tylko powtórne utworzenie
 
 **Blocked by:** 09
 
-**Status:** ready-for-agent
+**Status:** ready-for-human
 
-- [ ] Osobne okno ostrzegawcze z imieniem, nazwiskiem i specjalizacją usuwanego kontaktu
-- [ ] Usunięcie leci natychmiast i jest trwałe — bez miękkiego i bez odroczonego usuwania
-- [ ] Powiadomienie z akcją „Cofnij", okno na tyle długie, żeby zdążyć zareagować, i na tyle krótkie, żeby nie zawadzało
-- [ ] „Cofnij" tworzy kontakt na nowo z zapamiętanych danych — wraca z nowym identyfikatorem
-- [ ] Potwierdzenie przywrócenia; czytelny błąd, jeśli przywrócenie się nie uda — bez sugerowania, że kontakt wrócił
-- [ ] Nieodnaleziony kontakt: komunikat i unieważnienie listy
-- [ ] Testy szwu 1: trwałość usunięcia, usunięcie nieistniejącego kontaktu, odtworzenie kontaktu po usunięciu **z nowym identyfikatorem**
-- [ ] Testy szwu 2: usunięcie z odzwierciedleniem na liście, cofnięcie usunięcia, potwierdzenia
+- [x] Osobne okno ostrzegawcze z imieniem, nazwiskiem i specjalizacją usuwanego kontaktu
+- [x] Usunięcie leci natychmiast i jest trwałe — bez miękkiego i bez odroczonego usuwania
+- [x] Powiadomienie z akcją „Cofnij", okno na tyle długie, żeby zdążyć zareagować, i na tyle krótkie, żeby nie zawadzało
+- [x] „Cofnij" tworzy kontakt na nowo z zapamiętanych danych — wraca z nowym identyfikatorem
+- [x] Potwierdzenie przywrócenia; czytelny błąd, jeśli przywrócenie się nie uda — bez sugerowania, że kontakt wrócił
+- [x] Nieodnaleziony kontakt: komunikat i unieważnienie listy
+- [x] Testy szwu 1: trwałość usunięcia, usunięcie nieistniejącego kontaktu, odtworzenie kontaktu po usunięciu **z nowym identyfikatorem**
+- [x] Testy szwu 2: usunięcie z odzwierciedleniem na liście, cofnięcie usunięcia, potwierdzenia
