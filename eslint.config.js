@@ -103,6 +103,8 @@ export default tseslint.config(
     ignores: [
       "**/dist/**",
       "**/node_modules/**",
+      /* Kopie repo tworzone przez agentów — ten sam kod, lintowany u siebie. */
+      ".claude/worktrees/**",
       "apps/client/src/generated/**",
       "docs/DESIGN/**"
     ]
