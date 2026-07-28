@@ -1,5 +1,6 @@
 import { useId, useRef, useState } from "react"
 
+import { useEscapeLayer } from "../../../libs/ui/escape-layers"
 import { Input } from "../../../libs/ui/input"
 import { Label } from "../../../libs/ui/label"
 
@@ -60,6 +61,13 @@ export const RoleCombobox = ({
     setActive(-1)
   }
 
+  /*
+   * While the list is up it is the innermost thing `Escape` can close, so it
+   * says so. The dialog around us asks the innermost layer first — which is why
+   * the first `Escape` shuts this list and only the second the dialog.
+   */
+  useEscapeLayer(open, close)
+
   const pick = (role: string) => {
     onChange(role)
     close()
@@ -85,10 +93,7 @@ export const RoleCombobox = ({
       event.preventDefault()
       const match = matches[active]
       if (match !== undefined) pick(match)
-      return
     }
-
-    if (event.key === "Escape" && open) close()
   }
 
   return (
@@ -104,14 +109,6 @@ export const RoleCombobox = ({
       {/* Anchors the list: it is positioned against the field, not the panel. */}
       <div
         className="relative w-full"
-        /*
-         * Marks an open list for the dialog around us. Radix takes `Escape` on
-         * the document in the capture phase, so it decides before any handler
-         * here runs — `stopPropagation` cannot reach it. The dialog reads this
-         * attribute in `onEscapeKeyDown` and stands down while the list is up,
-         * so the first `Escape` closes the list and the second the dialog.
-         */
-        {...(open ? { "data-suggestions-open": "" } : {})}
         onBlur={(event) => {
           if (event.currentTarget.contains(event.relatedTarget)) return
           close()

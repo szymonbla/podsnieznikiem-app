@@ -23,20 +23,20 @@ stanu; ekran czyta go i wybiera gałąź.
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] `opener` nie występuje w interfejsie menu wiersza, tabeli, ekranu ani
+- [x] `opener` nie występuje w interfejsie menu wiersza, tabeli, ekranu ani
       modułu akcji; przywracanie focusu jest wewnątrz modułu dialogu
-- [ ] Testy „Escape zamyka dialog i wraca focus na przycisk" oraz „focus wraca na
+- [x] Testy „Escape zamyka dialog i wraca focus na przycisk" oraz „focus wraca na
       menu wiersza po edycji" przechodzą bez zmian w ich treści
-- [ ] Atrybut sygnalizujący otwartą listę podpowiedzi i obsługa `Escape` w
+- [x] Atrybut sygnalizujący otwartą listę podpowiedzi i obsługa `Escape` w
       dialogu formularza znikają; warstwy rejestrują się jawnie
-- [ ] Test „Escape zamyka najpierw listę, dialog zostaje otwarty" przechodzi
-- [ ] Moduł listy zwraca jeden dyskryminant stanu ekranu; ekran nie wylicza
+- [x] Test „Escape zamyka najpierw listę, dialog zostaje otwarty" przechodzi
+- [x] Moduł listy zwraca jeden dyskryminant stanu ekranu; ekran nie wylicza
       kolejności sprawdzeń ani flag pochodnych
-- [ ] Nowy test kolejności stanów (błąd > pustka > brak dopasowań) nie renderuje
+- [x] Nowy test kolejności stanów (błąd > pustka > brak dopasowań) nie renderuje
       ekranu
-- [ ] Ciało ekranu to układ i teksty — bez reguł stanu
+- [x] Ciało ekranu to układ i teksty — bez reguł stanu
 
 **Uwaga:** ticket łączy trzy pogłębienia (kandydaci 1, 2 i 4 z przeglądu
 architektury) na życzenie. Jeśli w trakcie okaże się za obszerny na jedno

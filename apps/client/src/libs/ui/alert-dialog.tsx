@@ -5,6 +5,7 @@ import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 
 import { cn } from "@/libs/ui/utils"
 import { Button } from "@/libs/ui/button"
+import { returnFocusToOpener } from "@/libs/ui/focus-return"
 
 function AlertDialog({
   ...props
@@ -47,6 +48,7 @@ function AlertDialogOverlay({
 function AlertDialogContent({
   className,
   size = "default",
+  onCloseAutoFocus,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
   size?: "default" | "sm"
@@ -66,6 +68,10 @@ function AlertDialogContent({
             "group/alert-dialog-content pointer-events-auto relative m-auto grid w-full gap-2 rounded-surface border-0 bg-background p-6 shadow-modal duration-200 data-[size=sm]:max-w-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[size=default]:sm:max-w-[420px]",
             className
           )}
+          onCloseAutoFocus={(event) => {
+            onCloseAutoFocus?.(event)
+            if (!event.defaultPrevented) returnFocusToOpener(event)
+          }}
           {...props}
         />
       </div>

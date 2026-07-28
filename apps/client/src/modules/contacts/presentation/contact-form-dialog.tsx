@@ -3,6 +3,7 @@ import { useEffect, useId, type ReactNode } from "react"
 import { Controller, useForm, type UseFormRegisterReturn } from "react-hook-form"
 
 import { Button } from "../../../libs/ui/button"
+import { EscapeLayerProvider, useEscapeLayers } from "../../../libs/ui/escape-layers"
 import {
   Dialog,
   DialogClose,
@@ -42,7 +43,6 @@ interface ContactFormDialogProps {
     values: ContactFormOutput
   ) => Promise<Readonly<Record<string, string>> | undefined>
   readonly pending: boolean
-  readonly onCloseAutoFocus: () => void
 }
 
 const EMPTY: ContactFormValues = { name: "", role: "", phone: "" }
@@ -116,7 +116,7 @@ const Field = ({
  * would share everything but three strings.
  *
  * `Enter` saves (a plain `<form>`), `Escape` closes, and the focus trap and
- * restore come from the dialog primitive.
+ * the return of focus come from the dialog primitive.
  */
 export const ContactFormDialog = ({
   open,
@@ -124,11 +124,13 @@ export const ContactFormDialog = ({
   contact,
   contacts,
   onSubmit,
-  pending,
-  onCloseAutoFocus
+  pending
 }: ContactFormDialogProps) => {
   const mode = contact === undefined ? "create" : "edit"
   const copy = contactsCopy.form[mode]
+
+  /* Content that `Escape` closes before the dialog — today, the suggestion list. */
+  const escape = useEscapeLayers()
 
   const {
     register,
@@ -167,94 +169,87 @@ export const ContactFormDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         aria-describedby="contact-form-description"
-        /* An open suggestion list swallows the first `Escape` — see the note
-           in `role-combobox.tsx`. */
+        /* `Escape` peels one layer at a time: while something registered inside
+           is up, that is what closes and the dialog stays. */
         onEscapeKeyDown={(event) => {
-          if (
-            event.target instanceof Element &&
-            event.target.closest("[data-suggestions-open]") !== null
-          ) {
-            event.preventDefault()
-          }
-        }}
-        onCloseAutoFocus={(event) => {
-          event.preventDefault()
-          onCloseAutoFocus()
+          if (escape.dismissTop()) event.preventDefault()
         }}
       >
-        <DialogHeader>
-          <DialogTitle>{copy.title}</DialogTitle>
-          <DialogDescription id="contact-form-description">{copy.description}</DialogDescription>
-        </DialogHeader>
+        <EscapeLayerProvider value={escape.stack}>
+          <DialogHeader>
+            <DialogTitle>{copy.title}</DialogTitle>
+            <DialogDescription id="contact-form-description">{copy.description}</DialogDescription>
+          </DialogHeader>
 
-        <form
-          noValidate
-          onSubmit={(event) => {
-            void handleSubmit(async (values) => {
-              const serverErrors = await onSubmit(values)
-              for (const [field, message] of Object.entries(serverErrors ?? {})) {
-                if (isContactField(field)) setError(field, { message })
+          <form
+            noValidate
+            onSubmit={(event) => {
+              void handleSubmit(async (values) => {
+                const serverErrors = await onSubmit(values)
+                for (const [field, message] of Object.entries(serverErrors ?? {})) {
+                  if (isContactField(field)) setError(field, { message })
+                }
+              })(event)
+            }}
+            className="flex flex-col gap-3"
+          >
+            <Field
+              label={contactsCopy.form.fields.name}
+              placeholder={contactsCopy.form.placeholders.name}
+              registration={register("name")}
+              error={errors.name?.message}
+            />
+
+            <Controller
+              control={control}
+              name="role"
+              render={({ field }) => (
+                <RoleCombobox
+                  label={contactsCopy.form.fields.role}
+                  placeholder={contactsCopy.form.placeholders.role}
+                  suggestions={contactsCopy.form.roleSuggestions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  error={errors.role?.message}
+                />
+              )}
+            />
+
+            <Field
+              label={contactsCopy.form.fields.phone}
+              placeholder={contactsCopy.form.placeholders.phone}
+              registration={register("phone")}
+              error={errors.phone?.message}
+              inputMode="tel"
+              note={
+                /*
+                  `status`, not `alert` — this is information to weigh, not a
+                  reason to stop. The save goes through regardless (ticket 08).
+                */
+                duplicate === undefined ? null : (
+                  <span
+                    role="status"
+                    className="w-full rounded-[var(--radius)] bg-destructive-subtle px-3 py-2 text-2xs font-medium text-foreground"
+                  >
+                    {contactsCopy.form.duplicate(duplicate.name, duplicate.role)}
+                  </span>
+                )
               }
-            })(event)
-          }}
-          className="flex flex-col gap-3"
-        >
-          <Field
-            label={contactsCopy.form.fields.name}
-            placeholder={contactsCopy.form.placeholders.name}
-            registration={register("name")}
-            error={errors.name?.message}
-          />
+            />
 
-          <Controller
-            control={control}
-            name="role"
-            render={({ field }) => (
-              <RoleCombobox
-                label={contactsCopy.form.fields.role}
-                placeholder={contactsCopy.form.placeholders.role}
-                suggestions={contactsCopy.form.roleSuggestions}
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.role?.message}
-              />
-            )}
-          />
-
-          <Field
-            label={contactsCopy.form.fields.phone}
-            placeholder={contactsCopy.form.placeholders.phone}
-            registration={register("phone")}
-            error={errors.phone?.message}
-            inputMode="tel"
-            note={
-              /*
-                `status`, not `alert` — this is information to weigh, not a
-                reason to stop. The save goes through regardless (ticket 08).
-              */
-              duplicate === undefined ? null : (
-                <span
-                  role="status"
-                  className="w-full rounded-[var(--radius)] bg-destructive-subtle px-3 py-2 text-2xs font-medium text-foreground"
-                >
-                  {contactsCopy.form.duplicate(duplicate.name, duplicate.role)}
-                </span>
-              )
-            }
-          />
-
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="outline">
-                {contactsCopy.form.cancel}
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline">
+                  {contactsCopy.form.cancel}
+                </Button>
+              </DialogClose>
+              <Button type="submit" disabled={pending}>
+                {copy.submit}
               </Button>
-            </DialogClose>
-            <Button type="submit" disabled={pending}>
-              {copy.submit}
-            </Button>
-          </DialogFooter>
-        </form>
+            </DialogFooter>
+          </form>
+        </EscapeLayerProvider>
       </DialogContent>
     </Dialog>
   )

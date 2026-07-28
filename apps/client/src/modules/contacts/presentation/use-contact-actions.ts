@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 
 import type { ContactFormOutput } from "../configuration/schema"
@@ -14,12 +14,10 @@ interface ContactActions {
   readonly isFormOpen: boolean
   readonly removed: Contact | undefined
   readonly isSaving: boolean
-  readonly openCreate: (opener: HTMLElement | null) => void
-  readonly openEdit: (contact: Contact, opener: HTMLElement | null) => void
+  readonly openCreate: () => void
+  readonly openEdit: (contact: Contact) => void
   readonly setFormOpen: (open: boolean) => void
-  readonly askRemove: (contact: Contact, opener: HTMLElement | null) => void
-  /** Focus returns to wherever the dialog was opened from (spec 0001, story 64). */
-  readonly restoreFocus: () => void
+  readonly askRemove: (contact: Contact) => void
   readonly cancelRemove: () => void
   readonly confirmRemove: () => void
   readonly submit: (
@@ -43,7 +41,6 @@ export const useContactActions = (): ContactActions => {
   const [isFormOpen, setFormOpen] = useState(false)
   const [edited, setEdited] = useState<Contact | undefined>(undefined)
   const [removed, setRemoved] = useState<Contact | undefined>(undefined)
-  const opener = useRef<HTMLElement | null>(null)
 
   const create = useCreateContact()
   const update = useUpdateContact()
@@ -86,32 +83,17 @@ export const useContactActions = (): ContactActions => {
     removed,
     isSaving: create.isPending || update.isPending,
 
-    openCreate: (from) => {
-      opener.current = from
+    openCreate: () => {
       setEdited(undefined)
       setFormOpen(true)
     },
-    openEdit: (contact, from) => {
-      opener.current = from
+    openEdit: (contact) => {
       setEdited(contact)
       setFormOpen(true)
     },
     setFormOpen,
-    /*
-     * Focus is restored explicitly, because for a dialog opened from a menu
-     * item (rather than from its own trigger) the library has nothing to
-     * remember — the element focused at the moment of opening disappears along
-     * with the menu.
-     */
-    restoreFocus: () => {
-      const target = opener.current
-      if (target !== null && document.contains(target)) target.focus()
-    },
 
-    askRemove: (contact, from) => {
-      opener.current = from
-      setRemoved(contact)
-    },
+    askRemove: setRemoved,
     cancelRemove: () => setRemoved(undefined),
     confirmRemove: () => {
       const contact = removed

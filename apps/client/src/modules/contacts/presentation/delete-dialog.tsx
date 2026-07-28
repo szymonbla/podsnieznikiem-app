@@ -16,7 +16,6 @@ interface DeleteDialogProps {
   readonly contact: Contact | undefined
   readonly onOpenChange: (open: boolean) => void
   readonly onConfirm: () => void
-  readonly onCloseAutoFocus: () => void
 }
 
 /**
@@ -25,20 +24,10 @@ interface DeleteDialogProps {
  * confirmed, the deletion is immediate and permanent; the rescue is the undo
  * action in the notification (ADR-0003).
  */
-export const DeleteDialog = ({
-  contact,
-  onOpenChange,
-  onConfirm,
-  onCloseAutoFocus
-}: DeleteDialogProps) => (
+export const DeleteDialog = ({ contact, onOpenChange, onConfirm }: DeleteDialogProps) => (
   <AlertDialog open={contact !== undefined} onOpenChange={onOpenChange}>
     {contact !== undefined ? (
-      <AlertDialogContent
-        onCloseAutoFocus={(event) => {
-          event.preventDefault()
-          onCloseAutoFocus()
-        }}
-      >
+      <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{contactsCopy.remove.title}</AlertDialogTitle>
           <AlertDialogDescription>
