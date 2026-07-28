@@ -11,10 +11,10 @@ teksty w `copy.ts`, nie w JSX).
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `bun run gen:api` podnosi serwer, pobiera OpenAPI i zapisuje plik typów; plik jest commitowany
-- [ ] Klient rozmawia z API przez typowany wrapper na `fetch` opakowany w TanStack Query (`staleTime` 5 min)
-- [ ] Klient nie importuje niczego z aplikacji serwera; z paczki kontraktów bierze wyłącznie typy — runtime Effecta nie trafia do bundla
-- [ ] Trasa `/kontakty` w routerze; ekran renderuje tabelę z trzema kolumnami
-- [ ] Test szwu 2 renderuje ekran z routerem i warstwą zapytań, sieć podstawiona serwerem podszywającym się (nie atrapami modułów); asercje po roli i tekście
+- [x] `bun run gen:api` podnosi serwer, pobiera OpenAPI i zapisuje plik typów; plik jest commitowany
+- [x] Klient rozmawia z API przez typowany wrapper na `fetch` opakowany w TanStack Query (`staleTime` 5 min)
+- [x] Klient nie importuje niczego z aplikacji serwera; z paczki kontraktów bierze wyłącznie typy — runtime Effecta nie trafia do bundla
+- [x] Trasa `/kontakty` w routerze; ekran renderuje tabelę z trzema kolumnami
+- [x] Test szwu 2 renderuje ekran z routerem i warstwą zapytań, sieć podstawiona serwerem podszywającym się (nie atrapami modułów); asercje po roli i tekście

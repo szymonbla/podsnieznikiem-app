@@ -377,9 +377,12 @@ zapytaniem). Pierwszy prowadzi do dodania, drugi do zmiany filtra.
 ```bash
 docker compose up -d      # Postgres 16
 bun install
-bun run db:migrate        # migracje + dane przykładowe
-bun run dev               # serwer :3000, klient :5173 (proxy /api → :3000)
+bun run dev               # serwer :3000, migracje idą na starcie
+bun run dev:client        # klient :5173 (proxy /api → :3000)
 ```
+
+Serwer i klient startują osobnymi komendami — dwie aplikacje, dwa logi, żadnego
+orkiestratora procesów przy dwóch procesach.
 
 Dane przykładowe to 24 kontakty z dostarczonego HTML-a — realistyczny zestaw
 fachowców, wystarczający do sensownego testowania sortowania i wyszukiwania
