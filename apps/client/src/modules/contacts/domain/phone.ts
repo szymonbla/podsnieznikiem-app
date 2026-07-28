@@ -75,18 +75,3 @@ export const isCompletePhone = (phone: Phone): boolean => phone.length === PHONE
 
 /** Nothing was typed, or nothing that carries digits. */
 export const isEmptyPhone = (phone: Phone): boolean => phone.length === 0
-
-/*
- * Entrances for callers that hold raw text rather than a `Phone` — each parses
- * once and then reads. They exist so a caller never has to brand a string by
- * hand.
- */
-
-/** Raw text -> digits, for storing and comparing. */
-export const normalizePhone = (input: string): string => phoneDigits(parsePhone(input))
-
-/** Raw text -> readable form. */
-export const formatPhone = (input: string): string => phoneReadable(parsePhone(input))
-
-/** Raw text -> dial address. */
-export const phoneHref = (input: string): string => phoneDial(parsePhone(input))
