@@ -1,0 +1,165 @@
+@import "tailwindcss";
+@import "./fonts.css";
+
+/*
+ * Tokeny z dostarczonego projektu (DESIGN.md §4) wchodzą jako motyw Tailwinda
+ * v4. Nazwy są te, po które sięga shadcn/ui (`background`, `foreground`,
+ * `primary`, `muted`, `border`, `ring`, `destructive`, `--radius`), więc
+ * komponenty dziedziczą tę paletę zamiast domyślnej — bez nadpisywania klas
+ * w każdym miejscu użycia.
+ */
+@theme {
+  --color-foreground: #2d3142;
+  --color-foreground-strong: #1d2130;
+  --color-primary: #2e7c82;
+  --color-primary-foreground: #ffffff;
+  --color-primary-subtle: rgba(46, 124, 130, 0.12);
+  --color-background: #ffffff;
+  --color-muted: #f4f5f7;
+  --color-muted-hover: #f0f1f4;
+  --color-surface: #fcfcfd;
+  --color-surface-sunken: #fafbfc;
+  --color-destructive: #c4462a;
+  --color-destructive-foreground: #ffffff;
+  --color-destructive-subtle: #fdeee7;
+
+  /* Przezroczystości tekstu na białym — jedna skala, żeby odcienie się nie rozjeżdżały. */
+  --color-ink-heading: rgba(45, 49, 66, 0.7);
+  --color-muted-foreground: rgba(45, 49, 66, 0.55);
+  --color-ink-placeholder: rgba(45, 49, 66, 0.38);
+  --color-border: rgba(45, 49, 66, 0.16);
+  --color-separator: rgba(45, 49, 66, 0.09);
+  --color-ring: var(--color-primary);
+
+  /*
+   * Nazwy, których shadcn używa poza własną paletą podstawową. Bez nich
+   * `bg-card`, `border-input` czy `bg-accent` w dorzuconym komponencie
+   * rozwiązałyby się w nic — dziedziczenie palety musi być kompletne, nie
+   * deklaratywne.
+   */
+  --color-card: var(--color-background);
+  --color-card-foreground: var(--color-foreground);
+  --color-popover: var(--color-background);
+  --color-popover-foreground: var(--color-foreground);
+  --color-secondary: var(--color-muted);
+  --color-secondary-foreground: var(--color-foreground);
+  --color-accent: var(--color-muted-hover);
+  --color-accent-foreground: var(--color-foreground);
+  --color-input: var(--color-border);
+
+  --font-heading: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Nunito Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --text-2xs: 0.75rem; /* 12px — etykiety wersalikami */
+  --text-xs: 0.8125rem; /* 13px */
+  --text-sm: 0.875rem; /* 14px — domyślny rozmiar interfejsu */
+  --text-base: 0.9375rem; /* 15px */
+  --text-lg: 1.1875rem; /* 19px */
+
+  --radius: 0.5rem; /* 8px — pola i przyciski (shadcn liczy od tego) */
+  --radius-card: 0.75rem; /* 12px — karty i modale */
+  --radius-surface: 1rem; /* 16px — duże powierzchnie */
+  --radius-pill: 999px;
+
+  /* Siatka powłoki — sidebar 264 px, reszta na treść (DESIGN.md §4). */
+  --spacing-sidebar: 16.5rem;
+}
+
+/*
+ * Próg wąskiego ekranu z projektu (900 px) nie pokrywa się z żadnym domyślnym
+ * breakpointem Tailwinda, więc dostaje własny wariant `wide:`.
+ */
+@custom-variant wide (@media (width >= 900px));
+
+@layer base {
+  html {
+    font-size: 16px;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-muted);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  h1 {
+    letter-spacing: -0.03em;
+  }
+
+  /*
+   * Pierścień fokusu jest wymogiem, nie ozdobą (DESIGN.md §4) — nie usuwać.
+   * Ustawiony globalnie, żeby nowy komponent dostawał go z urzędu.
+   */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /*
+   * Etykieta wersalikami z projektu (DESIGN.md §4) — jeden przepis zamiast
+   * przepisywania trzech klas przy każdym nagłówku grupy.
+   */
+  .label-caps {
+    font-size: var(--text-2xs);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .animate-fade-up {
+    animation: fade-up 180ms ease-out;
+  }
+
+  .animate-pop-in {
+    animation: pop-in 140ms ease-out;
+  }
+}
+
+/*
+ * Systemowe ograniczenie ruchu wyłącza animacje wszędzie, także w komponentach
+ * shadcn, które przynoszą własne (DESIGN.md §4).
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,11 +1,7 @@
-import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test"
+import { describe, expect, test } from "bun:test"
 import { screen, within } from "@testing-library/react"
 
 import { aContact, apiHandlers, mockApi, renderApp } from "../../../__tests__/harness"
-
-beforeAll(() => mockApi.listen({ onUnhandledRequest: "error" }))
-afterEach(() => mockApi.resetHandlers())
-afterAll(() => mockApi.close())
 
 describe("lista kontaktów na ekranie", () => {
   test("pokazuje kontakty pobrane z API w tabeli", async () => {

@@ -1,8 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query"
 import { RouterProvider, createMemoryHistory } from "@tanstack/react-router"
 import { render } from "@testing-library/react"
-import { http, HttpResponse, type HttpHandler } from "msw"
-import { setupServer } from "msw/node"
 
 import { createQueryClient } from "../core/query"
 import { createAppRouter } from "../core/router"
@@ -13,16 +11,8 @@ import type { Contact } from "../modules/contacts"
  * podstawia serwer podszywający się pod API (MSW), nie atrapa modułu. Dzięki
  * temu klient HTTP, react-query i komponenty są w teście prawdziwe, a jedyną
  * granicą jest to, co naprawdę wychodzi na sieć.
- *
- * `*` w ścieżkach handlerów rozstrzyga adres bazowy — klient uderza pod
- * względne `/api`, a test nie musi znać originu, na którym stoi happy-dom.
  */
-export const mockApi = setupServer()
-
-export const apiHandlers = {
-  contacts: (contacts: ReadonlyArray<Contact>): HttpHandler =>
-    http.get("*/api/contacts", () => HttpResponse.json(contacts))
-}
+export { apiHandlers, mockApi } from "./msw"
 
 let sequence = 0
 

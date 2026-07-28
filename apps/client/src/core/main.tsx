@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client"
 
 import { createQueryClient } from "./query"
 import { createAppRouter } from "./router"
+import "./style/index.css"
 
 const container = document.getElementById("root")
 if (container === null) {

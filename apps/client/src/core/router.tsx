@@ -1,5 +1,4 @@
 import {
-  Outlet,
   createRootRoute,
   createRoute,
   createRouter,
@@ -7,13 +6,14 @@ import {
 } from "@tanstack/react-router"
 
 import { ContactsScreen } from "../modules/contacts"
+import { AppShell } from "./layouts/app-shell"
 
 /**
  * Drzewo tras w kodzie, nie z konwencji plików — trasy są jawne i widoczne
- * w jednym miejscu (DESIGN.md §2). Powłoka (sidebar, layout) dojdzie do
- * korzenia osobnym ticketem; dziś korzeń tylko renderuje trasę potomną.
+ * w jednym miejscu (DESIGN.md §2). Korzeń renderuje powłokę, więc każda trasa
+ * dostaje nawigację bez powtarzania jej u siebie.
  */
-const rootRoute = createRootRoute({ component: Outlet })
+const rootRoute = createRootRoute({ component: AppShell })
 
 /** Kontakty to jedyny gotowy ekran, więc korzeń prowadzi prosto do niego. */
 const indexRoute = createRoute({

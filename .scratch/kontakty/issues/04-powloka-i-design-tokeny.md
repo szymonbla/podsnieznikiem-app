@@ -7,12 +7,12 @@ Na telefonie lista ma pierwszeństwo przed nawigacją.
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Tokeny z `DESIGN.md` (paleta, typografia, promienie, siatka powłoki) wchodzą jako motyw Tailwinda; shadcn dziedziczy je zamiast domyślnych
-- [ ] Fonty hostowane lokalnie, nie z Google Fonts
-- [ ] Sidebar: nazwa domku · `Kontakty` (aktywne) · grupa „Wkrótce" — Rezerwacje, Finanse, Zapytania jako nieaktywne i oznaczone dla czytnika ekranu · stopka z właścicielem
-- [ ] Poniżej progu wąskiego ekranu sidebar staje się poziomym paskiem; grupa „Wkrótce" i stopka znikają
-- [ ] Fokus jest zawsze wyraźnie widoczny — pierścienia fokusu nie wolno usuwać
-- [ ] Animacje ustępują przy systemowym ograniczeniu ruchu
-- [ ] Powłoka mieszka w warstwie `core` i nie zawiera logiki domenowej
+- [x] Tokeny z `DESIGN.md` (paleta, typografia, promienie, siatka powłoki) wchodzą jako motyw Tailwinda; shadcn dziedziczy je zamiast domyślnych
+- [x] Fonty hostowane lokalnie, nie z Google Fonts
+- [x] Sidebar: nazwa domku · `Kontakty` (aktywne) · grupa „Wkrótce" — Rezerwacje, Finanse, Zapytania jako nieaktywne i oznaczone dla czytnika ekranu · stopka z właścicielem
+- [x] Poniżej progu wąskiego ekranu sidebar staje się poziomym paskiem; grupa „Wkrótce" i stopka znikają
+- [x] Fokus jest zawsze wyraźnie widoczny — pierścienia fokusu nie wolno usuwać
+- [x] Animacje ustępują przy systemowym ograniczeniu ruchu
+- [x] Powłoka mieszka w warstwie `core` i nie zawiera logiki domenowej

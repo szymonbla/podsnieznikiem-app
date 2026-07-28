@@ -86,6 +86,7 @@ apps/
         api.ts                 # klient openapi-fetch
         layouts/
           app-shell.tsx        # sidebar + content
+          copy.ts              #   teksty powłoki
         style/
           index.css            # @theme — tokeny
           fonts.css
