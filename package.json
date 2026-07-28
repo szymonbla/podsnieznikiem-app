@@ -1,0 +1,17 @@
+{
+  "name": "podsnieznikiem",
+  "private": true,
+  "type": "module",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "bun run --hot apps/server/src/core/server.ts",
+    "start": "bun run apps/server/src/core/server.ts",
+    "db:up": "docker compose up -d --wait",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14",
+    "typescript": "5.9.3"
+  }
+}

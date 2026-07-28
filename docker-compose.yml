@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: podsnieznikiem-postgres
+    environment:
+      POSTGRES_USER: podsnieznikiem
+      POSTGRES_PASSWORD: podsnieznikiem
+      POSTGRES_DB: podsnieznikiem
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U podsnieznikiem"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:

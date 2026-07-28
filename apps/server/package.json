@@ -1,0 +1,18 @@
+{
+  "name": "@podsnieznikiem/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --env-file=../../.env --hot src/core/server.ts",
+    "start": "bun run --env-file=../../.env src/core/server.ts"
+  },
+  "dependencies": {
+    "@effect/platform": "^0.97.0",
+    "@effect/platform-bun": "^0.91.0",
+    "@effect/sql": "^0.52.0",
+    "@effect/sql-pg": "^0.53.0",
+    "@podsnieznikiem/contracts": "workspace:*",
+    "effect": "^3.22.0"
+  }
+}
