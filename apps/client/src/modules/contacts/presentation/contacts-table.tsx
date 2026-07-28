@@ -22,8 +22,8 @@ interface ContactsTableProps {
   readonly sort: SortColumn
   readonly direction: SortDirection
   readonly onSort: (column: SortColumn) => void
-  readonly onEdit: (contact: Contact, opener: HTMLElement | null) => void
-  readonly onRemove: (contact: Contact, opener: HTMLElement | null) => void
+  readonly onEdit: (contact: Contact) => void
+  readonly onRemove: (contact: Contact) => void
 }
 
 /**
@@ -172,8 +172,8 @@ export const ContactsTable = ({
                 <RowMenu
                   contact={contact}
                   onCopy={() => void copyPhone(contact.phone)}
-                  onEdit={(opener) => onEdit(contact, opener)}
-                  onRemove={(opener) => onRemove(contact, opener)}
+                  onEdit={() => onEdit(contact)}
+                  onRemove={() => onRemove(contact)}
                 />
               )}
             </TableCell>

@@ -4,6 +4,7 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@/libs/ui/utils"
 import { Button } from "@/libs/ui/button"
+import { returnFocusToOpener } from "@/libs/ui/focus-return"
 
 function Dialog({
   ...props
@@ -49,6 +50,7 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  onCloseAutoFocus,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
@@ -74,6 +76,10 @@ function DialogContent({
             "pointer-events-auto relative m-auto grid w-full gap-0 rounded-surface border-0 bg-background p-6 shadow-modal duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-[460px]",
             className
           )}
+          onCloseAutoFocus={(event) => {
+            onCloseAutoFocus?.(event)
+            if (!event.defaultPrevented) returnFocusToOpener(event)
+          }}
           {...props}
         >
           {children}

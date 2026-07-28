@@ -25,29 +25,21 @@ const COUNT_ID = "contacts-count"
  * width of its own — the list stretches as far as the sidebar leaves it.
  */
 export const ContactsScreen = () => {
-  const { data, isPending, isError, refetch } = useContacts()
-  const contacts = data ?? []
-  const { search, rows, total, isFiltered, setQuery, clearQuery, toggleSort } =
-    useContactList(contacts)
+  const query = useContacts()
+  const {
+    state,
+    hasRows,
+    isReady,
+    contacts,
+    search,
+    rows,
+    total,
+    isFiltered,
+    setQuery,
+    clearQuery,
+    toggleSort
+  } = useContactList(query)
   const actions = useContactActions()
-
-  /*
-   * The screen state is named once instead of being settled step by step in
-   * the JSX tree — the order of the checks is a rule here ("error beats
-   * emptiness, emptiness beats the filter"), not an accident of nesting.
-   */
-  const view = ((): "loading" | "error" | "empty" | "no-matches" | "list" => {
-    if (isPending) return "loading"
-    if (isError) return "error"
-    if (total === 0) return "empty"
-    if (rows.length === 0) return "no-matches"
-
-    return "list"
-  })()
-
-  /* The counter and the filter only make sense once there is something to count and filter. */
-  const hasRows = view === "no-matches" || view === "list"
-  const isReady = view !== "loading" && view !== "error"
 
   return (
     <main id="tresc" className="flex min-w-0 flex-col">
@@ -67,7 +59,7 @@ export const ContactsScreen = () => {
           do not know would end in a duplicate.
         */}
         {isReady ? (
-          <Button type="button" onClick={(event) => actions.openCreate(event.currentTarget)}>
+          <Button type="button" onClick={actions.openCreate}>
             <Plus aria-hidden="true" className="size-3.5" strokeWidth={2.4} />
             {contactsCopy.add}
           </Button>
@@ -104,38 +96,38 @@ export const ContactsScreen = () => {
       ) : null}
 
       <div className="flex flex-col gap-[18px] px-4 pt-[18px] pb-12 wide:px-8 wide:pt-[22px] wide:pb-16">
-        {view === "loading" ? (
+        {state === "loading" ? (
           <p role="status" className="text-muted-foreground">
             {contactsCopy.loading}
           </p>
         ) : null}
 
-        {view === "error" ? (
+        {state === "error" ? (
           <EmptyState
             assertive
             title={contactsCopy.loadError.title}
             description={contactsCopy.loadError.description}
             action={
-              <Button type="button" onClick={() => void refetch()}>
+              <Button type="button" onClick={() => void query.refetch()}>
                 {contactsCopy.loadError.action}
               </Button>
             }
           />
         ) : null}
 
-        {view === "empty" ? (
+        {state === "empty" ? (
           <EmptyState
             title={contactsCopy.emptyList.title}
             description={contactsCopy.emptyList.description}
             action={
-              <Button type="button" onClick={(event) => actions.openCreate(event.currentTarget)}>
+              <Button type="button" onClick={actions.openCreate}>
                 {contactsCopy.emptyList.action}
               </Button>
             }
           />
         ) : null}
 
-        {view === "no-matches" ? (
+        {state === "no-matches" ? (
           <EmptyState
             title={contactsCopy.emptySearch.title(search.q.trim())}
             description={contactsCopy.emptySearch.description}
@@ -147,7 +139,7 @@ export const ContactsScreen = () => {
           />
         ) : null}
 
-        {view === "list" ? (
+        {state === "list" ? (
           <ContactsTable
             contacts={rows}
             sort={search.sort}
@@ -170,7 +162,6 @@ export const ContactsScreen = () => {
         contacts={contacts}
         onSubmit={actions.submit}
         pending={actions.isSaving}
-        onCloseAutoFocus={actions.restoreFocus}
       />
 
       <DeleteDialog
@@ -179,7 +170,6 @@ export const ContactsScreen = () => {
           if (!open) actions.cancelRemove()
         }}
         onConfirm={actions.confirmRemove}
-        onCloseAutoFocus={actions.restoreFocus}
       />
     </main>
   )
