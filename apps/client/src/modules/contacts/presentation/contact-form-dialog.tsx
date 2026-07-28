@@ -23,7 +23,7 @@ import {
 import { findPhoneOwner } from "../domain/duplicates"
 import { RoleCombobox } from "./role-combobox"
 import type { Contact } from "../domain/models"
-import { formatPhone } from "../domain/phone"
+import { parsePhone, phoneReadable } from "../domain/phone"
 import { contactsCopy } from "./copy"
 
 interface ContactFormDialogProps {
@@ -156,7 +156,7 @@ export const ContactFormDialog = ({
     reset(
       contact === undefined
         ? EMPTY
-        : { name: contact.name, role: contact.role, phone: formatPhone(contact.phone) }
+        : { name: contact.name, role: contact.role, phone: phoneReadable(parsePhone(contact.phone)) }
     )
   }, [open, contact, reset])
 

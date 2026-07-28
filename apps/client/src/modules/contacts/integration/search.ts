@@ -1,5 +1,5 @@
 import type { Contact } from "../domain/models"
-import { normalizePhone } from "../domain/phone"
+import { isEmptyPhone, parsePhone, phoneDigits } from "../domain/phone"
 
 /** A query made of digits, spaces and dashes only — a number, not text. */
 const looksLikeNumber = (query: string): boolean => /^[\d\s\-()+.]+$/.test(query)
@@ -19,7 +19,7 @@ export const matchesQuery = (contact: Contact, query: string): boolean => {
   if (contact.role.toLocaleLowerCase("pl").includes(text)) return true
 
   if (!looksLikeNumber(query)) return false
-  const digits = normalizePhone(query)
+  const asked = parsePhone(query)
 
-  return digits.length > 0 && contact.phone.includes(digits)
+  return !isEmptyPhone(asked) && phoneDigits(parsePhone(contact.phone)).includes(asked)
 }

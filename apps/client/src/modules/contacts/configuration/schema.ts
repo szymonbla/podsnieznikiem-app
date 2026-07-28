@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 import type { ContactField, CreateContactBody } from "../domain/models"
-import { normalizePhone, PHONE_DIGITS } from "../domain/phone"
+import { isCompletePhone, parsePhone, phoneDigits, PHONE_DIGITS } from "../domain/phone"
 import { CONTACT_LIMITS } from "./constraints"
 
 /**
@@ -58,17 +58,19 @@ export const contactFormMessages = {
  * story 37). The transform is part of the schema, so the schema's **output**
  * is already nine digits — exactly what the API accepts.
  */
-/** Compiled once — the field schema checks it on every keystroke. */
-const PHONE_PATTERN = new RegExp(`^\\d{${PHONE_DIGITS}}$`)
-
+/**
+ * The field is where the number is read: `parsePhone` runs here and nowhere
+ * else on the way to the API. The schema's **output** is therefore the bare
+ * digits — a plain `string`, exactly what `CreateContactBody` accepts, which is
+ * what the contract assertion below checks (ADR-0001).
+ */
 const phoneField = z
   .string({ error: contactFormMessages.phone.required })
   .trim()
   .min(1, { error: contactFormMessages.phone.required })
-  .transform(normalizePhone)
-  .refine((digits) => PHONE_PATTERN.test(digits), {
-    error: contactFormMessages.phone.wrongLength
-  })
+  .transform(parsePhone)
+  .refine(isCompletePhone, { error: contactFormMessages.phone.wrongLength })
+  .transform(phoneDigits)
 
 export const contactFormSchema = z.object({
   name: required(

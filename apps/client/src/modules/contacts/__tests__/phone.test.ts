@@ -1,6 +1,16 @@
 import { describe, expect, test } from "bun:test"
 
-import { formatPhone, normalizePhone, phoneHref } from "../domain/phone"
+import {
+  formatPhone,
+  isCompletePhone,
+  isEmptyPhone,
+  normalizePhone,
+  parsePhone,
+  phoneDial,
+  phoneDigits,
+  phoneHref,
+  phoneReadable
+} from "../domain/phone"
 
 describe("czytelny zapis numeru", () => {
   test("splits nine digits into threes so they can be copied without a slip", () => {
@@ -42,5 +52,29 @@ describe("reducing a number to a comparable form", () => {
 
   test("text without digits leaves nothing, so it does not pose as a number query", () => {
     expect(normalizePhone("hydraulik")).toBe("")
+  })
+})
+
+describe("jeden odczyt numeru, trzy pytania do niego", () => {
+  test("gives the digits, the readable form and the dial address from a single parse", () => {
+    const phone = parsePhone("+48 602-118-447")
+
+    expect(phoneDigits(phone)).toBe("602118447")
+    expect(phoneReadable(phone)).toBe("602 118 447")
+    expect(phoneDial(phone)).toBe("tel:+48602118447")
+  })
+
+  test("parsing an already parsed number changes nothing — normalisation happens once", () => {
+    const once = parsePhone("602 118 447")
+    const twice = parsePhone(phoneDigits(once))
+
+    expect(phoneDigits(twice)).toBe(phoneDigits(once))
+  })
+
+  test("tells a whole number from a fragment, so a query is not mistaken for a contact", () => {
+    expect(isCompletePhone(parsePhone("602 118 447"))).toBe(true)
+    expect(isCompletePhone(parsePhone("602 118"))).toBe(false)
+    expect(isEmptyPhone(parsePhone("hydraulik"))).toBe(true)
+    expect(isEmptyPhone(parsePhone("602"))).toBe(false)
   })
 })

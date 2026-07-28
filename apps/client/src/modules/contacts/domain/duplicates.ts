@@ -1,5 +1,5 @@
 import type { Contact } from "./models"
-import { normalizePhone } from "./phone"
+import { isEmptyPhone, parsePhone } from "./phone"
 
 /**
  * Who already has this number — computed locally, on the fetched list, with no
@@ -19,10 +19,10 @@ export const findPhoneOwner = (
   phone: string,
   excludeId?: string
 ): Contact | undefined => {
-  const digits = normalizePhone(phone)
-  if (digits.length === 0) return undefined
+  const typed = parsePhone(phone)
+  if (isEmptyPhone(typed)) return undefined
 
   return contacts.find(
-    (contact) => contact.id !== excludeId && normalizePhone(contact.phone) === digits
+    (contact) => contact.id !== excludeId && parsePhone(contact.phone) === typed
   )
 }
