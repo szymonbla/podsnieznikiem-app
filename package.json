@@ -11,7 +11,6 @@
     "dev:client": "bun run --cwd apps/client dev",
     "start": "bun run apps/server/src/core/server.ts",
     "db:up": "docker compose up -d --wait",
-    "db:seed": "bun run apps/server/src/core/seed.ts",
     "gen:api": "bun run scripts/gen-api.ts",
     "typecheck": "tsc --noEmit && tsc --noEmit -p apps/client",
     "test": "bun run test:server && bun run test:client",

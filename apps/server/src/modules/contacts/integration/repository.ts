@@ -8,7 +8,6 @@ import {
   CreateContactBody,
   UpdateContactBody
 } from "../domain/models.js"
-import type { SampleContact } from "./seed-data.js"
 
 /**
  * A row of the `contacts` table — the shape comes from the contract, so a new
@@ -112,38 +111,11 @@ export class ContactsRepository extends Effect.Service<ContactsRepository>()(
           )
         )
 
-      const insertUnlessIdentical = (contact: SampleContact) =>
-        sql`
-          insert into contacts (name, role, phone)
-          select ${contact.name}, ${contact.role}, ${contact.phone}
-          where not exists (
-            select 1 from contacts
-            where name = ${contact.name}
-              and role = ${contact.role}
-              and phone = ${contact.phone}
-          )
-          returning id
-        `.pipe(Effect.map((rows) => rows.length))
-
-      /**
-       * Inserts the contacts whose identical triple (name, role, phone) is not
-       * in the database yet, and returns how many were added. The number alone
-       * does not decide — it is not unique (CONTEXT.md -> Telefon). All in one
-       * transaction, so the returned count describes the state of the database
-       * even when one of the rows fails.
-       */
-      const insertManyUnlessIdentical = (contacts: ReadonlyArray<SampleContact>) =>
-        Effect.forEach(contacts, insertUnlessIdentical, { concurrency: 1 }).pipe(
-          Effect.map((counts) => counts.reduce((total, count) => total + count, 0)),
-          sql.withTransaction
-        )
-
       return {
         findAll: () => findAll(),
         create,
         update,
-        remove,
-        insertManyUnlessIdentical
+        remove
       } as const
     }),
     dependencies: []
