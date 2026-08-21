@@ -10,8 +10,16 @@ DIRECTORY=/mnt/data/app
 
 mkdir -p "$DIRECTORY" /mnt/data/postgres
 
-cp "$PACKAGE/server" "$PACKAGE/compose.yml" "$DIRECTORY/"
-chmod +x "$DIRECTORY/server"
+cp "$PACKAGE/compose.yml" "$DIRECTORY/"
+
+# The running container holds this binary open, and Linux refuses to write over
+# a file that is executing — `cp` fails with "Text file busy". Renaming works
+# where copying does not: the running server keeps the old file, the name points
+# at the new one. Same filesystem, so the rename is atomic; there is no moment
+# at which `server` is half-written.
+cp "$PACKAGE/server" "$DIRECTORY/server.new"
+chmod +x "$DIRECTORY/server.new"
+mv "$DIRECTORY/server.new" "$DIRECTORY/server"
 
 # Leftovers from the layout with Caddy and the frontend on the machine. Unused,
 # but while hunting a fault they look like part of a working whole.
@@ -36,4 +44,10 @@ else
 fi
 
 docker compose "${PROFILE[@]}" up -d --remove-orphans
+
+# Docker binds the binary into the container when it makes the container, not
+# when it starts it. After a rename the old container still runs the old file.
+# Without this line a deployment reports success and changes nothing.
+docker compose "${PROFILE[@]}" up -d --force-recreate api
+
 docker compose "${PROFILE[@]}" ps
