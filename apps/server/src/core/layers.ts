@@ -32,6 +32,27 @@ export const DatabaseLive = Layer.provideMerge(
 const ApiLive = HttpApiBuilder.api(api).pipe(Layer.provide(ContactsApiLive))
 
 /**
+ * The origins the browser may call this API from, taken from the validated
+ * configuration.
+ *
+ * The check is a **predicate, not the list itself**. Handed a list, the
+ * middleware treats an empty one as "allow every origin" and answers `*` — so a
+ * deployment that forgot `ALLOWED_ORIGINS` would be open to every site on the
+ * internet, which is the opposite of what forgetting should cost. A predicate
+ * refuses whatever it was not told to allow.
+ */
+const CorsLive = Layer.unwrapEffect(
+  Effect.map(appConfig, (config) =>
+    HttpApiBuilder.middlewareCors({
+      allowedOrigins: (origin) => config.allowedOrigins.includes(origin),
+      // Cookies are not used yet. The setting is here so that adding log-in
+      // does not turn into a hunt for why the session is dropped.
+      credentials: true
+    })
+  )
+)
+
+/**
  * The raw OpenAPI document alongside Swagger UI — the source for the client
  * type generator (DESIGN.md §5; the generator itself ships with the client).
  */
@@ -47,6 +68,7 @@ const OpenApiJsonLive = HttpApiBuilder.Router.use((router) =>
  * `SqlClient` is re-exported so seam 1 tests can look into the database.
  */
 export const HttpLive = HttpApiBuilder.serve().pipe(
+  Layer.provide(CorsLive),
   Layer.provide(HttpApiSwagger.layer({ path: "/docs" })),
   Layer.provide(OpenApiJsonLive),
   Layer.provide(ApiLive),

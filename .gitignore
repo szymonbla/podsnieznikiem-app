@@ -5,4 +5,8 @@ dist/
 *.log
 *.tsbuildinfo
 
+# The server built for Linux — 98 MB, produced by every deployment
+deploy/server
+
 .claude/worktrees/
+.humanlayer/workspace.local.json

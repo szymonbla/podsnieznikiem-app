@@ -6,13 +6,13 @@ on:
   pull_request:
 
 jobs:
-  # Bramki jakości z DESIGN.md §3 i §5 — reguły, które dotąd były ustaleniem
-  # w dokumencie, tu przestają zależeć od pamięci autora (ticket 11).
+  # The quality gates from DESIGN.md §3 and §5 — rules that used to be an
+  # agreement in a document stop depending on the author's memory here.
   check:
     runs-on: ubuntu-latest
 
     services:
-      # Szew 1 uderza w prawdziwego Postgresa — bez niego testy serwera nie mają sensu.
+      # Seam 1 hits a real Postgres — without it the server tests are pointless.
       postgres:
         image: postgres:16
         env:
@@ -39,28 +39,73 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      # Typy bez `any` — ograniczenie przyjęte na wejściu (DESIGN.md §1).
+      # Types without `any` — a constraint taken on at the start (DESIGN.md §1).
       - name: Typecheck
         run: bun run typecheck
 
-      # Granice modułów i granica klient/serwer.
+      # Module boundaries and the client/server boundary.
       - name: Lint
         run: bun run lint
 
-      # Nieaktualny wygenerowany kontrakt wywala build, zamiast po cichu
-      # kompilować klienta na wczorajszym API (DESIGN.md §5).
-      - name: Wygenerowane typy są aktualne
+      # A stale generated contract breaks the build instead of quietly
+      # compiling the client against yesterday's API (DESIGN.md §5).
+      - name: Generated types are current
         run: bun run check:api
 
-      - name: Testy szwu 1 i szwu 3 (serwer, kontrakty)
+      - name: Seam 1 and seam 3 tests (server, contracts)
         run: bun run test:server
 
-      - name: Testy szwu 2 i szwu 3 (klient)
+      - name: Seam 2 and seam 3 tests (client)
         run: bun run test:client
 
-      - name: Build klienta
+      - name: Build the client
         run: bun run build:client
 
-      # Druga, niezależna kontrola granicy: runtime Effecta nie w przeglądarce.
-      - name: Runtime Effecta poza bundlem klienta
+      # A second, independent boundary check: the Effect runtime stays out of
+      # the browser.
+      - name: Effect runtime outside the client bundle
         run: bun run check:bundle
+
+  # Deploying the server onto the machine in AWS.
+  #
+  # `needs: check` is a safety condition here, not merely an ordering one.
+  # Database migrations run when the server starts — a broken deployment touches
+  # the data, not just the look of a page.
+  #
+  # There is no frontend here. Cloudflare Pages builds the static files straight
+  # from this repository, on the same push.
+  deploy:
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    permissions:
+      # GitHub issues a signed proof of identity. AWS exchanges it for
+      # credentials valid a few minutes. No long-lived AWS key sits in the
+      # repository's secrets.
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          # The value from `terraform output github_role`.
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: eu-north-1
+
+      # The same script you run by hand from the workstation. An empty profile
+      # name — here the credentials come from the environment, not from a
+      # profiles file.
+      - name: Deploy the server
+        env:
+          AWS_PROFILE_NAME: ""
+        run: ./deploy/deploy.sh

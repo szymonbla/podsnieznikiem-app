@@ -1,0 +1,87 @@
+# The application on the AWS machine. Three containers, nothing built here —
+# the compiled server arrives from outside (`deploy.sh` or GitHub Actions).
+#
+# There is no frontend here. The static files live on Cloudflare Pages, built
+# straight from the repository. This machine serves the API and the database.
+#
+# This differs from `docker-compose.yml` in the repository root. That one runs
+# a database for local work and exposes it on a port. This one exposes nothing.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    # The name is binding: the nightly backup script on the machine looks for
+    # exactly this container. Renaming it silently turns backups off.
+    container_name: podsnieznikiem-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: podsnieznikiem
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?missing password — .env is created by the first deployment}
+      POSTGRES_DB: podsnieznikiem
+    # No `ports:`. Only the application server reaches the database, over the
+    # internal docker network. Neither the machine nor the internet can.
+    volumes:
+      - /mnt/data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U podsnieznikiem"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  api:
+    # Plain Debian. The compiled server carries its own runtime, so the image
+    # needs neither bun nor the application's libraries. It must be glibc —
+    # this binary will not start on alpine.
+    image: debian:12-slim
+    container_name: podsnieznikiem-api
+    restart: unless-stopped
+    command: /app/server
+    environment:
+      DATABASE_URL: postgres://podsnieznikiem:${POSTGRES_PASSWORD}@postgres:5432/podsnieznikiem
+      PORT: 3000
+      # The page and the server sit at different addresses, so the browser asks
+      # the server for permission. Without this line the app receives nothing
+      # while `curl` keeps working. No trailing slash.
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://app.podsnieznikiem.pl}
+    # The compiled server, handed in from the machine's disk. The `debian:12-slim`
+    # image contains no application of its own — without this line the container
+    # starts and dies at once, unable to find the file named in `command`.
+    volumes:
+      - ./server:/app/server:ro
+    # No `ports:`. The only way in is the tunnel, over the internal docker
+    # network.
+    #
+    # Database migrations run when the server starts. Starting before the
+    # database is ready fails, so we wait for its health, not for its container.
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # The Cloudflare tunnel — the only route from the internet to this server.
+  #
+  # The program dials Cloudflare itself and holds the connection open. That is
+  # why the machine has no port open to the internet. The public address works
+  # for as long as the machine runs.
+  #
+  # In the Cloudflare dashboard the tunnel points `api.podsnieznikiem.pl` at
+  # `http://api:3000` — the name `api` resolves because both containers
+  # share one docker network.
+  #
+  # Starts only under the `public` profile, that is, when .env holds a token.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: podsnieznikiem-tunnel
+    restart: unless-stopped
+    profiles: ["public"]
+    command: tunnel --no-autoupdate run
+    environment:
+      # The token identifies the tunnel. It is a password — it lives in .env on
+      # the machine, never in the repository.
+      #
+      # The empty default is required. Docker interpolates the whole file before
+      # it filters out disabled profiles, so without it a missing token breaks
+      # start-up even with the tunnel switched off. `on-machine.sh` is what keeps
+      # a token-less tunnel from starting: no entry in .env, no `public` profile.
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on:
+      - api

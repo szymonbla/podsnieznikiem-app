@@ -48,4 +48,28 @@ describe("server configuration", () => {
       expect(withoutPort.value.port).toBe(3000)
     }
   })
+
+  test("allows no origin unless one is named", () => {
+    const result = load({ DATABASE_URL: "postgres://localhost/x" })
+
+    expect(Exit.isSuccess(result)).toBe(true)
+    if (Exit.isSuccess(result)) {
+      expect(result.value.allowedOrigins).toEqual([])
+    }
+  })
+
+  test("reads a comma separated list of allowed origins", () => {
+    const result = load({
+      DATABASE_URL: "postgres://localhost/x",
+      ALLOWED_ORIGINS: "https://app.podsnieznikiem.pl,https://podglad.example"
+    })
+
+    expect(Exit.isSuccess(result)).toBe(true)
+    if (Exit.isSuccess(result)) {
+      expect(result.value.allowedOrigins).toEqual([
+        "https://app.podsnieznikiem.pl",
+        "https://podglad.example"
+      ])
+    }
+  })
 })

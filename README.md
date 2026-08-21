@@ -53,3 +53,31 @@ Ekran: `localhost:5173/kontakty`. Kontrakt: `localhost:3000/docs`.
 
 Repo nie zawiera prawdziwych danych — kontakty w testach i makietach są
 zmyślone. Konfiguracja idzie przez `.env`, ignorowany przez git.
+
+## Wdrożenie
+
+Aplikacja stoi w dwóch miejscach, bo to dwie różne rzeczy:
+
+| Co | Gdzie | Adres |
+|---|---|---|
+| Pliki strony | Cloudflare Pages, budowane z tego repo | `app.podsnieznikiem.pl` |
+| Serwer i Postgres | maszyna w AWS, region eu-north-1 | `api.podsnieznikiem.pl` |
+
+Dane osobowe zostają wyłącznie w AWS, w Unii. Na Cloudflare leży sam JavaScript.
+
+Wdrożenie idzie samo po scaleniu do `main`. Pliki strony buduje Cloudflare,
+serwer wdraża zadanie `deploy` w [`ci.yml`](./.github/workflows/ci.yml) —
+dopiero po zielonych testach, bo migracje bazy wykonują się przy starcie
+serwera.
+
+GitHub nie ma klucza do AWS. Prosi o poświadczenia ważne kilkanaście minut,
+pokazując podpisany dowód, że pyta z gałęzi `main` tego repozytorium (OIDC).
+
+Ręcznie, gdy trzeba obejść automat:
+
+```bash
+./deploy/deploy.sh
+```
+
+Maszyna nie ma otwartego portu. Paczka jedzie przez S3, a maszyna pobiera ją na
+polecenie AWS Session Managera. Opis maszyny: `homebase-infra/projects/podsnieznikiem`.
