@@ -1,0 +1,20 @@
+{
+  // How Cloudflare serves the client. The panel has no field for the built
+  // directory, so it is named here — Wrangler reads this file at deploy time.
+  //
+  // `name` must match the Worker in the Cloudflare dashboard. A different name
+  // makes a second Worker instead of updating the first one.
+  "name": "podsnieznikiem-app",
+  "compatibility_date": "2026-08-21",
+
+  // No `main`. Nothing of ours runs on Cloudflare — only files leave here.
+  // The server and the database stay in AWS, inside the EU, and so does every
+  // piece of personal data.
+  "assets": {
+    "directory": "apps/client/dist",
+
+    // The router lives in the browser. A request for /kontakty must return
+    // index.html with a 200, not a 404 — the address is real, the file is not.
+    "not_found_handling": "single-page-application"
+  }
+}
