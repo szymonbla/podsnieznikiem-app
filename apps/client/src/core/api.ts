@@ -24,6 +24,12 @@ export const API_BASE_URL =
 
 export const apiClient = createClient<paths>({
   baseUrl: API_BASE_URL,
+  // The app and the API live on different subdomains in production
+  // (app.podsnieznikiem.pl vs api.podsnieznikiem.pl). `fetch` omits cookies
+  // on cross-origin requests unless told otherwise, so without this the
+  // Cloudflare Access session cookie never reaches the API and every call
+  // looks unauthenticated.
+  credentials: "include",
   // `openapi-fetch` would capture `globalThis.fetch` at import time. We reach
   // for it on every request so that swapping the network in seam 2 tests works
   // regardless of import order.
