@@ -1,5 +1,5 @@
 import { Link, Outlet } from "@tanstack/react-router"
-import { CalendarDays, MessageSquare, Phone, Wallet } from "lucide-react"
+import { CalendarDays, ListChecks, MessageSquare, Phone, Wallet } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 import { Toaster } from "../../libs/ui/sonner"
@@ -103,6 +103,20 @@ export const AppShell = () => (
                 strokeWidth={1.9}
               />
               {shellCopy.contacts}
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/zadania"
+              activeProps={{ "aria-current": "page" }}
+              className="flex items-center gap-2.5 rounded-[var(--radius)] p-2.5 text-sm font-semibold text-muted-foreground hover:bg-muted-hover aria-[current=page]:bg-muted aria-[current=page]:font-bold aria-[current=page]:text-foreground"
+            >
+              <ListChecks
+                aria-hidden="true"
+                className="size-[17px] shrink-0 text-primary"
+                strokeWidth={1.9}
+              />
+              {shellCopy.tasks}
             </Link>
           </li>
         </ul>
