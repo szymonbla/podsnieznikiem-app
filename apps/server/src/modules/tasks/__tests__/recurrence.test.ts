@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test"
 
 import { currentOccurrence, isoDateFromEpochMillis, taskOccurrence } from "../domain/recurrence.js"
-import type { IsoDate } from "../domain/recurrence.js"
+import type { IsoDate } from "../domain/models.js"
 
 const iso = (value: string) => value as IsoDate
 

@@ -1,6 +1,4 @@
-import type { IsoDate, Recurrence } from "@podsnieznikiem/contracts"
-
-export type { IsoDate } from "@podsnieznikiem/contracts"
+import type { IsoDate, Recurrence } from "./models.js"
 
 interface DateParts {
   readonly year: number

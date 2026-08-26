@@ -1,14 +1,15 @@
 import { FetchHttpClient, HttpApiClient, HttpServer } from "@effect/platform"
 import { BunContext, BunHttpServer } from "@effect/platform-bun"
 import { SqlClient } from "@effect/sql"
-import { Effect, Layer } from "effect"
+import { Effect, Layer, TestContext } from "effect"
 
 import { api } from "../core/api.js"
 import { HttpLive } from "../core/layers.js"
 
 const TestLive = Layer.mergeAll(BunContext.layer, FetchHttpClient.layer).pipe(
   Layer.merge(HttpLive),
-  Layer.provideMerge(BunHttpServer.layer({ port: 0 }))
+  Layer.provideMerge(BunHttpServer.layer({ port: 0 })),
+  Layer.provideMerge(TestContext.TestContext)
 )
 
 const makeClient = (baseUrl: string) => HttpApiClient.make(api, { baseUrl })
@@ -43,7 +44,7 @@ export const withServer = <A, E>(
     const client = yield* makeClient(baseUrl)
     const sql = yield* SqlClient.SqlClient
 
-    yield* sql`truncate table contacts`
+    yield* sql`truncate table contacts, tasks`
 
     return yield* test({ client, baseUrl, sql })
   }).pipe(Effect.provide(TestLive), Effect.scoped, Effect.runPromise)
