@@ -92,7 +92,7 @@ export const tasksCopy = {
   },
   remove: {
     title: "Usunąć zadanie?",
-    description: (description: string) => `„${description}" zniknie z listy. Usunięcie jest trwałe, ale przez chwilę da się je cofnąć.`,
+    description: (description: string) => `„${description}” zniknie z listy. Usunięcie jest trwałe, ale przez chwilę da się je cofnąć.`,
     confirm: "Usuń zadanie", cancel: "Zostaw",
     success: (description: string) => `Usunięto zadanie: ${description}`,
     failure: "Nie udało się usunąć zadania",
