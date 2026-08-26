@@ -3,13 +3,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { isDraft } from "../domain/drafts"
 import type { Task } from "../domain/models"
 import { formatDueDate, recurrenceSummary, tasksCopy } from "./copy"
+import { RowMenu } from "./row-menu"
 
 interface TasksTableProps {
   readonly tasks: ReadonlyArray<Task>
   readonly onEdit: (task: Task) => void
+  readonly onComplete: (task: Task) => void
+  readonly onRemove: (task: Task) => void
 }
 
-export const TasksTable = ({ tasks, onEdit }: TasksTableProps) => (
+export const TasksTable = ({ tasks, onEdit, onComplete, onRemove }: TasksTableProps) => (
   <Table regionLabel={tasksCopy.tableLabel} aria-label={tasksCopy.tableLabel} className="table-fixed border-collapse min-w-[560px]">
     <TableHeader className="[&_tr]:border-0">
       <TableRow className="sticky top-0 z-[5] border-b border-separator bg-background hover:bg-transparent">
@@ -36,7 +39,9 @@ export const TasksTable = ({ tasks, onEdit }: TasksTableProps) => (
           <TableCell className="px-3 py-2.5">
             {isDraft(task) ? "–" : <Badge variant="teal">{recurrenceSummary(task.recurrence)}</Badge>}
           </TableCell>
-          <TableCell className="px-0 py-2.5 text-right" />
+          <TableCell className="px-0 py-2.5 text-right">
+            {isDraft(task) ? null : <RowMenu task={task} onComplete={() => onComplete(task)} onEdit={() => onEdit(task)} onRemove={() => onRemove(task)} />}
+          </TableCell>
         </TableRow>
       ))}
     </TableBody>

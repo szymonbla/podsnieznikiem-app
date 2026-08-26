@@ -4,6 +4,7 @@ import { shellCopy } from "../../../core/layouts/copy"
 import { Button } from "../../../libs/ui/button"
 import { EmptyState } from "../../../libs/ui/empty-state"
 import { useTasks } from "../integration/queries"
+import { DeleteDialog } from "./delete-dialog"
 import { TaskFormDialog } from "./task-form-dialog"
 import { TasksTable } from "./tasks-table"
 import { tasksCopy } from "./copy"
@@ -40,13 +41,16 @@ export const TasksScreen = () => {
           <EmptyState title={tasksCopy.emptyList.title} description={tasksCopy.emptyList.description}
             action={<Button type="button" onClick={actions.openCreate}>{tasksCopy.emptyList.action}</Button>} />
         ) : null}
-        {state === "list" ? <TasksTable tasks={rows} onEdit={actions.openEdit} /> : null}
+        {state === "list" ? (
+          <TasksTable tasks={rows} onEdit={actions.openEdit} onComplete={actions.complete} onRemove={actions.askRemove} />
+        ) : null}
         {isReady ? <p className="pt-1 text-2xs text-ink-heading">{tasksCopy.autosave}</p> : null}
       </div>
 
       <TaskFormDialog open={actions.isFormOpen} onOpenChange={actions.setFormOpen}
         {...(actions.edited === undefined ? {} : { task: actions.edited })}
         onSubmit={actions.submit} pending={actions.isSaving} />
+      <DeleteDialog task={actions.removed} onOpenChange={(open) => { if (!open) actions.cancelRemove() }} onConfirm={actions.confirmRemove} />
     </main>
   )
 }

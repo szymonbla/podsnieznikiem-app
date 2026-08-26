@@ -138,3 +138,67 @@ describe("adding and editing a task", () => {
     expect((screen.getByRole("spinbutton", { name: "Dzień miesiąca" }) as HTMLInputElement).value).toBe("1")
   })
 })
+
+describe("marking a task done", () => {
+  test("hides it from the list and offers undo", async () => {
+    const user = userEvent.setup()
+    mockApi.use(...tasksApi([aTask({ description: "Wynieś śmieci" })]).handlers)
+    renderApp("/zadania")
+
+    await user.click(await screen.findByRole("button", { name: /Akcje zadania/ }))
+    await user.click(await screen.findByRole("menuitem", { name: "Oznacz jako zrobione" }))
+
+    expect(await screen.findByText("Oznaczono jako zrobione: Wynieś śmieci")).toBeDefined()
+    await waitFor(() => expect(screen.queryByText("Wynieś śmieci")).toBeNull())
+  })
+
+  test("undo brings it back", async () => {
+    const user = userEvent.setup()
+    mockApi.use(...tasksApi([aTask({ description: "Wynieś śmieci" })]).handlers)
+    renderApp("/zadania")
+
+    await user.click(await screen.findByRole("button", { name: /Akcje zadania/ }))
+    await user.click(await screen.findByRole("menuitem", { name: "Oznacz jako zrobione" }))
+    await user.click(await screen.findByRole("button", { name: "Cofnij" }))
+
+    expect(await screen.findByText("Cofnięto oznaczenie — Wynieś śmieci")).toBeDefined()
+    await waitFor(() => expect(screen.getByRole("row", { name: /Wynieś śmieci/ })).toBeDefined())
+  })
+})
+
+describe("deleting a task", () => {
+  test("asks for confirmation, then removes it and offers undo", async () => {
+    const user = userEvent.setup()
+    const api = tasksApi([aTask({ description: "Odśnieżanie" })])
+    mockApi.use(...api.handlers)
+    renderApp("/zadania")
+
+    await user.click(await screen.findByRole("button", { name: /Akcje zadania/ }))
+    await user.click(await screen.findByRole("menuitem", { name: "Usuń" }))
+    const dialog = await screen.findByRole("alertdialog")
+    expect(within(dialog).getByText(/Odśnieżanie/)).toBeDefined()
+
+    await user.click(screen.getByRole("button", { name: "Usuń zadanie" }))
+
+    expect(await screen.findByText("Usunięto zadanie: Odśnieżanie")).toBeDefined()
+    await waitFor(() => expect(screen.queryByText("Odśnieżanie")).toBeNull())
+  })
+
+  test("undo re-creates the task with a new id", async () => {
+    const user = userEvent.setup()
+    const api = tasksApi([aTask({ description: "Odśnieżanie" })])
+    mockApi.use(...api.handlers)
+    renderApp("/zadania")
+    const [original] = api.current()
+
+    await user.click(await screen.findByRole("button", { name: /Akcje zadania/ }))
+    await user.click(await screen.findByRole("menuitem", { name: "Usuń" }))
+    await screen.findByRole("alertdialog")
+    await user.click(screen.getByRole("button", { name: "Usuń zadanie" }))
+    await user.click(await screen.findByRole("button", { name: "Cofnij" }))
+
+    expect(await screen.findByText("Przywrócono zadanie: Odśnieżanie")).toBeDefined()
+    const [restored] = api.current()
+    expect(restored?.id).not.toBe(original?.id)
+  })
+})
