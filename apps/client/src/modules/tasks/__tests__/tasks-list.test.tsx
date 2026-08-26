@@ -59,6 +59,13 @@ describe("the task list on screen", () => {
     expect(await screen.findByText("Nie masz jeszcze żadnego zadania")).toBeDefined()
   })
 
+  test("with every task done it invites adding the first one, not an empty table", async () => {
+    mockApi.use(taskApiHandlers.tasks([aTask({ description: "Zrobione", done: true })]))
+    renderApp("/zadania")
+    expect(await screen.findByText("Nie masz jeszcze żadnego zadania")).toBeDefined()
+    expect(screen.queryByRole("table")).toBeNull()
+  })
+
   test("a connection error talks about the connection", async () => {
     mockApi.use(taskApiHandlers.tasksUnreachable())
     renderApp("/zadania")
@@ -81,6 +88,8 @@ describe("adding and editing a task", () => {
     await user.click(screen.getByRole("button", { name: "Dodaj zadanie" }))
 
     expect(await screen.findByText("Dodano zadanie: Przegląd pieca")).toBeDefined()
+    await waitFor(() => expect(api.requests).toHaveLength(1))
+    expect(api.requests[0]?.body.recurrence).toEqual({ type: "once", date: "2026-12-01" })
   })
 
   test("switching to weekly shows the weekday field instead of the date", async () => {
@@ -94,6 +103,58 @@ describe("adding and editing a task", () => {
 
     expect(screen.queryByLabelText("Data")).toBeNull()
     expect(screen.getByRole("combobox", { name: "Dzień tygodnia" })).toBeDefined()
+  })
+
+  test("adds a weekly task", async () => {
+    const user = userEvent.setup()
+    const api = tasksApi()
+    mockApi.use(...api.handlers)
+    renderApp("/zadania")
+
+    await user.click(await screen.findByRole("button", { name: "Nowe zadanie" }))
+    await user.type(screen.getByRole("textbox", { name: "Opis" }), "Wynieś śmieci")
+    await user.selectOptions(screen.getByRole("combobox", { name: "Rodzaj cykliczności" }), "weekly")
+    await user.selectOptions(screen.getByRole("combobox", { name: "Dzień tygodnia" }), "1")
+    await user.click(screen.getByRole("button", { name: "Dodaj zadanie" }))
+
+    await waitFor(() => expect(api.requests).toHaveLength(1))
+    expect(api.requests[0]?.body.recurrence).toEqual({ type: "weekly", weekday: 1 })
+  })
+
+  test("adds a monthly task", async () => {
+    const user = userEvent.setup()
+    const api = tasksApi()
+    mockApi.use(...api.handlers)
+    renderApp("/zadania")
+
+    await user.click(await screen.findByRole("button", { name: "Nowe zadanie" }))
+    await user.type(screen.getByRole("textbox", { name: "Opis" }), "Czynsz")
+    await user.selectOptions(screen.getByRole("combobox", { name: "Rodzaj cykliczności" }), "monthly")
+    await user.type(screen.getByRole("spinbutton", { name: "Dzień miesiąca" }), "10")
+    await user.click(screen.getByRole("button", { name: "Dodaj zadanie" }))
+
+    await waitFor(() => expect(api.requests).toHaveLength(1))
+    expect(api.requests[0]?.body.recurrence).toEqual({ type: "monthly", dayOfMonth: 10 })
+  })
+
+  test("adds a custom-interval task", async () => {
+    const user = userEvent.setup()
+    const api = tasksApi()
+    mockApi.use(...api.handlers)
+    renderApp("/zadania")
+
+    await user.click(await screen.findByRole("button", { name: "Nowe zadanie" }))
+    await user.type(screen.getByRole("textbox", { name: "Opis" }), "Filtr wody")
+    await user.selectOptions(screen.getByRole("combobox", { name: "Rodzaj cykliczności" }), "custom")
+    await user.type(screen.getByRole("spinbutton", { name: "Co ile" }), "3")
+    await user.selectOptions(screen.getByRole("combobox", { name: "Jednostka" }), "months")
+    await user.type(screen.getByLabelText("Data początkowa"), "2026-01-15")
+    await user.click(screen.getByRole("button", { name: "Dodaj zadanie" }))
+
+    await waitFor(() => expect(api.requests).toHaveLength(1))
+    expect(api.requests[0]?.body.recurrence).toEqual({
+      type: "custom", intervalValue: 3, intervalUnit: "months", anchorDate: "2026-01-15"
+    })
   })
 
   test("adds a yearly task matching the spec's own example", async () => {

@@ -18,6 +18,6 @@ export const useTaskList = (query: TasksQuery): { state: ScreenState; isReady: b
     () => [...tasks.filter((task) => !task.done)].sort(compareByDueDate),
     [tasks]
   )
-  const state = screenState({ isPending: query.isPending, isError: query.isError, total: tasks.length })
+  const state = screenState({ isPending: query.isPending, isError: query.isError, total: rows.length })
   return { state, isReady: isReady(state), rows }
 }

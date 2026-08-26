@@ -16,7 +16,7 @@ export type IsoDate = typeof IsoDate.Type
 const Weekday = Schema.Int.pipe(Schema.between(1, 7))
 const DayOfMonth = Schema.Int.pipe(Schema.between(1, 31))
 const Month = Schema.Int.pipe(Schema.between(1, 12))
-const IntervalValue = Schema.Int.pipe(Schema.greaterThanOrEqualTo(1))
+const IntervalValue = Schema.Int.pipe(Schema.between(1, 1000))
 const IntervalUnit = Schema.Literal("days", "weeks", "months")
 
 export const OnceRecurrence = Schema.Struct({

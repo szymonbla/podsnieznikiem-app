@@ -125,6 +125,25 @@ describe("a custom-interval task", () => {
     const r = { type: "custom", intervalValue: 3, intervalUnit: "months", anchorDate: iso("2026-11-30") } as const
     expect(currentOccurrence(r, iso("2027-01-15"))).toBe("2026-11-30")
   })
+
+  test("still computes correctly at the contract's new upper bound of 1000", () => {
+    const r = { type: "custom", intervalValue: 1000, intervalUnit: "days", anchorDate: iso("2026-01-01") } as const
+    expect(currentOccurrence(r, iso("2026-01-01"))).toBe("2026-01-01")
+  })
+
+  // Final-review finding 1: an unbounded `intervalValue` combined with a future
+  // `anchorDate` drove `customDaysOccurrence` to a calendar date so far outside
+  // JS's representable `Date` range that it silently produced "NaN-NaN-NaN"
+  // instead of a valid IsoDate — a row that then 500'd `GET /tasks` forever.
+  // The contract now caps `intervalValue` at 1000, but `currentOccurrence`
+  // itself takes plain numbers, so any future in-process caller that bypasses
+  // the schema must still fail loudly rather than emit garbage.
+  test("throws instead of producing a garbage date when a caller bypasses the schema's bound", () => {
+    const r = {
+      type: "custom", intervalValue: 100_000_000_000, intervalUnit: "days", anchorDate: iso("2026-06-01")
+    } as const
+    expect(() => currentOccurrence(r, iso("2026-01-01"))).toThrow()
+  })
 })
 
 describe("the view combining an occurrence with completion", () => {

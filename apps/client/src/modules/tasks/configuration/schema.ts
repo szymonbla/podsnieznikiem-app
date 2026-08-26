@@ -29,7 +29,7 @@ export const taskFormMessages = {
   dayOfMonth: { required: "Podaj dzień miesiąca", range: "Dzień miesiąca musi być liczbą od 1 do 31" },
   month: { required: "Wybierz miesiąc" },
   day: { required: "Podaj dzień", range: "Dzień musi być liczbą od 1 do 31" },
-  intervalValue: { required: "Podaj liczbę", range: "Liczba musi być większa od zera" },
+  intervalValue: { required: "Podaj liczbę", range: "Liczba musi być z zakresu od 1 do 1000" },
   anchorDate: { required: "Podaj datę początkową" }
 } as const
 
@@ -84,7 +84,7 @@ export const taskFormSchema = z
     }
 
     if (values.type === "custom") {
-      const intervalValue = requiredInt(values.intervalValue, 1, Number.MAX_SAFE_INTEGER)
+      const intervalValue = requiredInt(values.intervalValue, 1, 1000)
       require("intervalValue", intervalValue !== undefined, taskFormMessages.intervalValue.required)
       require("intervalValue", intervalValue !== null, taskFormMessages.intervalValue.range)
       require("anchorDate", (values.anchorDate ?? "").trim() !== "", taskFormMessages.anchorDate.required)

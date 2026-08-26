@@ -8,8 +8,33 @@ interface DateParts {
 
 const pad = (value: number, width: number): string => String(value).padStart(width, "0")
 
-const toIso = (parts: DateParts): IsoDate =>
-  `${pad(parts.year, 4)}-${pad(parts.month, 2)}-${pad(parts.day, 2)}` as IsoDate
+/**
+ * `IsoDate` is a fixed `YYYY-MM-DD` shape — a calendar arithmetic step that
+ * lands outside a 4-digit year, or produces a non-finite part (e.g. from an
+ * epoch day so large `Date` returns Invalid Date → `NaN`), can't be encoded
+ * as one. Throwing here turns that into a loud 500 on the single offending
+ * request instead of a silently corrupt `IsoDate` string reaching storage or
+ * the `TaskView` encoder (see Zadania final-review finding 1).
+ */
+const toIso = (parts: DateParts): IsoDate => {
+  const { year, month, day } = parts
+  if (
+    !Number.isInteger(year) ||
+    !Number.isInteger(month) ||
+    !Number.isInteger(day) ||
+    year < 0 ||
+    year > 9999 ||
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > 31
+  ) {
+    throw new Error(
+      `recurrence: computed a calendar date outside the representable IsoDate range (year=${year}, month=${month}, day=${day})`
+    )
+  }
+  return `${pad(year, 4)}-${pad(month, 2)}-${pad(day, 2)}` as IsoDate
+}
 
 const fromIso = (iso: IsoDate): DateParts => {
   const [year, month, day] = iso.split("-").map(Number)
@@ -23,7 +48,13 @@ const toEpochDay = (parts: DateParts): number =>
   Math.floor(Date.UTC(parts.year, parts.month - 1, parts.day) / MS_PER_DAY)
 
 const fromEpochDay = (epochDay: number): DateParts => {
+  if (!Number.isFinite(epochDay)) {
+    throw new Error(`recurrence: computed a non-finite epoch day (${epochDay})`)
+  }
   const date = new Date(epochDay * MS_PER_DAY)
+  if (Number.isNaN(date.getTime())) {
+    throw new Error(`recurrence: epoch day ${epochDay} is outside the range Date can represent`)
+  }
   return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1, day: date.getUTCDate() }
 }
 
