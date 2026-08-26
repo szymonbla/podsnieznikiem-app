@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
 
-import { currentOccurrence } from "../domain/recurrence.js"
+import { currentOccurrence, isoDateFromEpochMillis, taskOccurrence } from "../domain/recurrence.js"
 import type { IsoDate } from "../domain/recurrence.js"
 
 const iso = (value: string) => value as IsoDate
@@ -96,5 +96,58 @@ describe("a yearly task", () => {
     expect(
       currentOccurrence({ type: "yearly", month: 2, day: 29 }, iso("2028-03-01"))
     ).toBe("2028-02-29")
+  })
+})
+
+describe("a custom-interval task", () => {
+  test("steps by days from the anchor", () => {
+    const r = { type: "custom", intervalValue: 3, intervalUnit: "days", anchorDate: iso("2026-11-01") } as const
+    expect(currentOccurrence(r, iso("2026-11-08"))).toBe("2026-11-07")
+  })
+
+  test("steps by weeks from the anchor", () => {
+    const r = { type: "custom", intervalValue: 2, intervalUnit: "weeks", anchorDate: iso("2026-11-01") } as const
+    expect(currentOccurrence(r, iso("2026-11-20"))).toBe("2026-11-15")
+  })
+
+  test("an anchor in the future extrapolates the same interval backwards", () => {
+    const r = { type: "custom", intervalValue: 5, intervalUnit: "days", anchorDate: iso("2026-12-01") } as const
+    expect(currentOccurrence(r, iso("2026-11-20"))).toBe("2026-11-16")
+  })
+
+  test("steps by calendar months, not 30-day periods", () => {
+    const r = { type: "custom", intervalValue: 1, intervalUnit: "months", anchorDate: iso("2026-01-31") } as const
+    // Jan 31 -> clamp Feb 28 -> Mar 31 -> clamp Apr 30 -> ...
+    expect(currentOccurrence(r, iso("2026-04-15"))).toBe("2026-03-31")
+  })
+
+  test("crosses a year boundary stepping by months", () => {
+    const r = { type: "custom", intervalValue: 3, intervalUnit: "months", anchorDate: iso("2026-11-30") } as const
+    expect(currentOccurrence(r, iso("2027-01-15"))).toBe("2026-11-30")
+  })
+})
+
+describe("the view combining an occurrence with completion", () => {
+  test("overdue when the due date has passed and not completed for it", () => {
+    const r = { type: "once", date: iso("2026-11-17") } as const
+    expect(taskOccurrence(r, null, iso("2026-11-20"))).toEqual({
+      dueDate: "2026-11-17",
+      overdue: true,
+      done: false
+    })
+  })
+
+  test("done when completedThrough matches the current occurrence", () => {
+    const r = { type: "weekly", weekday: 1 } as const
+    expect(taskOccurrence(r, iso("2026-11-16"), iso("2026-11-16"))).toMatchObject({ done: true })
+  })
+
+  test("a stale completion (an earlier occurrence) does not count as done", () => {
+    const r = { type: "weekly", weekday: 1 } as const
+    expect(taskOccurrence(r, iso("2026-11-09"), iso("2026-11-16"))).toMatchObject({ done: false })
+  })
+
+  test("epoch millis convert to the UTC calendar date", () => {
+    expect(isoDateFromEpochMillis(Date.UTC(2026, 10, 17, 23, 59))).toBe("2026-11-17")
   })
 })

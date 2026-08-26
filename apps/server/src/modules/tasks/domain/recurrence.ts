@@ -82,6 +82,34 @@ const yearlyOccurrence = (month: number, day: number, today: DateParts): DatePar
   return occurrenceInMonth(today.year - 1, month, day)
 }
 
+const customDaysOccurrence = (anchor: DateParts, stepDays: number, today: DateParts): DateParts => {
+  const steps = Math.floor((toEpochDay(today) - toEpochDay(anchor)) / stepDays)
+  return fromEpochDay(toEpochDay(anchor) + steps * stepDays)
+}
+
+/** Calendar months, not fixed-length periods — the 31st stays the 31st, or the month's last day. */
+const customMonthsOccurrence = (anchor: DateParts, stepMonths: number, today: DateParts): DateParts => {
+  const anchorIndex = anchor.year * 12 + (anchor.month - 1)
+  const todayIndex = today.year * 12 + (today.month - 1)
+  let steps = Math.floor((todayIndex - anchorIndex) / stepMonths)
+
+  while (compareParts(addMonths(anchor, steps * stepMonths), today) > 0) steps -= 1
+  while (compareParts(addMonths(anchor, (steps + 1) * stepMonths), today) <= 0) steps += 1
+
+  return addMonths(anchor, steps * stepMonths)
+}
+
+const customOccurrence = (
+  recurrence: Extract<Recurrence, { type: "custom" }>,
+  today: DateParts
+): DateParts => {
+  const anchor = fromIso(recurrence.anchorDate)
+  if (recurrence.intervalUnit === "months") return customMonthsOccurrence(anchor, recurrence.intervalValue, today)
+
+  const stepDays = recurrence.intervalUnit === "weeks" ? recurrence.intervalValue * 7 : recurrence.intervalValue
+  return customDaysOccurrence(anchor, stepDays, today)
+}
+
 /**
  * The latest occurrence of `recurrence` that is not later than `today` — the
  * due date shown on the list, whatever the calendar says about whether it has
@@ -102,7 +130,27 @@ export const currentOccurrence = (recurrence: Recurrence, today: IsoDate): IsoDa
     case "yearly":
       return toIso(yearlyOccurrence(recurrence.month, recurrence.day, todayParts))
     case "custom":
-      // Task 3 fills this in.
-      throw new Error("custom recurrence not implemented yet")
+      return toIso(customOccurrence(recurrence, todayParts))
   }
+}
+
+export interface TaskOccurrence {
+  readonly dueDate: IsoDate
+  readonly overdue: boolean
+  readonly done: boolean
+}
+
+export const taskOccurrence = (
+  recurrence: Recurrence,
+  completedThrough: IsoDate | null,
+  today: IsoDate
+): TaskOccurrence => {
+  const dueDate = currentOccurrence(recurrence, today)
+  return { dueDate, overdue: dueDate < today, done: completedThrough === dueDate }
+}
+
+/** Today, in the server's one timezone (UTC) — the only place epoch millis become a calendar date. */
+export const isoDateFromEpochMillis = (epochMillis: number): IsoDate => {
+  const epochDay = Math.floor(epochMillis / MS_PER_DAY)
+  return toIso(fromEpochDay(epochDay))
 }
