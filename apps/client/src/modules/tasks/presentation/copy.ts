@@ -27,7 +27,7 @@ const polishCount = (count: number, forms: { one: string; few: string; many: str
   return forms.many
 }
 
-export const intervalUnitLabel = (count: number, unit: Recurrence extends { intervalUnit: infer U } ? U : never): string => {
+export const intervalUnitLabel = (count: number, unit: (typeof INTERVAL_UNITS)[number]): string => {
   switch (unit) {
     case "days": return polishCount(count, { one: "dzień", few: "dni", many: "dni" })
     case "weeks": return polishCount(count, { one: "tydzień", few: "tygodnie", many: "tygodni" })
