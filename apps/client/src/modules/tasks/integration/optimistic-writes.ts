@@ -25,8 +25,7 @@ const toMutationError = (status: number, body: TaskWriteFailure | undefined): Ta
 
   const fieldErrors: Partial<Record<TaskFormField, string>> = {}
   for (const issue of body?.issues ?? []) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const field = taskFormFieldFromPath(issue.path as any)
+    const field = taskFormFieldFromPath(issue.path.map((key) => (typeof key === "object" ? key.key : key)))
     if (field !== undefined) fieldErrors[field] ??= issue.message
   }
   return new TaskMutationError(`Request failed (HTTP ${status})`, false, fieldErrors)
