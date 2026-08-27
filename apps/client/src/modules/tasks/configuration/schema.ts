@@ -16,7 +16,7 @@ export const isTaskFormField = (value: unknown): value is TaskFormField =>
   typeof value === "string" && TASK_FORM_FIELDS.includes(value as TaskFormField)
 
 /** Server validation errors point at `recurrence.<field>` or `description` — this is where one becomes a form field. */
-export const taskFormFieldFromPath = (path: ReadonlyArray<PropertyKey>): TaskFormField | undefined => {
+export const taskFormFieldFromPath = (path: ReadonlyArray<unknown>): TaskFormField | undefined => {
   const [first, second] = path
   if (first === "recurrence" && isTaskFormField(second)) return second
   return isTaskFormField(first) ? first : undefined
@@ -38,10 +38,51 @@ const requiredText = (message: string) =>
     .max(TASK_LIMITS.description.max, { error: taskFormMessages.description.tooLong })
 
 /** Parses a required, ranged integer out of a raw string form field. `undefined` = empty, `null` = out of range. */
-const requiredInt = (raw: string | undefined, min: number, max: number): number | undefined | null => {
+const parseRangedInt = (raw: string | undefined, min: number, max: number): number | undefined | null => {
   if (raw === undefined || raw.trim() === "") return undefined
   const parsed = Number(raw)
   return Number.isInteger(parsed) && parsed >= min && parsed <= max ? parsed : null
+}
+
+type RawField = "date" | "weekday" | "dayOfMonth" | "month" | "day" | "intervalValue" | "anchorDate"
+
+interface TextRule { readonly kind: "text"; readonly key: RawField; readonly required: string }
+interface IntRule {
+  readonly kind: "int"; readonly key: RawField; readonly min: number; readonly max: number
+  readonly required: string; readonly range: string
+}
+type FieldRule = TextRule | IntRule
+
+/**
+ * The single source of truth for what each recurrence type requires — drives
+ * `superRefine` below. Previously this lived twice (once as `if` branches in
+ * the refinement, once implicitly in the transform's field reads), and the
+ * two copies had already drifted: `weekday`/`month` collapsed "empty" and
+ * "out of range" into one message while the others split them. That
+ * asymmetry is preserved here (unchanged product behaviour) but now stated
+ * once, so it can't silently diverge again.
+ */
+const RECURRENCE_FIELDS: Readonly<Record<RecurrenceTypeOption, ReadonlyArray<FieldRule>>> = {
+  once: [{ kind: "text", key: "date", required: taskFormMessages.date.required }],
+  weekly: [{
+    kind: "int", key: "weekday", min: 1, max: 7,
+    required: taskFormMessages.weekday.required, range: taskFormMessages.weekday.required
+  }],
+  monthly: [{
+    kind: "int", key: "dayOfMonth", min: 1, max: 31,
+    required: taskFormMessages.dayOfMonth.required, range: taskFormMessages.dayOfMonth.range
+  }],
+  yearly: [
+    { kind: "int", key: "month", min: 1, max: 12, required: taskFormMessages.month.required, range: taskFormMessages.month.required },
+    { kind: "int", key: "day", min: 1, max: 31, required: taskFormMessages.day.required, range: taskFormMessages.day.range }
+  ],
+  custom: [
+    {
+      kind: "int", key: "intervalValue", min: 1, max: 1000,
+      required: taskFormMessages.intervalValue.required, range: taskFormMessages.intervalValue.range
+    },
+    { kind: "text", key: "anchorDate", required: taskFormMessages.anchorDate.required }
+  ]
 }
 
 export const taskFormSchema = z
@@ -58,36 +99,17 @@ export const taskFormSchema = z
     anchorDate: z.string().optional()
   })
   .superRefine((values, ctx) => {
-    const require = (path: string, ok: boolean, message: string) => {
-      if (!ok) ctx.addIssue({ code: "custom", path: [path], message })
-    }
+    for (const field of RECURRENCE_FIELDS[values.type]) {
+      if (field.kind === "text") {
+        if ((values[field.key] ?? "").trim() === "") {
+          ctx.addIssue({ code: "custom", path: [field.key], message: field.required })
+        }
+        continue
+      }
 
-    if (values.type === "once") require("date", (values.date ?? "").trim() !== "", taskFormMessages.date.required)
-
-    if (values.type === "weekly") {
-      const weekday = requiredInt(values.weekday, 1, 7)
-      require("weekday", weekday !== undefined && weekday !== null, taskFormMessages.weekday.required)
-    }
-
-    if (values.type === "monthly") {
-      const dayOfMonth = requiredInt(values.dayOfMonth, 1, 31)
-      require("dayOfMonth", dayOfMonth !== undefined, taskFormMessages.dayOfMonth.required)
-      require("dayOfMonth", dayOfMonth !== null, taskFormMessages.dayOfMonth.range)
-    }
-
-    if (values.type === "yearly") {
-      const month = requiredInt(values.month, 1, 12)
-      require("month", month !== undefined && month !== null, taskFormMessages.month.required)
-      const day = requiredInt(values.day, 1, 31)
-      require("day", day !== undefined, taskFormMessages.day.required)
-      require("day", day !== null, taskFormMessages.day.range)
-    }
-
-    if (values.type === "custom") {
-      const intervalValue = requiredInt(values.intervalValue, 1, 1000)
-      require("intervalValue", intervalValue !== undefined, taskFormMessages.intervalValue.required)
-      require("intervalValue", intervalValue !== null, taskFormMessages.intervalValue.range)
-      require("anchorDate", (values.anchorDate ?? "").trim() !== "", taskFormMessages.anchorDate.required)
+      const parsed = parseRangedInt(values[field.key], field.min, field.max)
+      if (parsed === undefined) ctx.addIssue({ code: "custom", path: [field.key], message: field.required })
+      else if (parsed === null) ctx.addIssue({ code: "custom", path: [field.key], message: field.range })
     }
   })
   .transform((values): CreateTaskBody => {

@@ -41,7 +41,7 @@ interface ContactFormDialogProps {
    */
   readonly onSubmit: (
     values: ContactFormOutput
-  ) => Promise<Readonly<Record<string, string>> | undefined>
+  ) => Promise<Partial<Readonly<Record<string, string>>> | undefined>
   readonly pending: boolean
 }
 
@@ -187,7 +187,7 @@ export const ContactFormDialog = ({
               void handleSubmit(async (values) => {
                 const serverErrors = await onSubmit(values)
                 for (const [field, message] of Object.entries(serverErrors ?? {})) {
-                  if (isContactField(field)) setError(field, { message })
+                  if (message !== undefined && isContactField(field)) setError(field, { message })
                 }
               })(event)
             }}

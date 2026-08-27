@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import { Effect, TestClock } from "effect"
 
-import { withServer } from "../../../__tests__/harness.js"
+import { withClockControlledServer as withServer } from "../../../__tests__/harness.js"
 
 describe("marking a task done", () => {
   test("hides it — done becomes true for the current occurrence", () =>

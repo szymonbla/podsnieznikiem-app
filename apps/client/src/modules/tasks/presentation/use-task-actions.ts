@@ -16,8 +16,7 @@ interface TaskActions {
   readonly openCreate: () => void
   readonly openEdit: (task: Task) => void
   readonly setFormOpen: (open: boolean) => void
-  readonly submit: (values: TaskFormOutput) => Promise<Readonly<Record<string, string>> | undefined>
-  readonly reportFailure: (error: unknown, fallback: string) => Readonly<Record<string, string>> | undefined
+  readonly submit: (values: TaskFormOutput) => Promise<Partial<Readonly<Record<string, string>>> | undefined>
   readonly askRemove: (task: Task) => void
   readonly cancelRemove: () => void
   readonly confirmRemove: () => void
@@ -70,7 +69,6 @@ export const useTaskActions = (): TaskActions => {
     openCreate: () => { setEdited(undefined); setFormOpen(true) },
     openEdit: (task) => { setEdited(task); setFormOpen(true) },
     setFormOpen,
-    reportFailure,
     submit: async (values) => {
       const target = edited
       try {

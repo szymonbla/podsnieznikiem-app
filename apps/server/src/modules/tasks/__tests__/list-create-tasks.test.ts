@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import { Effect, TestClock } from "effect"
 
-import { withServer } from "../../../__tests__/harness.js"
+import { withClockControlledServer as withServer } from "../../../__tests__/harness.js"
 
 describe("listing tasks", () => {
   test("returns an empty list when there is no task", () =>

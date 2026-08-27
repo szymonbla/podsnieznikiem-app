@@ -15,7 +15,7 @@ interface TaskFormDialogProps {
   readonly open: boolean
   readonly onOpenChange: (open: boolean) => void
   readonly task?: Task
-  readonly onSubmit: (values: TaskFormOutput) => Promise<Readonly<Record<string, string>> | undefined>
+  readonly onSubmit: (values: TaskFormOutput) => Promise<Partial<Readonly<Record<string, string>>> | undefined>
   readonly pending: boolean
 }
 
@@ -98,7 +98,7 @@ export const TaskFormDialog = ({ open, onOpenChange, task, onSubmit, pending }: 
           void handleSubmit(async (values) => {
             const serverErrors = await onSubmit(values)
             for (const [field, message] of Object.entries(serverErrors ?? {})) {
-              if (isTaskFormField(field)) setError(field, { message })
+              if (message !== undefined && isTaskFormField(field)) setError(field, { message })
             }
           })(event)
         }} className="flex flex-col gap-3">
