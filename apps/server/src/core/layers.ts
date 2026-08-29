@@ -10,6 +10,7 @@ import { PgClient } from "@effect/sql-pg"
 import { Effect, Layer } from "effect"
 
 import { ContactsApiLive } from "../modules/contacts/index.js"
+import { TasksApiLive } from "../modules/tasks/index.js"
 import { api } from "./api.js"
 import { appConfig } from "./config.js"
 import { MigratorLive } from "./migrator.js"
@@ -29,7 +30,7 @@ export const DatabaseLive = Layer.provideMerge(
   SqlLive
 )
 
-const ApiLive = HttpApiBuilder.api(api).pipe(Layer.provide(ContactsApiLive))
+const ApiLive = HttpApiBuilder.api(api).pipe(Layer.provide(ContactsApiLive), Layer.provide(TasksApiLive))
 
 /**
  * The origins the browser may call this API from, taken from the validated

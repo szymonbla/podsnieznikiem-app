@@ -14,6 +14,7 @@ export const shellCopy = {
   /** Sonner names its region in English until it is given a label of its own. */
   notifications: "Powiadomienia",
   contacts: "Kontakty",
+  tasks: "Zadania",
   upcomingGroup: "Wkrótce",
   /** Repeated on every item, because a screen reader cannot see the grouping. */
   upcomingBadge: "Wkrótce",

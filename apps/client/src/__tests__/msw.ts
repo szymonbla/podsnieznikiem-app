@@ -2,6 +2,7 @@ import { http, HttpResponse, type HttpHandler } from "msw"
 import { setupServer } from "msw/node"
 
 import type { Contact } from "../modules/contacts"
+import type { Task } from "../modules/tasks"
 
 /**
  * A server standing in for the API — the network is seam 2's only stubbed
@@ -128,4 +129,82 @@ export const contactsApi = (
   ]
 
   return { handlers, requests, current: () => contacts }
+}
+
+export const taskApiHandlers = {
+  tasks: (tasks: ReadonlyArray<Task>): HttpHandler => http.get("*/api/tasks", () => HttpResponse.json(tasks)),
+  tasksUnreachable: (): HttpHandler => http.get("*/api/tasks", () => HttpResponse.error()),
+  tasksPending: (): HttpHandler => http.get("*/api/tasks", () => new Promise<never>(() => {}))
+}
+
+interface TaskWriteBody { readonly description?: string; readonly recurrence?: unknown }
+
+export const tasksApi = (
+  initial: ReadonlyArray<Task> = [],
+  failWith?: { readonly status: 400 | 404 | 500; readonly body: Record<string, unknown> }
+) => {
+  let tasks = [...initial]
+  let sequence = 0
+  const requests: Array<{ method: string; body: TaskWriteBody }> = []
+  const stamp = "2026-02-01T12:00:00.000Z"
+
+  const fail = () => failWith !== undefined
+  const failure = () => HttpResponse.json(failWith?.body ?? {}, { status: failWith?.status ?? 500 })
+
+  const handlers: ReadonlyArray<HttpHandler> = [
+    http.get("*/api/tasks", () => HttpResponse.json(tasks)),
+    http.post("*/api/tasks", async ({ request }) => {
+      const body = (await request.json()) as TaskWriteBody
+      requests.push({ method: "POST", body })
+      if (fail()) return failure()
+      if (body.description === undefined || body.recurrence === undefined) {
+        return HttpResponse.json({ issues: [{ path: ["description"], message: "is missing" }] }, { status: 400 })
+      }
+      sequence += 1
+      const created: Task = {
+        id: `created-${sequence}`, description: body.description, recurrence: body.recurrence as Task["recurrence"],
+        completedThrough: null, dueDate: "2026-12-01", overdue: false, done: false, createdAt: stamp, updatedAt: stamp
+      }
+      tasks = [...tasks, created]
+      return HttpResponse.json(created, { status: 201 })
+    }),
+    http.patch("*/api/tasks/:id", async ({ request, params }) => {
+      const body = (await request.json()) as TaskWriteBody
+      requests.push({ method: "PATCH", body })
+      if (fail()) return failure()
+      const existing = tasks.find((task) => task.id === params["id"])
+      if (existing === undefined) return HttpResponse.json({ _tag: "TaskNotFound", id: String(params["id"]) }, { status: 404 })
+      const updated: Task = { ...existing, ...body, recurrence: (body.recurrence as Task["recurrence"]) ?? existing.recurrence, updatedAt: stamp }
+      tasks = tasks.map((task) => (task.id === updated.id ? updated : task))
+      return HttpResponse.json(updated)
+    }),
+    http.delete("*/api/tasks/:id", ({ params }) => {
+      requests.push({ method: "DELETE", body: {} })
+      if (fail()) return failure()
+      const existing = tasks.find((task) => task.id === params["id"])
+      if (existing === undefined) return HttpResponse.json({ _tag: "TaskNotFound", id: String(params["id"]) }, { status: 404 })
+      tasks = tasks.filter((task) => task.id !== existing.id)
+      return new HttpResponse(null, { status: 204 })
+    }),
+    http.post("*/api/tasks/:id/complete", ({ params }) => {
+      requests.push({ method: "COMPLETE", body: {} })
+      if (fail()) return failure()
+      const existing = tasks.find((task) => task.id === params["id"])
+      if (existing === undefined) return HttpResponse.json({ _tag: "TaskNotFound", id: String(params["id"]) }, { status: 404 })
+      const updated = { ...existing, done: true, completedThrough: existing.dueDate }
+      tasks = tasks.map((task) => (task.id === updated.id ? updated : task))
+      return HttpResponse.json(updated)
+    }),
+    http.post("*/api/tasks/:id/uncomplete", ({ params }) => {
+      requests.push({ method: "UNCOMPLETE", body: {} })
+      if (fail()) return failure()
+      const existing = tasks.find((task) => task.id === params["id"])
+      if (existing === undefined) return HttpResponse.json({ _tag: "TaskNotFound", id: String(params["id"]) }, { status: 404 })
+      const updated = { ...existing, done: false, completedThrough: null }
+      tasks = tasks.map((task) => (task.id === updated.id ? updated : task))
+      return HttpResponse.json(updated)
+    })
+  ]
+
+  return { handlers, requests, current: () => tasks }
 }

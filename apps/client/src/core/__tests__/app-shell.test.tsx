@@ -55,4 +55,10 @@ describe("application shell", () => {
 
     expect(within(screen.getByRole("main")).getByRole("table")).toBeDefined()
   })
+
+  test("lists Tasks as an available section, not an upcoming one", async () => {
+    const nav = await renderShell()
+    const zadania = within(nav).getByRole("link", { name: "Zadania" })
+    expect(zadania.getAttribute("href")).toBe("/zadania")
+  })
 })

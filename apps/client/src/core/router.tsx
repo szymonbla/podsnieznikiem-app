@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router"
 
 import { ContactsScreen, contactsSearchSchema } from "../modules/contacts"
+import { TasksScreen } from "../modules/tasks"
 import { AppShell } from "./layouts/app-shell"
 
 /**
@@ -37,7 +38,13 @@ const contactsRoute = createRoute({
   validateSearch: contactsSearchSchema
 })
 
-export const routeTree = rootRoute.addChildren([indexRoute, contactsRoute])
+const tasksRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/zadania",
+  component: TasksScreen
+})
+
+export const routeTree = rootRoute.addChildren([indexRoute, contactsRoute, tasksRoute])
 
 type RouterOptions = Omit<Parameters<typeof createRouter>[0], "routeTree">
 

@@ -12,8 +12,9 @@ import { createAppRouter } from "../core/router"
  * components real in the test, with the only boundary being what actually goes
  * out to the network.
  */
-export { apiHandlers, contactsApi, mockApi } from "./msw"
+export { apiHandlers, contactsApi, taskApiHandlers, tasksApi, mockApi } from "./msw"
 export { aContact } from "./contact-builder"
+export { aTask } from "./task-builder"
 
 /**
  * Renders the application at the given address, the way a browser would. It

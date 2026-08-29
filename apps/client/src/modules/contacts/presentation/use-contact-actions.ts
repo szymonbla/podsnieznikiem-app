@@ -22,7 +22,7 @@ interface ContactActions {
   readonly confirmRemove: () => void
   readonly submit: (
     values: ContactFormOutput
-  ) => Promise<Readonly<Record<string, string>> | undefined>
+  ) => Promise<Partial<Readonly<Record<string, string>>> | undefined>
 }
 
 /** Contact data without identity — enough to create it again. */
