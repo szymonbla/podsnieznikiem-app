@@ -456,8 +456,8 @@ export interface operations {
                             /** @enum {string} */
                             type: "custom";
                             /**
-                             * greaterThanOrEqualTo(1)
-                             * @description a number greater than or equal to 1
+                             * between(1, 1000)
+                             * @description a number between 1 and 1000
                              */
                             intervalValue: components["schemas"]["Int"];
                             /** @enum {string} */
@@ -536,8 +536,8 @@ export interface operations {
                         /** @enum {string} */
                         type: "custom";
                         /**
-                         * greaterThanOrEqualTo(1)
-                         * @description a number greater than or equal to 1
+                         * between(1, 1000)
+                         * @description a number between 1 and 1000
                          */
                         intervalValue: components["schemas"]["Int"];
                         /** @enum {string} */
@@ -604,8 +604,8 @@ export interface operations {
                             /** @enum {string} */
                             type: "custom";
                             /**
-                             * greaterThanOrEqualTo(1)
-                             * @description a number greater than or equal to 1
+                             * between(1, 1000)
+                             * @description a number between 1 and 1000
                              */
                             intervalValue: components["schemas"]["Int"];
                             /** @enum {string} */
@@ -726,8 +726,8 @@ export interface operations {
                         /** @enum {string} */
                         type: "custom";
                         /**
-                         * greaterThanOrEqualTo(1)
-                         * @description a number greater than or equal to 1
+                         * between(1, 1000)
+                         * @description a number between 1 and 1000
                          */
                         intervalValue: components["schemas"]["Int"];
                         /** @enum {string} */
@@ -794,8 +794,8 @@ export interface operations {
                             /** @enum {string} */
                             type: "custom";
                             /**
-                             * greaterThanOrEqualTo(1)
-                             * @description a number greater than or equal to 1
+                             * between(1, 1000)
+                             * @description a number between 1 and 1000
                              */
                             intervalValue: components["schemas"]["Int"];
                             /** @enum {string} */
@@ -900,8 +900,8 @@ export interface operations {
                             /** @enum {string} */
                             type: "custom";
                             /**
-                             * greaterThanOrEqualTo(1)
-                             * @description a number greater than or equal to 1
+                             * between(1, 1000)
+                             * @description a number between 1 and 1000
                              */
                             intervalValue: components["schemas"]["Int"];
                             /** @enum {string} */
@@ -1006,8 +1006,8 @@ export interface operations {
                             /** @enum {string} */
                             type: "custom";
                             /**
-                             * greaterThanOrEqualTo(1)
-                             * @description a number greater than or equal to 1
+                             * between(1, 1000)
+                             * @description a number between 1 and 1000
                              */
                             intervalValue: components["schemas"]["Int"];
                             /** @enum {string} */
