@@ -38,13 +38,16 @@ describe("the task list on screen", () => {
     expect(screen.queryByText("Zrobione")).toBeNull()
   })
 
-  test("shows the recurrence summary and the formatted due date", async () => {
+  test("shows the recurrence summary and a day/month due-date stamp", async () => {
     mockApi.use(taskApiHandlers.tasks([
       aTask({ description: "Ubezpieczenie", recurrence: { type: "yearly", month: 11, day: 17 }, dueDate: "2026-11-17" })
     ]))
     renderApp("/zadania")
-    await screen.findByText("17.11.2026")
-    expect(screen.getByText("Co rok — 17 listopada")).toBeDefined()
+    const row = await screen.findByRole("row", { name: /Ubezpieczenie/ })
+    expect(within(row).getByText("17")).toBeDefined()
+    expect(within(row).getByText("LIS")).toBeDefined()
+    expect(within(row).getByLabelText("17 listopada 2026")).toBeDefined()
+    expect(within(row).getByText("Co rok — 17 listopada")).toBeDefined()
   })
 
   test("says it is loading, then shows an empty state with nothing to show", async () => {

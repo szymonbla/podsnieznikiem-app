@@ -3,10 +3,10 @@ import { useEffect, useId } from "react"
 import { useForm, type UseFormRegisterReturn } from "react-hook-form"
 
 import { Button } from "../../../libs/ui/button"
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../../libs/ui/dialog"
 import { Input } from "../../../libs/ui/input"
 import { Label } from "../../../libs/ui/label"
 import { Select } from "../../../libs/ui/select"
+import { Sheet, SheetBody, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "../../../libs/ui/sheet"
 import { isTaskFormField, taskFormSchema, type TaskFormOutput, type TaskFormValues } from "../configuration/schema"
 import type { Task } from "../domain/models"
 import { MONTH_OPTIONS, RECURRENCE_TYPE_OPTIONS, WEEKDAY_OPTIONS, INTERVAL_UNIT_OPTIONS, tasksCopy } from "./copy"
@@ -87,57 +87,63 @@ export const TaskFormDialog = ({ open, onOpenChange, task, onSubmit, pending }: 
   const type = watch("type")
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent aria-describedby="task-form-description">
-        <DialogHeader>
-          <DialogTitle>{copy.title}</DialogTitle>
-          <DialogDescription id="task-form-description">{copy.description}</DialogDescription>
-        </DialogHeader>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent aria-describedby="task-form-description">
+        <form
+          noValidate
+          onSubmit={(event) => {
+            void handleSubmit(async (values) => {
+              const serverErrors = await onSubmit(values)
+              for (const [field, message] of Object.entries(serverErrors ?? {})) {
+                if (message !== undefined && isTaskFormField(field)) setError(field, { message })
+              }
+            })(event)
+          }}
+          className="flex h-full flex-col"
+        >
+          <SheetHeader>
+            <SheetTitle>{copy.title}</SheetTitle>
+            <SheetDescription id="task-form-description">{copy.description}</SheetDescription>
+          </SheetHeader>
 
-        <form noValidate onSubmit={(event) => {
-          void handleSubmit(async (values) => {
-            const serverErrors = await onSubmit(values)
-            for (const [field, message] of Object.entries(serverErrors ?? {})) {
-              if (message !== undefined && isTaskFormField(field)) setError(field, { message })
-            }
-          })(event)
-        }} className="flex flex-col gap-3">
-          <Field label={tasksCopy.form.fields.description} registration={register("description")} error={errors.description?.message} />
-          <SelectField label={tasksCopy.form.fields.type} registration={register("type")} error={undefined} options={RECURRENCE_TYPE_OPTIONS} />
+          <SheetBody>
+            <Field label={tasksCopy.form.fields.description} registration={register("description")} error={errors.description?.message} />
+            <SelectField label={tasksCopy.form.fields.type} registration={register("type")} error={undefined} options={RECURRENCE_TYPE_OPTIONS} />
 
-          {type === "once" ? <Field label={tasksCopy.form.fields.date} type="date" registration={register("date")} error={errors.date?.message} /> : null}
+            {type === "once" ? <Field label={tasksCopy.form.fields.date} type="date" registration={register("date")} error={errors.date?.message} /> : null}
 
-          {type === "weekly" ? (
-            <SelectField label={tasksCopy.form.fields.weekday} registration={register("weekday")} error={errors.weekday?.message}
-              options={WEEKDAY_OPTIONS} placeholder={tasksCopy.form.placeholders.weekday} />
-          ) : null}
+            {type === "weekly" ? (
+              <SelectField label={tasksCopy.form.fields.weekday} registration={register("weekday")} error={errors.weekday?.message}
+                options={WEEKDAY_OPTIONS} placeholder={tasksCopy.form.placeholders.weekday} />
+            ) : null}
 
-          {type === "monthly" ? (
-            <Field label={tasksCopy.form.fields.dayOfMonth} type="number" registration={register("dayOfMonth")} error={errors.dayOfMonth?.message} />
-          ) : null}
+            {type === "monthly" ? (
+              <Field label={tasksCopy.form.fields.dayOfMonth} type="number" registration={register("dayOfMonth")} error={errors.dayOfMonth?.message} />
+            ) : null}
 
-          {type === "yearly" ? (
-            <>
-              <SelectField label={tasksCopy.form.fields.month} registration={register("month")} error={errors.month?.message}
-                options={MONTH_OPTIONS} placeholder={tasksCopy.form.placeholders.month} />
-              <Field label={tasksCopy.form.fields.day} type="number" registration={register("day")} error={errors.day?.message} />
-            </>
-          ) : null}
+            {type === "yearly" ? (
+              <>
+                <SelectField label={tasksCopy.form.fields.month} registration={register("month")} error={errors.month?.message}
+                  options={MONTH_OPTIONS} placeholder={tasksCopy.form.placeholders.month} />
+                <Field label={tasksCopy.form.fields.day} type="number" registration={register("day")} error={errors.day?.message} />
+              </>
+            ) : null}
 
-          {type === "custom" ? (
-            <>
-              <Field label={tasksCopy.form.fields.intervalValue} type="number" registration={register("intervalValue")} error={errors.intervalValue?.message} />
-              <SelectField label={tasksCopy.form.fields.intervalUnit} registration={register("intervalUnit")} error={undefined} options={INTERVAL_UNIT_OPTIONS} />
-              <Field label={tasksCopy.form.fields.anchorDate} type="date" registration={register("anchorDate")} error={errors.anchorDate?.message} />
-            </>
-          ) : null}
+            {type === "custom" ? (
+              <>
+                <Field label={tasksCopy.form.fields.intervalValue} type="number" registration={register("intervalValue")} error={errors.intervalValue?.message} />
+                <SelectField label={tasksCopy.form.fields.intervalUnit} registration={register("intervalUnit")} error={undefined} options={INTERVAL_UNIT_OPTIONS} />
+                <Field label={tasksCopy.form.fields.anchorDate} type="date" registration={register("anchorDate")} error={errors.anchorDate?.message} />
+              </>
+            ) : null}
+          </SheetBody>
 
-          <DialogFooter>
-            <DialogClose asChild><Button type="button" variant="outline">{tasksCopy.form.cancel}</Button></DialogClose>
+          <SheetFooter>
+            <SheetClose asChild><Button type="button" variant="outline">{tasksCopy.form.cancel}</Button></SheetClose>
             <Button type="submit" disabled={pending}>{copy.submit}</Button>
-          </DialogFooter>
+          </SheetFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   )
 }

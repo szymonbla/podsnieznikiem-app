@@ -18,6 +18,29 @@ export const formatDueDate = (iso: string): string => {
   return `${day}.${month}.${year}`
 }
 
+const MONTH_ABBR: Readonly<Record<number, string>> = {
+  1: "STY", 2: "LUT", 3: "MAR", 4: "KWI", 5: "MAJ", 6: "CZE",
+  7: "LIP", 8: "SIE", 9: "WRZ", 10: "PAŹ", 11: "LIS", 12: "GRU"
+}
+
+export interface DueDateStamp {
+  readonly day: string
+  readonly month: string
+  /** The full date, spoken form — carries the day/month split's meaning to a screen reader. */
+  readonly full: string
+}
+
+/** The due-date stamp: a two-line day/month tile, the signature element of the task row. */
+export const dueDateStamp = (iso: string): DueDateStamp => {
+  const [year, month, day] = iso.split("-")
+  const monthNumber = Number(month)
+  return {
+    day: day ?? "–",
+    month: MONTH_ABBR[monthNumber] ?? "–",
+    full: `${Number(day)} ${MONTH_NAMES_GENITIVE[monthNumber] ?? ""} ${year}`.trim()
+  }
+}
+
 /** 1 -> singular, 2-4 -> few, else -> many; 12-14 always take "many" (same rule as Kontakty's numeral inflection). */
 const polishCount = (count: number, forms: { one: string; few: string; many: string }): string => {
   const lastTwo = count % 100
